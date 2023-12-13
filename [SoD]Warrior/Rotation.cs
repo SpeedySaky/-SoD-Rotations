@@ -7,7 +7,6 @@ using wShadow.Warcraft.Managers;
 using wShadow.Warcraft.Structures.Wow_Player;
 using wShadow.Warcraft.Defines.Wow_Player;
 using wShadow.Warcraft.Defines.Wow_Spell;
-using wShadow.Warcraft.Structures.Wow_Auras;
 
 
 
