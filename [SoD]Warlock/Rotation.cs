@@ -7,6 +7,7 @@ using wShadow.Warcraft.Managers;
 using wShadow.Warcraft.Structures.Wow_Player;
 using wShadow.Warcraft.Defines.Wow_Player;
 using wShadow.Warcraft.Defines.Wow_Spell;
+using wShadow.Warcraft.Structures.Wow_Auras;
 
 
 public class Warlock : Rotation
@@ -159,7 +160,7 @@ var healthPercentage = me.HealthPercent;
 		 }        	
 		var meTarget = me.Target;
 		  
-        if (meTarget != null)
+        if (meTarget == null)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Assist Pet");
