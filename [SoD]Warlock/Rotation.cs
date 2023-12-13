@@ -160,7 +160,7 @@ var healthPercentage = me.HealthPercent;
 		 }        	
 		var meTarget = me.Target;
 		  
-        if (meTarget == null)
+        if (meTarget == null || target.IsDead())
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Assist Pet");
@@ -249,7 +249,7 @@ var healthPercentage = me.HealthPercent;
     if (Api.Spellbook.Cast("Curse of Agony"))
         return true;
 	}
-	if (Api.Spellbook.CanCast("Shadow Bolt") && targethealth>=50  )
+	if (Api.Spellbook.CanCast("Shadow Bolt") && targethealth>=30  )
 	{
     Console.ForegroundColor = ConsoleColor.Green;
     Console.WriteLine("Casting Shadow Bolt");
@@ -258,7 +258,7 @@ var healthPercentage = me.HealthPercent;
     if (Api.Spellbook.Cast("Shadow Bolt"))
         return true;
 	}
-	if (Api.Spellbook.CanCast("Shoot")  && targethealth<=50 )
+	if (Api.Spellbook.CanCast("Shoot")  && targethealth<=30 )
 	{
     Console.ForegroundColor = ConsoleColor.Green;
     Console.WriteLine("Casting Shoot");
