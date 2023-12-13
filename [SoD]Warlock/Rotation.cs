@@ -94,6 +94,15 @@ if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChann
     if (Api.Spellbook.Cast("Demon Skin"))
         return true;
 	}
+	if (PetHealth<50 && healthPercentage>50 && Api.Spellbook.CanCast("Health Funnel"))
+		{
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Healing Pet ");
+            Console.ResetColor();
+
+            if (Api.Spellbook.Cast("Health Funnel"))
+                return true;
+        }
 	if (me.HasItem("Soul Shard") && !me.HasItem("Minor Healthstone"))
 	  {
             Console.ForegroundColor = ConsoleColor.Green;
@@ -103,7 +112,18 @@ if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChann
             if (Api.Spellbook.Cast("Create Healthstone (Minor)"))
                 return true;
         }
-	if (!IsValid(pet) && Api.Spellbook.CanCast("Summon Imp") )
+		
+		if ( !IsValid(pet) && Api.Spellbook.CanCast("Summon Voidwalker") && me.HasItem("Soul Shard"))
+	
+		 {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Casting Summon VoidWalker.");
+            Console.ResetColor();
+
+            if (Api.Spellbook.Cast("Summon Voidwalker"))
+                return true;
+        }
+		else if (!IsValid(pet) && Api.Spellbook.CanCast("Summon Imp")  && !Api.Spellbook.CanCast("Summon Voidwalker"))
 
         {
             Console.ForegroundColor = ConsoleColor.Green;
