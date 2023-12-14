@@ -27,6 +27,8 @@ public class Hunter : Rotation
 	private DateTime lastFeedTime = DateTime.MinValue;
 	private DateTime lastChimeraShotTime = DateTime.MinValue;
     private TimeSpan chimeraShotCooldown = TimeSpan.FromSeconds(6.5);
+	private DateTime lastCallPetTime = DateTime.MinValue;
+	private TimeSpan callPetCooldown = TimeSpan.FromSeconds(10);
     public override void Initialize()
     {  
 	// Can set min/max levels required for this rotation.
@@ -87,63 +89,22 @@ if (me.IsDead() || me.IsGhost() || me.IsCasting() ||  me.IsChanneling() ) return
         if (me.HasAura("Drink") || me.HasAura("Food")) return false;
 		
 		
-		if (IsValid(pet) && !pet.IsDead() && (DateTime.Now - lastFeedTime).TotalMinutes >= 10 && Api.HasMacro("Feed"))
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Feeding pet.");
-            Console.ResetColor();
-
-            if (Api.UseMacro("Feed"))
-            {
-                lastFeedTime = DateTime.Now; // Update lastFeedTime
-
-                // Log the estimated time until the next feeding attempt
-                var nextFeedTime = lastFeedTime.AddMinutes(10);
-                var timeUntilNextFeed = nextFeedTime - DateTime.Now;
-
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine($"Next feed pet in: {timeUntilNextFeed.TotalMinutes} minutes.");
-                Console.ResetColor();
-
-                return true;
-            }
-        }
-if (!pet.IsDead() && PetHealth < 40  &&  Api.Spellbook.CanCast("Mend Pet") && !pet.HasAura("Mend Pet") && mana >10 )
-    {
-        Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.WriteLine("Pet health is low healing him");
-        Console.ResetColor();
-		if (Api.Spellbook.Cast("Mend Pet"))
-            
-                return true;
-        // Add logic here for actions when pet's health is low, e.g., healing spells
-    }
-	
-if (!IsValid(pet) && Api.Spellbook.CanCast("Call Pet") )
-
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Call Pet.");
-            Console.ResetColor();
-
-            if (Api.Spellbook.Cast("Call Pet"))
-                return true;
-        }
-        // Additional actions for when the pet is dead
-   
-    else if (!IsValid(pet) && Api.Spellbook.CanCast("Revive Pet") || pet.IsDead())
-    {
-        Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.WriteLine("Casting Revive Pet");
-        Console.ResetColor();
-		if (Api.Spellbook.Cast("Revive Pet"))
-            
-                return true;
-        // Add logic here for actions when pet's health is low, e.g., healing spells
-    }
- 
-
+		if (Api.HasMacro("Lion") && !me.HasPermanent("Aspect of the Lion") )
 			
+					{
+						Console.ForegroundColor = ConsoleColor.Green;
+						Console.WriteLine("Casting Aspect of the Lion");
+						Console.ResetColor();
+
+					if (Api.UseMacro("Lion"))
+						
+					return true;
+						
+					}
+	
+
+        // Add logic here for actions when pet's health is low, e.g., healing spells
+    		
 		 
 		if (Api.Spellbook.CanCast("Aspect of the Cheetah") && !me.HasPermanent("Aspect of the Cheetah") )
 			
@@ -202,7 +163,60 @@ if (Api.Spellbook.CanCast("Hunter's Mark") &&!target.HasAura("Hunter's Mark") &&
     if (Api.Spellbook.Cast("Serpent Sting"))
         return true;
 	}
-	
+	if (Api.Spellbook.CanCast("Call Pet")  && (DateTime.Now - lastCallPetTime) >= callPetCooldown)
+{
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("Casting Call Pet.");
+    Console.ResetColor();
+
+    if (Api.Spellbook.Cast("Call Pet"))
+    {
+        lastCallPetTime = DateTime.Now; // Update the lastCallPetTime after successful casting
+        return true;
+    }
+}
+// Additional actions for when the pet is dead
+else if (pet.IsDead() && Api.Spellbook.CanCast("Revive Pet"))
+{
+    Console.ForegroundColor = ConsoleColor.Yellow;
+    Console.WriteLine("Casting Revive Pet");
+    Console.ResetColor();
+
+    if (Api.Spellbook.Cast("Revive Pet"))
+    {
+        return true;
+    }
+ }
+ if (IsValid(pet) && !pet.IsDead() && (DateTime.Now - lastFeedTime).TotalMinutes >= 10 && Api.HasMacro("Feed"))
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Feeding pet.");
+            Console.ResetColor();
+
+            if (Api.UseMacro("Feed"))
+            {
+                lastFeedTime = DateTime.Now; // Update lastFeedTime
+
+                // Log the estimated time until the next feeding attempt
+                var nextFeedTime = lastFeedTime.AddMinutes(10);
+                var timeUntilNextFeed = nextFeedTime - DateTime.Now;
+
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine($"Next feed pet in: {timeUntilNextFeed.TotalMinutes} minutes.");
+                Console.ResetColor();
+
+                return true;
+            }
+        }
+	if (!pet.IsDead() && PetHealth < 40  &&  Api.Spellbook.CanCast("Mend Pet") && !pet.HasAura("Mend Pet") && mana >10 )
+    {
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.WriteLine("Pet health is low healing him");
+        Console.ResetColor();
+		if (Api.Spellbook.Cast("Mend Pet"))
+            
+                return true;
+}
 				return base.PassivePulse();
 
 		}
@@ -212,7 +226,6 @@ public override bool CombatPulse()
 	// Variables for player and target instances
 var me = Api.Player;
 var target = Api.Target;
-var empty = Api.
 	var targetDistance = target.Position.Distance2D(me.Position);
 var pet = me.Pet();
 	  var PetHealth  = 0.0f;
@@ -239,10 +252,19 @@ var targethealth = target.HealthPercent;
         if (me.HasAura("Drink") || me.HasAura("Food")) return false;
 		
 		var meTarget = me.Target;
-		if (me.PetInCombat() && me.InCombat() && meTarget == null)
 			  
-    
-        if (meTarget != null && Api.HasMacro("AssistPet"))
+if (pet.IsDead() && Api.Spellbook.CanCast("Revive Pet"))
+{
+    Console.ForegroundColor = ConsoleColor.Yellow;
+    Console.WriteLine("Casting Revive Pet");
+    Console.ResetColor();
+
+    if (Api.Spellbook.Cast("Revive Pet"))
+    {
+        return true;
+    }
+ }
+        if (meTarget == null || target.IsDead())
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Assist Pet");
@@ -342,15 +364,7 @@ if (Api.Spellbook.CanCast("Hunter's Mark") &&!target.HasAura("Hunter's Mark") &&
             }
         }
 	
-        if (Api.Spellbook.CanCast("Arcane Shot") && mana>30 && targethealth>20 && !Api.Spellbook.OnCooldown("Arcane Shot"))
-	{
-    Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine("Casting Arcane Shot");
-    Console.ResetColor();
-
-    if (Api.Spellbook.Cast("Arcane Shot"))
-        return true;
-	}
+   
 	if (Api.Spellbook.CanCast("Auto Shot") )
 	{
     Console.ForegroundColor = ConsoleColor.Green;
@@ -420,61 +434,65 @@ var healthPercentage = me.HealthPercent;
         Console.WriteLine($"{healthPercentage}% Health available");
 		Console.ResetColor();
 
-if (Api.Spellbook.CanCast("Chimera Shot") )
-{
-    Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine("Can Cast Chimera Shot");
-    Console.ResetColor();
-    
-}
-else
-	{
-    Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine("Cant Cast Chimera Shot");
-    Console.ResetColor();
-    
-}
+
 	// Existing code...
 
 // Check the status of the pet and log accordingly
 
-if (IsValid(pet))
-    {
-        PetHealth = pet.HealthPercent;
-
-        if (PetHealth <= 0)
+if (!pet.IsDead())
         {
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("Pet is dead.");
+            Console.WriteLine("Pet is alive.");
             Console.ResetColor();
             // Additional actions for when the pet is dead
         }
-        else
-        {
-            if (PetHealth <= 50)
+		else 
+if (Api.HasPet())			
+{
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Pet is not summoned.");
+            Console.ResetColor();
+            // Additional actions for when the pet is dead
+        }
+		
+        // Log the pet's health only when its status changes
+ 
+    else 
+    
+            if (pet.IsDead())
             {
                 Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("Pet health is low.");
+                Console.WriteLine("Pet is dead.");
                 Console.ResetColor();
                 // Additional actions for when the pet's health is low
             }
-            else
-            {
-                // Pet health is fine
-                // Proceed with other actions as needed
-            }
+if (me.HasAura("Aspect of the Lion"))
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("HasPerHasAuramanent Aspect of the Lion");
+            Console.ResetColor();
+            // Additional actions for when the pet is dead
         }
-
+		else 
+if (me.HasPermanent("Aspect of the Lion"))			
+{
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("HasPermanent Aspect of the Lion");
+            Console.ResetColor();
+            // Additional actions for when the pet is dead
+        }
+		
         // Log the pet's health only when its status changes
-    }
-    else
-    {
-        Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.WriteLine("Pet is missing or invalid.");
-        Console.ResetColor();
-        // Additional actions for when the pet is missing or invalid
-    }
-
+ 
+    else 
+    
+            if (me.HasPassive("Aspect of the Lion"))
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("HasPassive Aspect of the Lion");
+                Console.ResetColor();
+                // Additional actions for when the pet's health is low
+            }
     // Remaining code...
 }    
 	}

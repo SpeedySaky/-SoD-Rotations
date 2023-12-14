@@ -203,14 +203,22 @@ if (Api.Spellbook.CanCast("Wrath") && healthPercentage > 50 && !me.HasPermanent(
 				}
 				
 			}
+		if (Api.HasMacro("Roar") && points >=1 && energy >= 25 && !me.HasAura("Savage Roar") && me.HasPermanent("Cat Form"))
+		{
+			Console.ForegroundColor = ConsoleColor.Green;
+			Console.WriteLine($"Casting Savage Roar");
+			Console.ResetColor();
 
+		if (Api.UseMacro("Roar"))
+				return true;
+		}
 		if (Api.HasMacro("Mangle") && points < 3 && energy >= 45 && me.HasPermanent("Cat Form"))
 		{
 			Console.ForegroundColor = ConsoleColor.Green;
 			Console.WriteLine($"Casting Mangle (Cat) with {energy} Energy");
 			Console.ResetColor();
 
-		if (Api.UseMacro("Mangle(cat)"))
+		if (Api.UseMacro("Mangle"))
 				return true;
 		}
 
@@ -224,7 +232,7 @@ if (Api.Spellbook.CanCast("Wrath") && healthPercentage > 50 && !me.HasPermanent(
 			return true;
 		}
 
-		if (Api.Spellbook.CanCast("Rip") && !target.HasAura("Rip") && target.HealthPercent >= 20 && energy > 30 && points == 3 && me.HasPermanent("Cat Form"))
+		if (Api.Spellbook.CanCast("Rip") && !target.HasAura("Rip") && target.HealthPercent >= 20 && energy > 30 && points >= 3 && me.HasPermanent("Cat Form"))
 		{
 			Console.ForegroundColor = ConsoleColor.Green;
 			Console.WriteLine($"Casting Rip with {points} Points and {energy} Energy");
