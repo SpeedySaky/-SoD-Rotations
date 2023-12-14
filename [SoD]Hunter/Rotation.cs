@@ -29,6 +29,8 @@ public class Hunter : Rotation
     private TimeSpan chimeraShotCooldown = TimeSpan.FromSeconds(6.5);
 	private DateTime lastCallPetTime = DateTime.MinValue;
 	private TimeSpan callPetCooldown = TimeSpan.FromSeconds(10);
+	private DateTime lastFlanking = DateTime.MinValue;
+	private TimeSpan FlankingCooldown = TimeSpan.FromSeconds(30);
     public override void Initialize()
     {  
 	// Can set min/max levels required for this rotation.
@@ -378,6 +380,18 @@ if (Api.Spellbook.CanCast("Hunter's Mark") &&!target.HasAura("Hunter's Mark") &&
 	
 	if (!target.IsDead() && targetDistance<=7 )
 	{
+			if (Api.HasMacro && (DateTime.Now - lastFlanking) >= FlankingCooldown)
+{
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("Casting Flanking Strike.");
+    Console.ResetColor();
+
+    if (Api.UseMacro("Flanking"))
+    {
+        lastFlanking = DateTime.Now; // Update the lastCallPetTime after successful casting
+        return true;
+    }
+}
 		if (Api.Spellbook.CanCast("Wing Clip") && mana>40 && !target.HasAura("Wing Clip"))
 	{
     Console.ForegroundColor = ConsoleColor.Green;
