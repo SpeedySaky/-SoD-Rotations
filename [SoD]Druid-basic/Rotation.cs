@@ -90,6 +90,20 @@ if (Api.Spellbook.CanCast("Mark of the Wild") && !me.HasAura("Mark of the Wild")
    
         return true;
     }
+	if (!me.HasPermanent("Cat Form") && Api.Spellbook.CanCast("Cat Form") )	
+		{	
+		if (Api.Spellbook.CanCast("Cat Form") && !me.HasPermanent("Cat Form") )
+				{
+			Console.ForegroundColor = ConsoleColor.Green;
+			Console.WriteLine("Casting Cat Form");
+			Console.ResetColor();
+		if (Api.Spellbook.Cast("Cat Form"))
+				{
+					return true;
+				}
+				}
+				
+			}
 			 var target = Api.Target;
 
 			if (!target.IsDead())

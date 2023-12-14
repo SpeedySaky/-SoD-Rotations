@@ -380,7 +380,8 @@ if (Api.Spellbook.CanCast("Hunter's Mark") &&!target.HasAura("Hunter's Mark") &&
 	
 	if (!target.IsDead() && targetDistance<=7 )
 	{
-			if (Api.HasMacro && (DateTime.Now - lastFlanking) >= FlankingCooldown)
+
+			if (Api.HasMacro("Flanking") && (DateTime.Now - lastFlanking) >= FlankingCooldown)
 {
     Console.ForegroundColor = ConsoleColor.Green;
     Console.WriteLine("Casting Flanking Strike.");
