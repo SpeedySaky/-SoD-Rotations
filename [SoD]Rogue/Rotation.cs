@@ -68,8 +68,27 @@ var energy = me.Energy; // Energy
 
 if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() ) return false;
         if (me.HasAura("Drink") || me.HasAura("Food")) return false;
-		
+		if (!me.HasPermanent("Stealth") && Api.Spellbook.CanCast("Stealth") && !Api.Spellbook.OnCooldown("Stealth"))
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Casting Stealth");
+        Console.ResetColor();
+        if (Api.Spellbook.Cast("Stealth"))
+        
+            return true;
+        
+    }
+	if (!target.IsDead() && targetDistance<=20 &&  && Api.HasMacro("Shadowstrike"))
+    {
+      
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("Casting Shadowstrike");
+    Console.ResetColor();
 
+    if (Api.UseMacro("Shadowstrike"))
+        return true;
+	
+    }
 
 				return base.PassivePulse();
 
@@ -97,6 +116,16 @@ var energy = me.Energy; // Energy
 
 		if (me.IsDead() || me.IsGhost() || me.IsCasting()  ) return false;
         if (me.HasAura("Drink") || me.HasAura("Food")) return false;
+		if (Api.Spellbook.CanCast("Kick") && !Api.Spellbook.OnCooldown("Kick") && (target.IsCasting() || target.IsChanneling()))
+{
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("Casting Kick");
+    Console.ResetColor();
+    if (Api.Spellbook.Cast("Kick"))
+    {
+        return true;
+    }
+}
 		
 		if (Api.Spellbook.CanCast("Eviscerate")  && points == 5 )
 {
