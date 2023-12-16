@@ -78,7 +78,7 @@ if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChann
             return true;
         
     }
-	if (!target.IsDead() && targetDistance<=20 &&  && Api.HasMacro("Shadowstrike"))
+	if (!target.IsDead() && targetDistance<=20 &&   Api.HasMacro("Shadowstrike"))
     {
       
     Console.ForegroundColor = ConsoleColor.Green;
