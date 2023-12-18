@@ -111,14 +111,14 @@ if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChann
                     Thread.Sleep(pickPocketDelay);
 
                     // Attempting Backstab after delay
-                    if (!target.IsDead() && targetDistance<=20 && Api.HasMacro("Shadowstrike"))
+                    if (!target.IsDead() && targetDistance<=20 && Api.HasMacro("Hands"))
 					{
       
 					Console.ForegroundColor = ConsoleColor.Green;
 						Console.WriteLine("Casting Shadowstrike");
 					Console.ResetColor();
 
-					if (Api.UseMacro("Shadowstrike"))
+					if (Api.UseMacro("Hands"))
 					return true;
 	
 					}
@@ -205,7 +205,7 @@ if (Api.HasMacro("Legs") && energy>=35)
                 Console.WriteLine("Legs rune is on cooldown. Skipping cast.");
             }
         }	
-		if (Api.Spellbook.CanCast("Eviscerate")  && points == 5 )
+		if (Api.Spellbook.CanCast("Eviscerate")  && points >= 5 )
 {
     Console.ForegroundColor = ConsoleColor.Green;
     Console.WriteLine($"Casting Eviscerate ");
