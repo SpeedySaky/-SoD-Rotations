@@ -12,13 +12,13 @@ using wShadow.Warcraft.Defines.Wow_Spell;
 public class Rogue : Rotation
 {
 	
-    private int debugInterval = 5; // Set the debug interval in seconds
-    private DateTime lastDebugTime = DateTime.MinValue;
+
     private int pickPocketDelay = 3000; // Delay in milliseconds (3 seconds)
 	private DateTime lastQuickdraw = DateTime.MinValue;
     private TimeSpan QuickdrawCooldown = TimeSpan.FromSeconds(11);
 	private DateTime lastBetween = DateTime.MinValue;
     private TimeSpan BetweenCooldown = TimeSpan.FromSeconds(10);
+	
     public override void Initialize()
     {  
 	// Can set min/max levels required for this rotation.
@@ -69,53 +69,14 @@ var energy = me.Energy; // Energy
 // Target distance from the player
 	var targetDistance = target.Position.Distance2D(me.Position);
 
-if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsLooting() ) return false;
+if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() ) return false;
         if (me.HasAura("Drink") || me.HasAura("Food")) return false;
 		
-		
-		if (Api.Spellbook.CanCast("Sprint") && !Api.Spellbook.OnCooldown("Sprint") )
-{
-    Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine("Casting Sprint");
-    Console.ResetColor();
-    if (Api.Spellbook.Cast("Sprint"))
-    {
-        return true;
-    }
-}
-		if (!me.HasPermanent("Stealth") && Api.Spellbook.CanCast("Stealth") && !Api.Spellbook.OnCooldown("Stealth") && Api.HasTarget())
-    {
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine("Casting Stealth");
-        Console.ResetColor();
-        if (Api.Spellbook.Cast("Stealth"))
-        
-            return true;
-        
-    }
- if (!target.IsDead())
-        {
-           
-                    if (!target.IsDead() && targetDistance<=20 && Api.HasMacro("Hands"))
-					{
-      
-					Console.ForegroundColor = ConsoleColor.Green;
-						Console.WriteLine("Casting Shadowstrike");
-					Console.ResetColor();
 
-					if (Api.UseMacro("Hands"))
-					return true;
-	
-					}
-
-                    }
-                
-            
-        
 
 				return base.PassivePulse();
 
-				}
+		}
 		
 public override bool CombatPulse()
     {
@@ -139,7 +100,8 @@ var energy = me.Energy; // Energy
 
 		if (me.IsDead() || me.IsGhost() || me.IsCasting()  ) return false;
         if (me.HasAura("Drink") || me.HasAura("Food")) return false;
-		if (Api.Spellbook.CanCast("Kick") && !Api.Spellbook.OnCooldown("Kick") && (target.IsCasting() || target.IsChanneling()))
+		
+				if (Api.Spellbook.CanCast("Kick") && !Api.Spellbook.OnCooldown("Kick") && (target.IsCasting() || target.IsChanneling()))
 {
     Console.ForegroundColor = ConsoleColor.Green;
     Console.WriteLine("Casting Kick");
@@ -149,7 +111,7 @@ var energy = me.Energy; // Energy
         return true;
     }
 }
-if (Api.HasMacro("Chest") && energy>=20)
+		if (Api.HasMacro("Chest") && energy>=20)
         {
             if ((DateTime.Now - lastQuickdraw) >= QuickdrawCooldown)
             {
@@ -189,7 +151,7 @@ if (Api.HasMacro("Legs") && energy>=35)
                 // If the cooldown period for Chimera Shot hasn't elapsed yet
                 Console.WriteLine("Legs rune is on cooldown. Skipping cast.");
             }
-        }	
+        }
 		if (Api.Spellbook.CanCast("Evasion")  && !me.HasPermanent("Evasion") && Api.UnfriendlyUnitsNearby(10, true) >= 2 && !Api.Spellbook.OnCooldown("Evasion"))
 {
     Console.ForegroundColor = ConsoleColor.Green;
@@ -259,9 +221,7 @@ var energy = me.Energy; // Energy
 		Console.ResetColor();
 
 
-	
-	
+}
 
-Console.ResetColor();
     }
-	}
+	

@@ -93,25 +93,7 @@ if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChann
             return true;
         
     }
- if (!target.IsDead() && targetDistance <= 5)
-        {
-            if (Api.Spellbook.CanCast("Pick Pocket"))
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Casting Pick Pocket");
-                Console.ResetColor();
-
-                if (Api.Spellbook.Cast("Pick Pocket"))
-                {
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.WriteLine("Pick Pocket successful! Waiting before Shadowstrike.");
-                    Console.ResetColor();
-
-                    // Introducing a delay after Pick Pocket
-                    Thread.Sleep(pickPocketDelay);
-
-                    // Attempting Backstab after delay
-                    if (!target.IsDead() && targetDistance<=20 && Api.HasMacro("Hands"))
+    if (!target.IsDead() && targetDistance<=20 && Api.HasMacro("Hands"))
 					{
       
 					Console.ForegroundColor = ConsoleColor.Green;
@@ -123,9 +105,9 @@ if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChann
 	
 					}
 
-                    }
-                }
-            }
+                    
+                
+            
         
 
 				return base.PassivePulse();
@@ -205,7 +187,27 @@ if (Api.HasMacro("Legs") && energy>=35)
                 Console.WriteLine("Legs rune is on cooldown. Skipping cast.");
             }
         }	
-		if (Api.Spellbook.CanCast("Eviscerate")  && points >= 5 )
+		if (Api.Spellbook.CanCast("Evasion")  && !me.HasPermanent("Evasion") && Api.UnfriendlyUnitsNearby(10, true) >= 2 && !Api.Spellbook.OnCooldown("Evasion"))
+{
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine($"Casting Evasion");
+    Console.ResetColor();
+
+    if (Api.Spellbook.Cast("Evasion"))
+        return true;
+}
+
+		
+if (Api.Spellbook.HasSpell("Slice and Dice")  && points >= 2 && !me.HasPermanent("Slice and Dice") && energy>=25)
+{
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine($"Casting Slice and Dice ");
+    Console.ResetColor();
+
+    if (Api.Spellbook.Cast("Slice and Dice"))
+        return true;
+}
+		if (Api.Spellbook.CanCast("Eviscerate")  && points == 5  && energy>=35)
 {
     Console.ForegroundColor = ConsoleColor.Green;
     Console.WriteLine($"Casting Eviscerate ");
