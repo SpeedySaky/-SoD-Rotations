@@ -69,7 +69,7 @@ var energy = me.Energy; // Energy
 // Target distance from the player
 	var targetDistance = target.Position.Distance2D(me.Position);
 
-if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() ) return false;
+if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsLooting() ) return false;
         if (me.HasAura("Drink") || me.HasAura("Food")) return false;
 		
 		
@@ -83,7 +83,7 @@ if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChann
         return true;
     }
 }
-		if (!me.HasPermanent("Stealth") && Api.Spellbook.CanCast("Stealth") && !Api.Spellbook.OnCooldown("Stealth"))
+		if (!me.HasPermanent("Stealth") && Api.Spellbook.CanCast("Stealth") && !Api.Spellbook.OnCooldown("Stealth") && Api.HasTarget())
     {
         Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine("Casting Stealth");
@@ -93,27 +93,39 @@ if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChann
             return true;
         
     }
- if (!target.IsDead() )
+ if (!target.IsDead() && targetDistance <= 5)
         {
-            
-               
+            if (Api.Spellbook.CanCast("Pick Pocket"))
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Pick Pocket");
+                Console.ResetColor();
+
+                if (Api.Spellbook.Cast("Pick Pocket"))
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine("Pick Pocket successful! Waiting before Shadowstrike.");
+                    Console.ResetColor();
+
+                    // Introducing a delay after Pick Pocket
+                    Thread.Sleep(pickPocketDelay);
 
                     // Attempting Backstab after delay
-                    if (!target.IsDead() && targetDistance<=20 && Api.HasMacro("Hands"))
+                    if (!target.IsDead() && targetDistance<=20 && Api.HasMacro("Shadowstrike"))
 					{
       
 					Console.ForegroundColor = ConsoleColor.Green;
-						Console.WriteLine("Casting Hands rune");
+						Console.WriteLine("Casting Shadowstrike");
 					Console.ResetColor();
 
-					if (Api.UseMacro("Hands"))
+					if (Api.UseMacro("Shadowstrike"))
 					return true;
 	
 					}
 
                     }
-                
-            
+                }
+            }
         
 
 				return base.PassivePulse();
