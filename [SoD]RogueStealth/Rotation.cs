@@ -14,8 +14,11 @@ public class Rogue : Rotation
 	
     private int debugInterval = 5; // Set the debug interval in seconds
     private DateTime lastDebugTime = DateTime.MinValue;
-
-	
+    private int pickPocketDelay = 3000; // Delay in milliseconds (3 seconds)
+	private DateTime lastQuickdraw = DateTime.MinValue;
+    private TimeSpan QuickdrawCooldown = TimeSpan.FromSeconds(11);
+	private DateTime lastBetween = DateTime.MinValue;
+    private TimeSpan BetweenCooldown = TimeSpan.FromSeconds(10);
     public override void Initialize()
     {  
 	// Can set min/max levels required for this rotation.
@@ -68,6 +71,18 @@ var energy = me.Energy; // Energy
 
 if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() ) return false;
         if (me.HasAura("Drink") || me.HasAura("Food")) return false;
+		
+		
+		if (Api.Spellbook.CanCast("Sprint") && !Api.Spellbook.OnCooldown("Sprint") )
+{
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("Casting Sprint");
+    Console.ResetColor();
+    if (Api.Spellbook.Cast("Sprint"))
+    {
+        return true;
+    }
+}
 		if (!me.HasPermanent("Stealth") && Api.Spellbook.CanCast("Stealth") && !Api.Spellbook.OnCooldown("Stealth"))
     {
         Console.ForegroundColor = ConsoleColor.Green;
@@ -78,21 +93,32 @@ if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChann
             return true;
         
     }
-	if (!target.IsDead() && targetDistance<=20 &&   Api.HasMacro("Shadowstrike"))
-    {
-      
-    Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine("Casting Shadowstrike");
-    Console.ResetColor();
+ if (!target.IsDead() )
+        {
+            
+               
 
-    if (Api.UseMacro("Shadowstrike"))
-        return true;
+                    // Attempting Backstab after delay
+                    if (!target.IsDead() && targetDistance<=20 && Api.HasMacro("Hands"))
+					{
+      
+					Console.ForegroundColor = ConsoleColor.Green;
+						Console.WriteLine("Casting Hands rune");
+					Console.ResetColor();
+
+					if (Api.UseMacro("Hands"))
+					return true;
 	
-    }
+					}
+
+                    }
+                
+            
+        
 
 				return base.PassivePulse();
 
-		}
+				}
 		
 public override bool CombatPulse()
     {
@@ -126,7 +152,47 @@ var energy = me.Energy; // Energy
         return true;
     }
 }
-		
+if (Api.HasMacro("Chest") && energy>=20)
+        {
+            if ((DateTime.Now - lastQuickdraw) >= QuickdrawCooldown)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Chest Rune");
+                Console.ResetColor();
+
+                if (Api.UseMacro("Chest"))
+                {
+                    lastQuickdraw = DateTime.Now;
+                    return true;
+                }
+            }
+            else
+            {
+                // If the cooldown period for Chimera Shot hasn't elapsed yet
+                Console.WriteLine("Chest rune is on cooldown. Skipping cast.");
+            }
+        }
+	
+if (Api.HasMacro("Legs") && energy>=35)
+        {
+            if ((DateTime.Now - lastBetween) >= BetweenCooldown)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Legs Rune");
+                Console.ResetColor();
+
+                if (Api.UseMacro("Legs"))
+                {
+                    lastBetween = DateTime.Now;
+                    return true;
+                }
+            }
+            else
+            {
+                // If the cooldown period for Chimera Shot hasn't elapsed yet
+                Console.WriteLine("Legs rune is on cooldown. Skipping cast.");
+            }
+        }	
 		if (Api.Spellbook.CanCast("Eviscerate")  && points == 5 )
 {
     Console.ForegroundColor = ConsoleColor.Green;
