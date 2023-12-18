@@ -90,51 +90,58 @@ if (Api.Spellbook.CanCast("Mark of the Wild") && !me.HasAura("Mark of the Wild")
    
         return true;
     }
-	if (!me.HasPermanent("Cat Form") && Api.Spellbook.CanCast("Cat Form") )	
-		{	
-		if (Api.Spellbook.CanCast("Cat Form") && !me.HasPermanent("Cat Form") )
-				{
-			Console.ForegroundColor = ConsoleColor.Green;
-			Console.WriteLine("Casting Cat Form");
-			Console.ResetColor();
-		if (Api.Spellbook.Cast("Cat Form"))
-				{
-					return true;
-				}
-				}
-				
-			}
+	
 			 var target = Api.Target;
 
 			if (!target.IsDead())
-
-if (Api.Spellbook.CanCast("Wrath") && healthPercentage > 50 && !me.HasPermanent("Cat Form"))
-  
+				{
+				
+if (Api.Spellbook.CanCast("Moonfire") && !target.HasAura("Moonfire") )
+{
+    var reaction = me.GetReaction(target);
+    
+    if (reaction != UnitReaction.Friendly)
     {
-        var reaction = me.GetReaction(target);
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Casting Moonfire");
+        Console.ResetColor();
         
-        if (reaction != UnitReaction.Friendly)
+        if (Api.Spellbook.Cast("Moonfire"))
         {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Wrath");
-            Console.ResetColor();
-            
-            if (Api.Spellbook.Cast("Wrath"))
-            {
-                return true;
-            }
+            return true; // Successful cast of Wrath
         }
-        else
+    }
+    // If unable to cast Moonfire, proceed to the next spell
+}
+else 
+if (Api.Spellbook.CanCast("Wrath") )
+{
+    var reaction = me.GetReaction(target);
+    
+    if (reaction != UnitReaction.Friendly)
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Casting Wrath");
+        Console.ResetColor();
+        
+        if (Api.Spellbook.Cast("Wrath"))
         {
-            // Handle if the target is friendly
-            Console.WriteLine("Target is friendly. Skipping Wrath cast.");
+            return true; // Successful cast of Wrath
         }
     }
     else
     {
-        // Handle if the target is not valid
-        Console.WriteLine("Invalid target. Skipping Wrath cast.");
+        // Handle if the target is friendly
+        Console.WriteLine("Target is friendly. Skipping Wrath cast.");
     }
+}
+else
+{
+    // Handle if unable to cast Wrath or Moonfire
+    Console.WriteLine("Unable to cast Moonfire or Wrath. Skipping cast.");
+}
+
+}
 
  return base.PassivePulse();
 }				
@@ -228,7 +235,7 @@ if (Api.Spellbook.CanCast("Wrath") && healthPercentage > 50 && !me.HasPermanent(
 		
 
         Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine($"{mana}% Mana available");
+        Console.WriteLine($"{mana} Mana available");
         Console.WriteLine($"{healthPercentage}% Health available");
 		Console.ResetColor();
 Console.ResetColor();
