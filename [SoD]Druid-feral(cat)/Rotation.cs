@@ -62,7 +62,7 @@ public class Druid : Rotation
         }
 
 
-if (Api.Spellbook.CanCast("Mark of the Wild") && !me.HasAura("Mark of the Wild")  )
+if (Api.Spellbook.CanCast("Mark of the Wild") && !me.HasAura("Mark of the Wild") && (!me.HasPermanent("Cat Form")|| me.HasPermanent("Cat Form")) )
 {
     Console.ForegroundColor = ConsoleColor.Green;
     Console.WriteLine("Casting Mark of the Wild");
@@ -71,7 +71,8 @@ if (Api.Spellbook.CanCast("Mark of the Wild") && !me.HasAura("Mark of the Wild")
    
         return true;
     }
-	if (Api.Spellbook.CanCast("Thorns") && !me.HasAura("Thorns")  )
+	
+	if (Api.Spellbook.CanCast("Thorns") && !me.HasAura("Thorns") && (!me.HasPermanent("Cat Form")|| me.HasPermanent("Cat Form")) )
 {
     Console.ForegroundColor = ConsoleColor.Green;
     Console.WriteLine("Casting Thorns");
@@ -81,7 +82,7 @@ if (Api.Spellbook.CanCast("Mark of the Wild") && !me.HasAura("Mark of the Wild")
         return true;
     }
 
-	if (Api.Spellbook.CanCast("Omen of Clarity") && !me.HasAura("Omen of Clarity")  )
+	if (Api.Spellbook.CanCast("Omen of Clarity") && !me.HasAura("Omen of Clarity") && (!me.HasPermanent("Cat Form")|| me.HasPermanent("Cat Form")) )
 {
     Console.ForegroundColor = ConsoleColor.Green;
     Console.WriteLine("Casting Omen of Clarity");
@@ -106,37 +107,6 @@ if (Api.Spellbook.CanCast("Mark of the Wild") && !me.HasAura("Mark of the Wild")
 			}
 			 var target = Api.Target;
 
-if (Api.Spellbook.CanCast("Rejuvenation") &&!me.HasAura("Rejuvenation") && healthPercentage <= 80 && mana > 15)
-        {
-			Console.ForegroundColor = ConsoleColor.Green;
-			Console.WriteLine("Casting Rejuvenation");
-			Console.ResetColor();
-			if (Api.Spellbook.Cast("Rejuvenation"))
-			{
-				return true;
-			}
-		}
-		
-		if (Api.Spellbook.CanCast("Healing Touch") && healthPercentage <= 60 && mana > 25 && me.HasAura("Fury of Stormrage"))
-        {
-			Console.ForegroundColor = ConsoleColor.Green;
-			Console.WriteLine("Casting Healing Touch");
-			Console.ResetColor();
-			if (Api.Spellbook.Cast("Healing Touch"))
-			{
-				return true;
-			}
-       }
-	   if (Api.Spellbook.CanCast("Healing Touch") && healthPercentage <= 50 && mana > 25 )
-        {
-			Console.ForegroundColor = ConsoleColor.Green;
-			Console.WriteLine("Casting Healing Touch");
-			Console.ResetColor();
-			if (Api.Spellbook.Cast("Healing Touch"))
-			{
-				return true;
-			}
-       }
 
  return base.PassivePulse();
 }				
@@ -164,7 +134,7 @@ if (Api.Spellbook.CanCast("Rejuvenation") &&!me.HasAura("Rejuvenation") && healt
 			}
 		}
 		
-		if (Api.Spellbook.CanCast("Healing Touch") && healthPercentage <= 60 && mana > 25 && me.HasAura("Fury of Stormrage"))
+		if (Api.Spellbook.CanCast("Healing Touch") && healthPercentage <= 45 && mana > 25 && me.HasAura("Fury of Stormrage"))
         {
 			Console.ForegroundColor = ConsoleColor.Green;
 			Console.WriteLine("Casting Healing Touch");
@@ -239,16 +209,7 @@ if (Api.Spellbook.CanCast("Rejuvenation") &&!me.HasAura("Rejuvenation") && healt
 				return true;
 		}
 
-       if (Api.Spellbook.CanCast("Wrath") && !me.HasPermanent("Cat Form"))
-	   {
-			Console.ForegroundColor = ConsoleColor.Green;
-			Console.WriteLine("Casting Wrath");
-			Console.ResetColor();
-			if (Api.Spellbook.Cast("Wrath"))
-			{
-				return true;
-			}		   
-	   }
+       
 
 		return base.CombatPulse();
     }
