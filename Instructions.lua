@@ -207,7 +207,7 @@ Moonfire
 
 CAT FORM
 
-Mangle ----> macro needed
+Roar ----> macro needed
 Macro name : Roar
 Macro code :
 #showtooltip
