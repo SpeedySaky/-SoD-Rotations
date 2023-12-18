@@ -93,24 +93,9 @@ if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChann
             return true;
         
     }
- if (!target.IsDead() && targetDistance <= 5)
+ if (!target.IsDead())
         {
-            if (Api.Spellbook.CanCast("Pick Pocket"))
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Casting Pick Pocket");
-                Console.ResetColor();
-
-                if (Api.Spellbook.Cast("Pick Pocket"))
-                {
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.WriteLine("Pick Pocket successful! Waiting before Shadowstrike.");
-                    Console.ResetColor();
-
-                    // Introducing a delay after Pick Pocket
-                    Thread.Sleep(pickPocketDelay);
-
-                    // Attempting Backstab after delay
+           
                     if (!target.IsDead() && targetDistance<=20 && Api.HasMacro("Hands"))
 					{
       
@@ -124,8 +109,8 @@ if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChann
 					}
 
                     }
-                }
-            }
+                
+            
         
 
 				return base.PassivePulse();
