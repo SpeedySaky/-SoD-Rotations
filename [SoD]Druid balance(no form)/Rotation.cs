@@ -182,7 +182,7 @@ if (Api.Spellbook.CanCast("Wrath") && healthPercentage > 50 && !me.HasPermanent(
 				return true;
 			}
        }
-		if (!target.HasAura("Sunfire") && targethealth>30 && !me.HasPermanent("Cat Form") && Api.HasMacro("Sunfire") )
+		if (!target.HasAura("Sunfire") && targethealth>30 && Api.HasMacro("Sunfire") )
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Sunfire");
@@ -192,7 +192,7 @@ if (Api.Spellbook.CanCast("Wrath") && healthPercentage > 50 && !me.HasPermanent(
                 return true;
             }
         }
-		if (Api.Spellbook.CanCast("Moonfire") && !target.HasAura("Moonfire") && targethealth>30 && !me.HasPermanent("Cat Form"))
+		if (Api.Spellbook.CanCast("Moonfire") && !target.HasAura("Moonfire") && targethealth>30 )
 		{
 			Console.ForegroundColor = ConsoleColor.Green;
 			Console.WriteLine("Casting Moonfire");
@@ -203,60 +203,9 @@ if (Api.Spellbook.CanCast("Wrath") && healthPercentage > 50 && !me.HasPermanent(
 			}
 		}
 
-		if (!me.HasPermanent("Cat Form") && Api.Spellbook.CanCast("Cat Form") )	
-		{	
-		if (Api.Spellbook.CanCast("Cat Form") && !me.HasPermanent("Cat Form") )
-				{
-			Console.ForegroundColor = ConsoleColor.Green;
-			Console.WriteLine("Casting Cat Form");
-			Console.ResetColor();
-		if (Api.Spellbook.Cast("Cat Form"))
-				{
-					return true;
-				}
-				}
-				
-			}
-		if (Api.HasMacro("Roar") && points >=1 && energy >= 25 && !me.HasAura("Savage Roar") && me.HasPermanent("Cat Form"))
-		{
-			Console.ForegroundColor = ConsoleColor.Green;
-			Console.WriteLine($"Casting Savage Roar");
-			Console.ResetColor();
+		
 
-		if (Api.UseMacro("Roar"))
-				return true;
-		}
-		if (Api.HasMacro("Mangle") && points < 3 && energy >= 45 && me.HasPermanent("Cat Form"))
-		{
-			Console.ForegroundColor = ConsoleColor.Green;
-			Console.WriteLine($"Casting Mangle (Cat) with {energy} Energy");
-			Console.ResetColor();
-
-		if (Api.UseMacro("Mangle"))
-				return true;
-		}
-
-		if (Api.Spellbook.CanCast("Claw") && points < 3 && energy >= 45 && me.HasPermanent("Cat Form"))
-		{
-			Console.ForegroundColor = ConsoleColor.Green;
-			Console.WriteLine($"Casting Claw (Cat) with {energy} Energy");
-			Console.ResetColor();
-
-		if (Api.Spellbook.Cast("Claw"))
-			return true;
-		}
-
-		if (Api.Spellbook.CanCast("Rip") && !target.HasAura("Rip") && target.HealthPercent >= 20 && energy > 30 && points >= 3 && me.HasPermanent("Cat Form"))
-		{
-			Console.ForegroundColor = ConsoleColor.Green;
-			Console.WriteLine($"Casting Rip with {points} Points and {energy} Energy");
-			Console.ResetColor();
-
-		if (Api.Spellbook.Cast("Rip"))
-				return true;
-		}
-
-       if (Api.Spellbook.CanCast("Wrath") && !me.HasPermanent("Cat Form"))
+       if (Api.Spellbook.CanCast("Wrath") )
 	   {
 			Console.ForegroundColor = ConsoleColor.Green;
 			Console.WriteLine("Casting Wrath");

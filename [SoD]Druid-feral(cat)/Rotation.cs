@@ -106,35 +106,37 @@ if (Api.Spellbook.CanCast("Mark of the Wild") && !me.HasAura("Mark of the Wild")
 			}
 			 var target = Api.Target;
 
-			if (!target.IsDead())
-
-if (Api.Spellbook.CanCast("Wrath") && healthPercentage > 50 && !me.HasPermanent("Cat Form"))
-  
-    {
-        var reaction = me.GetReaction(target);
-        
-        if (reaction != UnitReaction.Friendly)
+if (Api.Spellbook.CanCast("Rejuvenation") &&!me.HasAura("Rejuvenation") && healthPercentage <= 80 && mana > 15)
         {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Wrath");
-            Console.ResetColor();
-            
-            if (Api.Spellbook.Cast("Wrath"))
-            {
-                return true;
-            }
-        }
-        else
+			Console.ForegroundColor = ConsoleColor.Green;
+			Console.WriteLine("Casting Rejuvenation");
+			Console.ResetColor();
+			if (Api.Spellbook.Cast("Rejuvenation"))
+			{
+				return true;
+			}
+		}
+		
+		if (Api.Spellbook.CanCast("Healing Touch") && healthPercentage <= 60 && mana > 25 && me.HasAura("Fury of Stormrage"))
         {
-            // Handle if the target is friendly
-            Console.WriteLine("Target is friendly. Skipping Wrath cast.");
-        }
-    }
-    else
-    {
-        // Handle if the target is not valid
-        Console.WriteLine("Invalid target. Skipping Wrath cast.");
-    }
+			Console.ForegroundColor = ConsoleColor.Green;
+			Console.WriteLine("Casting Healing Touch");
+			Console.ResetColor();
+			if (Api.Spellbook.Cast("Healing Touch"))
+			{
+				return true;
+			}
+       }
+	   if (Api.Spellbook.CanCast("Healing Touch") && healthPercentage <= 50 && mana > 25 )
+        {
+			Console.ForegroundColor = ConsoleColor.Green;
+			Console.WriteLine("Casting Healing Touch");
+			Console.ResetColor();
+			if (Api.Spellbook.Cast("Healing Touch"))
+			{
+				return true;
+			}
+       }
 
  return base.PassivePulse();
 }				
@@ -162,7 +164,7 @@ if (Api.Spellbook.CanCast("Wrath") && healthPercentage > 50 && !me.HasPermanent(
 			}
 		}
 		
-		if (Api.Spellbook.CanCast("Healing Touch") && healthPercentage <= 45 && mana > 25 && me.HasAura("Fury of Stormrage"))
+		if (Api.Spellbook.CanCast("Healing Touch") && healthPercentage <= 60 && mana > 25 && me.HasAura("Fury of Stormrage"))
         {
 			Console.ForegroundColor = ConsoleColor.Green;
 			Console.WriteLine("Casting Healing Touch");
