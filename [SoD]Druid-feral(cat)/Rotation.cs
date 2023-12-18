@@ -170,6 +170,16 @@ if (Api.Spellbook.CanCast("Mark of the Wild") && !me.HasAura("Mark of the Wild")
 				}
 				
 			}
+			if (Api.Spellbook.CanCast("Tiger's Fury") &&!me.HasAura("Tiger's Fury") &&   !Api.Spellbook.OnCooldown("Tiger's Fury"))
+        {
+			Console.ForegroundColor = ConsoleColor.Green;
+			Console.WriteLine("Casting Tiger's Fury");
+			Console.ResetColor();
+			if (Api.Spellbook.Cast("Tiger's Fury"))
+			{
+				return true;
+			}
+		}
 		if (Api.HasMacro("Roar") && points >=1 && energy >= 25 && !me.HasAura("Savage Roar") && me.HasPermanent("Cat Form"))
 		{
 			Console.ForegroundColor = ConsoleColor.Green;
