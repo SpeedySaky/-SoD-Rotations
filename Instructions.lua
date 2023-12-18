@@ -190,7 +190,7 @@ Sinister Strike until 5 points
 DRUID
 
 OOC
-Mark of the Wiild
+Mark of the Wild
 Thorns
 Omen of Clarity
 Wrath as opener spell
@@ -206,6 +206,12 @@ Macro code :
 Moonfire
 
 CAT FORM
+
+Mangle ----> macro needed
+Macro name : Roar
+Macro code :
+#showtooltip
+/cast Savage Roar
 
 
 Mangle ----> macro needed
