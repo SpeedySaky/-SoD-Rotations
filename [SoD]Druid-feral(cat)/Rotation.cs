@@ -122,8 +122,18 @@ if (Api.Spellbook.CanCast("Mark of the Wild") && !me.HasAura("Mark of the Wild")
 		var targethealth = target.HealthPercent;
 		var energy = me.Energy;
 		var points = me.ComboPoints;
-
-		if (Api.Spellbook.CanCast("Rejuvenation") &&!me.HasAura("Rejuvenation") && healthPercentage <= 70 && mana > 15)
+		
+		 if (Api.Spellbook.CanCast("War Stomp") &&   !Api.Spellbook.OnCooldown("War Stomp") && healthPercentage<=30 )
+        {
+			Console.ForegroundColor = ConsoleColor.Green;
+			Console.WriteLine("Casting War Stomp");
+			Console.ResetColor();
+			if (Api.Spellbook.Cast("War Stomp"))
+			{
+				return true;
+			}
+       }
+		if (Api.Spellbook.CanCast("Rejuvenation") &&!me.HasAura("Rejuvenation") && healthPercentage <= 30 && mana > 15)
         {
 			Console.ForegroundColor = ConsoleColor.Green;
 			Console.WriteLine("Casting Rejuvenation");
@@ -134,7 +144,7 @@ if (Api.Spellbook.CanCast("Mark of the Wild") && !me.HasAura("Mark of the Wild")
 			}
 		}
 		
-		if (Api.Spellbook.CanCast("Healing Touch") && healthPercentage <= 45 && mana > 25 && me.HasAura("Fury of Stormrage"))
+		if (Api.Spellbook.CanCast("Healing Touch") && healthPercentage <= 30 && mana > 25 && me.HasAura("Fury of Stormrage"))
         {
 			Console.ForegroundColor = ConsoleColor.Green;
 			Console.WriteLine("Casting Healing Touch");
@@ -144,7 +154,7 @@ if (Api.Spellbook.CanCast("Mark of the Wild") && !me.HasAura("Mark of the Wild")
 				return true;
 			}
        }
-	   if (Api.Spellbook.CanCast("Healing Touch") && healthPercentage <= 45 && mana > 25 )
+	   if (Api.Spellbook.CanCast("Healing Touch") && healthPercentage <=30 && mana > 25 )
         {
 			Console.ForegroundColor = ConsoleColor.Green;
 			Console.WriteLine("Casting Healing Touch");
