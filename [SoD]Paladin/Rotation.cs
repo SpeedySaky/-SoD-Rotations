@@ -128,7 +128,7 @@ if (Api.Spellbook.CanCast("Devotion Aura") && !me.HasPermanent("Devotion Aura") 
 		var healthPercentage = me.HealthPercent;
 		var mana = me.Mana;
 		 var target = Api.Target;
-
+		var targethp = target.HealthPercent;
 		if (me.IsDead() || me.IsGhost() || me.IsCasting() ) return false;
         if (me.HasAura("Drink") || me.HasAura("Food")) return false;
 		
@@ -181,6 +181,16 @@ if ( Api.HasMacro("Crusader"))
         Console.WriteLine("Casting Holy Light");
         Console.ResetColor();
         if (Api.Spellbook.Cast("Holy Light"))
+        
+            return true;
+        
+    }
+	if (Api.Spellbook.CanCast("Consecration") && !Api.Spellbook.OnCooldown("Consecration") && targethp>=30 )
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Casting Consecration");
+        Console.ResetColor();
+        if (Api.Spellbook.Cast("Consecration"))
         
             return true;
         
@@ -253,7 +263,7 @@ if (Api.Spellbook.CanCast("Judgement") && !Api.Spellbook.OnCooldown("Judgement")
 		
 
         Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine($"{mana}% Mana available");
+        Console.WriteLine($"{mana} Mana available");
         Console.WriteLine($"{healthPercentage}% Health available");
 
 // Assuming me is an instance of a player character

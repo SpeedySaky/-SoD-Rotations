@@ -15,7 +15,8 @@ public class Druid : Rotation
 	
     private int debugInterval = 5; // Set the debug interval in seconds
     private DateTime lastDebugTime = DateTime.MinValue;
-
+  private TimeSpan starsurgeCooldown = TimeSpan.FromSeconds(6.5);
+	private DateTime laststarsurgeTime = DateTime.MinValue;
 	
     public override void Initialize()
     {
@@ -197,6 +198,27 @@ else
             if (Api.UseMacro("Sunfire"))
             {
                 return true;
+            }
+        }
+		
+		if (Api.HasMacro("Starsurge"))
+        {
+            if ((DateTime.Now - laststarsurgeTime) >= starsurgeCooldown)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Starsurge");
+                Console.ResetColor();
+
+                if (Api.UseMacro("Starsurge"))
+                {
+                    laststarsurgeTime = DateTime.Now;
+                    return true;
+                }
+            }
+            else
+            {
+                // If the cooldown period for Chimera Shot hasn't elapsed yet
+                Console.WriteLine("Starsurge is on cooldown. Skipping cast.");
             }
         }
 		if (Api.Spellbook.CanCast("Moonfire") && !target.HasAura("Moonfire") && targethealth>30 )
