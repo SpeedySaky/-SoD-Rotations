@@ -16,6 +16,8 @@ public class EnhaShaman : Rotation
     private int debugInterval = 5; // Set the debug interval in seconds
     private DateTime lastDebugTime = DateTime.MinValue;
 	 private DateTime lastRockbiterTime = DateTime.MinValue;   
+	private DateTime lastlash = DateTime.MinValue;
+	private TimeSpan lashCooldown = TimeSpan.FromSeconds(6.5);
 
 	
     public override void Initialize()
@@ -77,9 +79,18 @@ public class EnhaShaman : Rotation
             }
         }
 
+if (Api.Spellbook.CanCast("Ghost Wolf") && !me.HasPermanent("Ghost Wolf"))
+{
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("Casting Ghost Wolf");
+    Console.ResetColor();
+    if (Api.Spellbook.Cast("Ghost Wolf"))
+    {
+        return true;
+    }
+}
 
-
-if (!me.HasAura("Lightning Shield") && mana > 30 )
+if (Api.Spellbook.CanCast("Lightning Shield") && !me.HasAura("Lightning Shield") && mana > 30 )
 {
     Console.ForegroundColor = ConsoleColor.Green;
     Console.WriteLine("Casting Lighting Shield");
@@ -102,7 +113,6 @@ if (!me.HasAura("Lightning Shield") && mana > 30 )
 		 var target = Api.Target;
 
 		
-		Console.WriteLine("combat");
 		
 		if (Api.Spellbook.CanCast("Healing Wave") && healthPercentage <= 50 && mana > 20)
         {
@@ -114,7 +124,16 @@ if (!me.HasAura("Lightning Shield") && mana > 30 )
 				return true;
 			}
        }
-	
+		if (Api.Spellbook.CanCast("Earth Shock") && !Api.Spellbook.OnCooldown("Earth Shock") && (target.IsCasting() || target.IsChanneling()))
+{
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("Casting Earth Shock");
+    Console.ResetColor();
+    if (Api.Spellbook.Cast("Earth Shock"))
+    {
+        return true;
+    }
+}
 	
 		if (Api.Spellbook.CanCast("Flame Shock") && !Api.Spellbook.OnCooldown("Flame Shock") && !target.HasAura("Flame Shock"))
 		{
@@ -127,16 +146,19 @@ if (!me.HasAura("Lightning Shield") && mana > 30 )
 			}
 		}
 
-       if ( mana > 30)
-	   {
-			Console.ForegroundColor = ConsoleColor.Green;
-			Console.WriteLine("Casting Lava Lash`");
-			Console.ResetColor();
-			if (Api.UseMacro("Lash"))
-			{
-				return true;
-			}		   
-	   }
+		if (Api.HasMacro("Lash") && mana >=30 && (DateTime.Now - lastLash) >= lashCooldown)
+{
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("Casting Lash.");
+    Console.ResetColor();
+
+    if (Api.UseMacro("Lash"))
+    {
+        lastLash = DateTime.Now; // Update the lastCallPetTime after successful casting
+        return true;
+    }
+}	
+
 
 	
 		return base.CombatPulse();
