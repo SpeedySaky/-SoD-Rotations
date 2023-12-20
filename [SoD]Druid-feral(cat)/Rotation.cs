@@ -154,6 +154,17 @@ if (Api.Spellbook.CanCast("Mark of the Wild") && !me.HasAura("Mark of the Wild")
 				return true;
 			}
        }
+	   if (Api.Spellbook.CanCast("War Stomp") &&   !Api.Spellbook.OnCooldown("War Stomp") )
+        {
+			Console.ForegroundColor = ConsoleColor.Green;
+			Console.WriteLine("Casting War Stomp");
+			Console.ResetColor();
+			if (Api.Spellbook.Cast("War Stomp"))
+			{
+				return true;
+			}
+       }
+		
 		
 
 		if (!me.HasPermanent("Cat Form") && Api.Spellbook.CanCast("Cat Form") )	
@@ -170,6 +181,7 @@ if (Api.Spellbook.CanCast("Mark of the Wild") && !me.HasAura("Mark of the Wild")
 				}
 				
 			}
+			
 			if (Api.Spellbook.CanCast("Tiger's Fury") &&!me.HasAura("Tiger's Fury") &&   !Api.Spellbook.OnCooldown("Tiger's Fury"))
         {
 			Console.ForegroundColor = ConsoleColor.Green;
