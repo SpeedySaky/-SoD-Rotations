@@ -146,7 +146,7 @@ if (Api.Spellbook.CanCast("Lightning Shield") && !me.HasAura("Lightning Shield")
 			}
 		}
 
-		if (Api.HasMacro("Lash") && mana >=30 && (DateTime.Now - lastLash) >= lashCooldown)
+		if (Api.HasMacro("Lash") && mana >=30 && (DateTime.Now - lastlash) >= lashCooldown)
 {
     Console.ForegroundColor = ConsoleColor.Green;
     Console.WriteLine("Casting Lash.");
@@ -154,7 +154,7 @@ if (Api.Spellbook.CanCast("Lightning Shield") && !me.HasAura("Lightning Shield")
 
     if (Api.UseMacro("Lash"))
     {
-        lastLash = DateTime.Now; // Update the lastCallPetTime after successful casting
+        lastlash = DateTime.Now; // Update the lastCallPetTime after successful casting
         return true;
     }
 }	
