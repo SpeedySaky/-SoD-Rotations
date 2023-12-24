@@ -25,8 +25,8 @@ public class Druid : Rotation
     {
         var me = Api.Player;
         if (!me.IsValid()) return false;
-        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving()) return false;
         if (me.HasAura("Drink") || me.HasAura("Food")) return false;
+        if (me.IsDeadOrGhost() || me.IsCasting() || me.IsMoving()) return false;
 
         var mana = me.Mana;
         var healthPercentage = me.HealthPercent;
