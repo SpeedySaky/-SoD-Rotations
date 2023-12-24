@@ -62,7 +62,7 @@ public class Druid : Rotation
         }
 
 
-if (Api.Spellbook.CanCast("Mark of the Wild") && !me.HasAura("Mark of the Wild") && (!me.HasPermanent("Cat Form")|| me.HasPermanent("Cat Form")) )
+if (Api.Spellbook.CanCast("Mark of the Wild") && !me.HasAura("Mark of the Wild") && (!me.HasPermanent(768)|| me.HasPermanent(768)) )
 {
     Console.ForegroundColor = ConsoleColor.Green;
     Console.WriteLine("Casting Mark of the Wild");
@@ -72,7 +72,7 @@ if (Api.Spellbook.CanCast("Mark of the Wild") && !me.HasAura("Mark of the Wild")
         return true;
     }
 	
-	if (Api.Spellbook.CanCast("Thorns") && !me.HasAura("Thorns") && (!me.HasPermanent("Cat Form")|| me.HasPermanent("Cat Form")) )
+	if (Api.Spellbook.CanCast("Thorns") && !me.HasAura("Thorns") && (!me.HasPermanent(768)|| me.HasPermanent(768)) )
 {
     Console.ForegroundColor = ConsoleColor.Green;
     Console.WriteLine("Casting Thorns");
@@ -82,7 +82,7 @@ if (Api.Spellbook.CanCast("Mark of the Wild") && !me.HasAura("Mark of the Wild")
         return true;
     }
 
-	if (Api.Spellbook.CanCast("Omen of Clarity") && !me.HasAura("Omen of Clarity") && (!me.HasPermanent("Cat Form")|| me.HasPermanent("Cat Form")) )
+	if (Api.Spellbook.CanCast("Omen of Clarity") && !me.HasAura("Omen of Clarity") && (!me.HasPermanent(768)|| me.HasPermanent(768)) )
 {
     Console.ForegroundColor = ConsoleColor.Green;
     Console.WriteLine("Casting Omen of Clarity");
@@ -91,14 +91,14 @@ if (Api.Spellbook.CanCast("Mark of the Wild") && !me.HasAura("Mark of the Wild")
    
         return true;
     }
-	if (!me.HasPermanent("Cat Form") && Api.Spellbook.CanCast("Cat Form") )	
+	if (!me.HasPermanent(768) && Api.Spellbook.CanCast(768) )	
 		{	
-		if (Api.Spellbook.CanCast("Cat Form") && !me.HasPermanent("Cat Form") )
+		if (Api.Spellbook.CanCast(768) && !me.HasPermanent(768) )
 				{
 			Console.ForegroundColor = ConsoleColor.Green;
 			Console.WriteLine("Casting Cat Form");
 			Console.ResetColor();
-		if (Api.Spellbook.Cast("Cat Form"))
+		if (Api.Spellbook.Cast(768))
 				{
 					return true;
 				}
@@ -177,14 +177,14 @@ if (Api.Spellbook.CanCast("Mark of the Wild") && !me.HasAura("Mark of the Wild")
 		
 		
 
-		if (!me.HasPermanent("Cat Form") && Api.Spellbook.CanCast("Cat Form") )	
+		if (!me.HasPermanent(768) && Api.Spellbook.CanCast(768) )	
 		{	
-		if (Api.Spellbook.CanCast("Cat Form") && !me.HasPermanent("Cat Form") )
+		if (Api.Spellbook.CanCast(768) && !me.HasPermanent(768) )
 				{
 			Console.ForegroundColor = ConsoleColor.Green;
 			Console.WriteLine("Casting Cat Form");
 			Console.ResetColor();
-		if (Api.Spellbook.Cast("Cat Form"))
+		if (Api.Spellbook.Cast(768))
 				{
 					return true;
 				}
@@ -202,7 +202,7 @@ if (Api.Spellbook.CanCast("Mark of the Wild") && !me.HasAura("Mark of the Wild")
 				return true;
 			}
 		}
-		if (Api.HasMacro("Roar") && points >=1 && energy >= 25 && !me.HasAura("Savage Roar") && me.HasPermanent("Cat Form"))
+		if (Api.HasMacro("Roar") && points >=1 && energy >= 25 && !me.HasAura("Savage Roar") && me.HasPermanent(768))
 		{
 			Console.ForegroundColor = ConsoleColor.Green;
 			Console.WriteLine($"Casting Savage Roar");
@@ -211,7 +211,7 @@ if (Api.Spellbook.CanCast("Mark of the Wild") && !me.HasAura("Mark of the Wild")
 		if (Api.UseMacro("Roar"))
 				return true;
 		}
-		if (Api.HasMacro("Mangle") && points < 3 && energy >= 45 && me.HasPermanent("Cat Form"))
+		if (Api.HasMacro("Mangle") && points < 3 && energy >= 45 && me.HasPermanent(768))
 		{
 			Console.ForegroundColor = ConsoleColor.Green;
 			Console.WriteLine($"Casting Mangle (Cat) with {energy} Energy");
@@ -221,7 +221,7 @@ if (Api.Spellbook.CanCast("Mark of the Wild") && !me.HasAura("Mark of the Wild")
 				return true;
 		}
 
-		if (Api.Spellbook.CanCast("Claw") && points < 3 && energy >= 45 && me.HasPermanent("Cat Form"))
+		if (Api.Spellbook.CanCast("Claw") && points < 3 && energy >= 45 && me.HasPermanent(768))
 		{
 			Console.ForegroundColor = ConsoleColor.Green;
 			Console.WriteLine($"Casting Claw (Cat) with {energy} Energy");
@@ -231,7 +231,7 @@ if (Api.Spellbook.CanCast("Mark of the Wild") && !me.HasAura("Mark of the Wild")
 			return true;
 		}
 
-		if (Api.Spellbook.CanCast("Rip") && !target.HasAura("Rip") && target.HealthPercent >= 20 && energy > 30 && points >= 3 && me.HasPermanent("Cat Form"))
+		if (Api.Spellbook.CanCast("Rip") && !target.HasAura("Rip") && target.HealthPercent >= 20 && energy > 30 && points >= 3 && me.HasPermanent(768))
 		{
 			Console.ForegroundColor = ConsoleColor.Green;
 			Console.WriteLine($"Casting Rip with {points} Points and {energy} Energy");
