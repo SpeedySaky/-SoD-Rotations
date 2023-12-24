@@ -73,16 +73,8 @@ public class RetPala : Rotation
 }
 
 
-if (me.HasItem("Elixir of Minor Defense") && !me.HasAura("Lesser Armor") )
-{
-    Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine("Using Elixir of Minor Defense");
-    Console.ResetColor();
-    if (Api.Inventory.Use("Elixir of Minor Defense"))
-    {
-        return true;
-    }
-}
+  
+
 if (Api.Spellbook.CanCast("Blessing of Wisdom") && !me.HasAura("Blessing of Might") && mana < 30)
 {
     Console.ForegroundColor = ConsoleColor.Green;
