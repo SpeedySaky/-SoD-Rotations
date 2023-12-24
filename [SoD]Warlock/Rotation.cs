@@ -68,6 +68,7 @@ var pet = me.Pet();
 		 {
 		   TargetHealth = target.HealthPercent;
 		 }
+		 
 if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
         {
             LogPlayerStats();
@@ -78,6 +79,7 @@ var healthPercentage = me.HealthPercent;
 var targethealth = target.HealthPercent;
 
 
+// Target distance from the player
 // Target distance from the player
 	var targetDistance = target.Position.Distance2D(me.Position);
 
@@ -102,26 +104,7 @@ if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChann
             if (Api.Spellbook.Cast("Health Funnel"))
                 return true;
         }
-	if (me.HasItem("Soul Shard") && !me.HasItem("Minor Healthstone"))
-	  {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Create Healthstone ");
-            Console.ResetColor();
 
-            if (Api.Spellbook.Cast("Create Healthstone (Minor)"))
-                return true;
-        }
-		
-		if ( !IsValid(pet) && Api.Spellbook.CanCast("Summon Voidwalker") && me.HasItem("Soul Shard"))
-	
-		 {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Summon VoidWalker.");
-            Console.ResetColor();
-
-            if (Api.Spellbook.Cast("Summon Voidwalker"))
-                return true;
-        }
 		else if (!IsValid(pet) && Api.Spellbook.CanCast("Summon Imp")  && !Api.Spellbook.CanCast("Summon Voidwalker"))
 
         {
@@ -133,7 +116,7 @@ if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChann
                 return true;
         }
 		var reaction = me.GetReaction(target);
-	if (Api.HasMacro("Haunt") && reaction != UnitReaction.Friendly && targethealth>=1)
+	if (Api.HasMacro("Hands") && reaction != UnitReaction.Friendly && targethealth>=1)
   
 
         {
@@ -141,7 +124,7 @@ if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChann
             Console.WriteLine("Casting Haunt");
             Console.ResetColor();
             
-            if (Api.UseMacro("Haunt"))
+            if (Api.UseMacro("Hands"))
             {
                 return true;
             }
@@ -209,7 +192,7 @@ var healthPercentage = me.HealthPercent;
             if (Api.Spellbook.Cast("Summon Imp"))
                 return true;
         }
-		if (!target.HasAura("Haunt") && Api.HasMacro("Haunt") && targethealth>=30 && mana>=12)
+		if (!target.HasAura("Haunt") && Api.HasMacro("Hands") && targethealth>=30 && mana>=12)
   
     {
         var reaction = me.GetReaction(target);
@@ -220,7 +203,7 @@ var healthPercentage = me.HealthPercent;
             Console.WriteLine("Casting Haunt");
             Console.ResetColor();
             
-            if (Api.UseMacro("Haunt"))
+            if (Api.UseMacro("Hands"))
             {
                 return true;
             }
@@ -228,26 +211,7 @@ var healthPercentage = me.HealthPercent;
 		
 		}
 		
-		if (me.HasItem("Minor Healthstone")&& healthPercentage<=50 &&  !Api.Inventory.OnCooldown("Minor Healthstone"))
-		{
-    Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine("Using Minor Healthstone");
-    Console.ResetColor();
 
-    if (Api.Inventory.Use("Minor Healthstone"));
-        return true;
-		}
-	
-	
-	if (Api.Spellbook.CanCast("Drain Soul") && me.ItemCount("Soul Shard")<=2 && targethealth<=20)
-		{
-    Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine("Casting Drain Soul");
-    Console.ResetColor();
-
-    if (Api.Spellbook.Cast("Drain Soul"))
-        return true;
-	}
 	
 	if (Api.Spellbook.CanCast("Corruption") && !target.HasAura("Corruption")  )
 	{
@@ -268,7 +232,7 @@ var healthPercentage = me.HealthPercent;
     if (Api.Spellbook.Cast("Curse of Agony"))
         return true;
 	}
-	if (Api.Spellbook.CanCast("Shadow Bolt") && targethealth>=30  )
+	if (Api.Spellbook.CanCast("Shadow Bolt")  )
 	{
     Console.ForegroundColor = ConsoleColor.Green;
     Console.WriteLine("Casting Shadow Bolt");
@@ -334,7 +298,6 @@ var healthPercentage = me.HealthPercent;
         Console.WriteLine($"{mana}% Mana available");
         Console.WriteLine($"{healthPercentage}% Health available");
 		Console.ResetColor();
-
 
 	if (me.HasAura("Demon Skin")) // Replace "Thorns" with the actual aura name
 	{
