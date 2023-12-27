@@ -1,13 +1,8 @@
 using System;
-using System.Threading;
 using wShadow.Templates;
 using wShadow.Warcraft.Classes;
 using wShadow.Warcraft.Defines;
 using wShadow.Warcraft.Managers;
-using wShadow.Warcraft.Structures.Wow_Player;
-using wShadow.Warcraft.Defines.Wow_Player;
-using wShadow.Warcraft.Defines.Wow_Spell;
-
 
 public class Warlock : Rotation
 {
@@ -68,7 +63,7 @@ var pet = me.Pet();
 		 {
 		   TargetHealth = target.HealthPercent;
 		 }
-		 
+	
 if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
         {
             LogPlayerStats();
@@ -77,8 +72,7 @@ if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
 // Health percentage of the player
 var healthPercentage = me.HealthPercent;
 var targethealth = target.HealthPercent;
-
-
+ShadowApi shadowApi = new ShadowApi();
 // Target distance from the player
 // Target distance from the player
 	var targetDistance = target.Position.Distance2D(me.Position);
@@ -105,16 +99,44 @@ if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChann
                 return true;
         }
 
-		else if (!IsValid(pet) && Api.Spellbook.CanCast("Summon Imp")  && !Api.Spellbook.CanCast("Summon Voidwalker"))
+		if (!IsValid(pet) && Api.Spellbook.CanCast("Summon Voidwalker") && shadowApi.Inventory.HasItem("Soul Shard") && mana>30)
+{
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("Casting Summon VoidWalker.");
+    Console.ResetColor();
 
+    if (Api.Spellbook.Cast("Summon Voidwalker"))
+    {
+        return true;
+    }
+}
+else if (!IsValid(pet) && Api.Spellbook.CanCast("Summon Imp") && !Api.Spellbook.CanCast("Summon Voidwalker") && mana >30)
+{
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("Casting Summon Imp.");
+    Console.ResetColor();
+
+    if (Api.Spellbook.Cast("Summon Imp"))
+    {
+        return true;
+    }
+}
+
+		
+		if (shadowApi.Inventory.HasItem("Soul Shard") && !shadowApi.Inventory.HasItem("Minor Healthstone"))
+{
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("Create Healthstone ");
+    Console.ResetColor();
+
+    if (Api.Spellbook.HasLearned("Create Healthstone (Minor)") && Api.Spellbook.CanCast("Create Healthstone (Minor)"))
+    {
+        if (Api.Spellbook.Cast("Create Healthstone (Minor)"))
         {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Summon Imp.");
-            Console.ResetColor();
-
-            if (Api.Spellbook.Cast("Summon Imp"))
-                return true;
+            return true;
         }
+    }
+}
 		var reaction = me.GetReaction(target);
 	if (Api.HasMacro("Hands") && reaction != UnitReaction.Friendly && targethealth>=1)
   
@@ -142,7 +164,7 @@ var target = Api.Target;
 		var mana = me.ManaPercent;
 var targethealth = target.HealthPercent;
 var healthPercentage = me.HealthPercent;
-
+ShadowApi shadowApi = new ShadowApi();
  if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
         {
             LogPlayerStats();
@@ -176,22 +198,60 @@ var healthPercentage = me.HealthPercent;
                 // without triggering a premature exit
             }
         }
+		
+		if (Api.Spellbook.CanCast("Drain Soul") && shadowApi.Inventory.ItemCount("Soul Shard") <= 2 && targethealth <= 20)
+{
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("Casting Drain Soul");
+    Console.ResetColor();
+
+    if (Api.Spellbook.Cast("Drain Soul"))
+    {
+        return true;
+    }
+}
     	if (Api.Player.InCombat() && Api.Target != null && Api.Target.IsValid())
 		{
 
     // Single Target Abilities
     if (!target.IsDead())
     {
-		if (!IsValid(pet) && Api.Spellbook.CanCast("Summon Imp")  )
+		if (!IsValid(pet) && Api.Spellbook.CanCast("Summon Voidwalker") && shadowApi.Inventory.HasItem("Soul Shard") && mana >=30)
+{
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("Casting Summon VoidWalker.");
+    Console.ResetColor();
 
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Summon Imp.");
-            Console.ResetColor();
+    if (Api.Spellbook.Cast("Summon Voidwalker"))
+    {
+        return true;
+    }
+}
+else if (!IsValid(pet) && Api.Spellbook.CanCast("Summon Imp") && !Api.Spellbook.CanCast("Summon Voidwalker") && mana >=30)
+{
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("Casting Summon Imp.");
+    Console.ResetColor();
 
-            if (Api.Spellbook.Cast("Summon Imp"))
-                return true;
-        }
+    if (Api.Spellbook.Cast("Summon Imp"))
+    {
+        return true;
+    }
+}
+
+if (shadowApi.Inventory.HasItem("Minor Healthstone") && healthPercentage <= 50 && !shadowApi.Inventory.OnCooldown("Minor Healthstone"))
+{
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("Using Minor Healthstone");
+    Console.ResetColor();
+
+    if (shadowApi.Inventory.Use("Minor Healthstone"))
+    {
+        return true;
+    }
+}
+
+
 		if (!target.HasAura("Haunt") && Api.HasMacro("Hands") && targethealth>=30 && mana>=12)
   
     {
@@ -213,7 +273,7 @@ var healthPercentage = me.HealthPercent;
 		
 
 	
-	if (Api.Spellbook.CanCast("Corruption") && !target.HasAura("Corruption")  )
+	if (Api.Spellbook.CanCast("Corruption") && !target.HasAura("Corruption") && mana>=10 )
 	{
     Console.ForegroundColor = ConsoleColor.Green;
     Console.WriteLine("Casting Corruption");
@@ -223,7 +283,7 @@ var healthPercentage = me.HealthPercent;
         return true;
 	}
 	
-	if (Api.Spellbook.CanCast("Curse of Agony") && !target.HasAura("Curse of Agony")  )
+	if (Api.Spellbook.CanCast("Curse of Agony") && !target.HasAura("Curse of Agony") && mana>=10 )
 	{
     Console.ForegroundColor = ConsoleColor.Green;
     Console.WriteLine("Casting Curse of Agony");
@@ -232,7 +292,8 @@ var healthPercentage = me.HealthPercent;
     if (Api.Spellbook.Cast("Curse of Agony"))
         return true;
 	}
-	if (Api.Spellbook.CanCast("Shadow Bolt")  )
+	
+	if (Api.Spellbook.CanCast("Shadow Bolt") && mana>=10 )
 	{
     Console.ForegroundColor = ConsoleColor.Green;
     Console.WriteLine("Casting Shadow Bolt");
@@ -268,12 +329,7 @@ if (me.InCombat() && Api.UnfriendlyUnitsNearby(10, true) >= 2)
             // }
         }
     
-
-		
-			
-    	
-	
-    }
+   }
 }
 return base.CombatPulse();
 }
@@ -288,7 +344,6 @@ var targethealth = target.HealthPercent;
 
 // Health percentage of the player
 var healthPercentage = me.HealthPercent;
-
 
 // Target distance from the player
 		var targetDistance = target.Position.Distance2D(me.Position);
@@ -311,8 +366,13 @@ Console.ResetColor();
 	Console.ResetColor();
 	}
 	
-	
+ShadowApi shadowApi = new ShadowApi();
+// Access the Bank property and use its methods
+if (shadowApi.Inventory.HasItem("Hearthstone"))
+{
+    Console.WriteLine("Hearthstone found in inventory");
+    Console.ResetColor();
+}
 
-Console.ResetColor();
     }
 	}

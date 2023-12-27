@@ -1,4 +1,4 @@
-using System;
+ using System;
 using System.Threading;
 using wShadow.Templates;
 using wShadow.Warcraft.Classes;
@@ -83,7 +83,7 @@ if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChann
         return true;
     }
 }
-		if (!me.HasPermanent("Stealth") && Api.Spellbook.CanCast("Stealth") && !Api.Spellbook.OnCooldown("Stealth") && Api.HasTarget())
+		if (!me.HasPermanent("Stealth") && Api.Spellbook.CanCast("Stealth") && !Api.Spellbook.OnCooldown("Stealth") && Api.HasTarget() && targetDistance<=30 && !target.IsDead())
     {
         Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine("Casting Stealth");
@@ -93,7 +93,7 @@ if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChann
             return true;
         
     }
-    if (!target.IsDead() && targetDistance<=20 && Api.HasMacro("Hands"))
+    if (!target.IsDead() && targetDistance<=25 && Api.HasMacro("Hands"))
 					{
       
 					Console.ForegroundColor = ConsoleColor.Green;
@@ -167,7 +167,7 @@ if (Api.HasMacro("Chest") && energy>=20)
             }
         }
 	
-if (Api.HasMacro("Legs") && energy>=35)
+if (Api.HasMacro("Legs") && energy>=35 && targetDistance >=6 && points>=2)
         {
             if ((DateTime.Now - lastBetween) >= BetweenCooldown)
             {
@@ -207,7 +207,7 @@ if (Api.Spellbook.HasSpell("Slice and Dice")  && points >= 2 && !me.HasPermanent
     if (Api.Spellbook.Cast("Slice and Dice"))
         return true;
 }
-		if (Api.Spellbook.CanCast("Eviscerate")  && points == 5  && energy>=35)
+		if (Api.Spellbook.CanCast("Eviscerate")  && points >= 3  && energy>=35)
 {
     Console.ForegroundColor = ConsoleColor.Green;
     Console.WriteLine($"Casting Eviscerate ");
