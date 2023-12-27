@@ -167,7 +167,28 @@ if ( Api.HasMacro("Crusader"))
                 Console.WriteLine("Crusader Strike is on cooldown. Skipping cast.");
             }
         }
-		if (Api.Spellbook.CanCast("Holy Light") && healthPercentage <= 50 && mana > 20)
+		
+		if (Api.Spellbook.CanCast("Divine Protection") && healthPercentage <= 45 && !me.HasAura("Forbearance"))
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Casting Divine Protection");
+        Console.ResetColor();
+        if (Api.Spellbook.Cast("Divine Protection"))
+        
+            return true;
+        
+    }
+		if (Api.Spellbook.CanCast("Lay on Hands") && healthPercentage <= 10 && !me.HasAura("Forbearance"))
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Casting Lay on Hands");
+        Console.ResetColor();
+        if (Api.Spellbook.Cast("Lay on Hands"))
+        
+            return true;
+        
+    }
+		if (Api.Spellbook.CanCast("Holy Light") && healthPercentage <= 45 && mana > 20)
     {
         Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine("Casting Holy Light");
