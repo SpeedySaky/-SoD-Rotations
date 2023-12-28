@@ -4,17 +4,14 @@ using wShadow.Templates;
 using wShadow.Warcraft.Classes;
 using wShadow.Warcraft.Defines;
 using wShadow.Warcraft.Managers;
-using wShadow.Warcraft.Structures.Wow_Player;
-using wShadow.Warcraft.Defines.Wow_Player;
-using wShadow.Warcraft.Defines.Wow_Spell;
 
 
-public class RetPala : Rotation
+
+public class MageSoD : Rotation
 {
 	
-    private int debugInterval = 5; // Set the debug interval in seconds
+ private int debugInterval = 5; // Set the debug interval in seconds
     private DateTime lastDebugTime = DateTime.MinValue;
-
 	
     public override void Initialize()
     {  
@@ -26,7 +23,7 @@ public class RetPala : Rotation
         // The simplest calculation for optimal ticks (to avoid key spam and false attempts)
 
 		// Assuming wShadow is an instance of some class containing UnitRatings property
-        SlowTick = 600;
+        SlowTick = 800;
         FastTick = 200;
 
         // You can also use this method to add to various action lists.
@@ -49,7 +46,7 @@ public class RetPala : Rotation
 	 // Variables for player and target instances
 var me = Api.Player;
 var target = Api.Target;
-    var pet = me.Pet();
+var pet = me.Pet();
 
 if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
         {
@@ -58,12 +55,9 @@ if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
         }
 // Health percentage of the player
 var healthPercentage = me.HealthPercent;
-
-// Power percentages for different resources
-		var mana = me.Mana;
-
-// Target distance from the player
-	var targetDistance = target.Position.Distance2D(me.Position);
+var mana = me.ManaPercent;
+var targetDistance = target.Position.Distance2D(me.Position);
+ShadowApi shadowApi = new ShadowApi();
 
 if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() ) return false;
         if (me.HasAura("Drink") || me.HasAura("Food")) return false;
@@ -87,42 +81,74 @@ if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChann
     if (Api.Spellbook.Cast("Arcane Intellect"))
         return true;
 	}
-	if (Api.Spellbook.CanCast("Conjure Water"))
+	
+	
+	string[] waterTypes = { "Conjured Fresh Water", "Conjured Water", "Conjured Purified Water" };
+bool needsWater = true;
+
+foreach (string waterType in waterTypes)
 {
-    string[] waterTypes = new string[] { "Conjured Fresh Water", "Conjured Water" }; // Define water types from better to worse
-
-    foreach (string waterType in waterTypes)
+    if (shadowApi.Inventory.HasItem(waterType))
     {
-        if (me.ItemCount(waterType) < 1)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting " + waterType);
-            Console.ResetColor();
-
-            if (Api.Spellbook.Cast("Conjure Water"))
-            {
-                return true;
-            }
-        }
-        else
-        {
-            // Handle if already have the specified water type
-            Console.WriteLine("Already have " + waterType + ". Skipping Conjure Water.");
-            break; // Stop conjuring if already have a higher quality water
-        }
+        needsWater = false;
+        break;
     }
 }
 
-	
-	if (Api.Spellbook.CanCast("Conjure Food")  && me.ItemCount("Conjured Muffin")<1)
-	{
+// Now needsWater variable will indicate if the character needs water
+if (needsWater)
+{
     Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine("Casting Conjure Food");
+    Console.WriteLine("Character needs water!");
     Console.ResetColor();
 
-    if (Api.Spellbook.Cast("Conjure Food"))
-        return true;
-	}
+    // Add logic here to conjure water or perform any action needed to acquire water
+    // Example: Cast "Conjure Water" spell
+    // Assuming the API allows for conjuring water in a similar way to casting spells
+    if (Api.Spellbook.CanCast("Conjure Water"))
+    {
+        if (Api.Spellbook.Cast("Conjure Water"))
+        {
+            Console.WriteLine("Conjured water.");
+            // Add further actions if needed after conjuring water
+        }
+ }
+}
+string[] foodTypes = { "Conjured Muffin", "Conjured Bread", "Conjured Rye" };
+bool needsFood = true;
+
+foreach (string foodType in foodTypes)
+{
+    if (shadowApi.Inventory.HasItem(foodType))
+    {
+        needsFood = false;
+        break;
+    }
+}
+
+// Now needsWater variable will indicate if the character needs food
+if (needsFood)
+{
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("Character needs food!");
+    Console.ResetColor();
+
+    // Add logic here to conjure water or perform any action needed to acquire food
+    // Example: Cast "Conjure food" spell
+    // Assuming the API allows for conjuring food in a similar way to casting spells
+    if (Api.Spellbook.CanCast("Conjure Food"))
+    {
+        if (Api.Spellbook.Cast("Conjure Food"))
+        {
+            Console.WriteLine("Conjured Food.");
+            // Add further actions if needed after conjuring water
+        }
+
+}
+}
+
+	
+	
 	
 	if (!target.IsDead())
 
@@ -188,7 +214,7 @@ var targethealth = target.HealthPercent;
     // Single Target Abilities
     if (!target.IsDead())
     {
-		if (Api.Spellbook.CanCast("Fireblast") && mana>30 && targethealth<30 && !target.IsDead() && !Api.Spellbook.OnCooldown("Fireblast"))
+		if (Api.Spellbook.CanCast("Fireblast") && mana>30 && targethealth<50  && !Api.Spellbook.OnCooldown("Fireblast"))
 	{
     Console.ForegroundColor = ConsoleColor.Green;
     Console.WriteLine("Casting Fireblast");
@@ -207,7 +233,7 @@ var targethealth = target.HealthPercent;
         return true;
 	}
 	
-	if (Api.Spellbook.CanCast("Frostbolt")  && targethealth<20)
+	if (Api.Spellbook.CanCast("Frostbolt")  && targethealth<20 && mana>20)
 	{
     Console.ForegroundColor = ConsoleColor.Green;
     Console.WriteLine("Casting Frostbolt");
@@ -216,7 +242,18 @@ var targethealth = target.HealthPercent;
     if (Api.Spellbook.Cast("Frostbolt"))
         return true;
 	}
+	
+	if (Api.Spellbook.CanCast("Shoot")   )
+	{
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("Casting Shoot");
+    Console.ResetColor();
+
+    if (Api.Spellbook.Cast("Shoot"))
+        return true;
+	}
     }
+	
 	}
 
 // Check if in combat and if there are multiple targets nearby
@@ -248,7 +285,8 @@ private void LogPlayerStats()
         // Variables for player and target instances
 var me = Api.Player;
 var target = Api.Target;
-		var mana = me.Mana;
+		var mana = me.ManaPercent;
+ShadowApi shadowApi = new ShadowApi();
 
 // Health percentage of the player
 var healthPercentage = me.HealthPercent;
@@ -259,7 +297,7 @@ var healthPercentage = me.HealthPercent;
 		
 
         Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine($"{mana} Mana available");
+        Console.WriteLine($"{mana}% Mana available");
         Console.WriteLine($"{healthPercentage}% Health available");
 		Console.ResetColor();
 
@@ -276,40 +314,35 @@ Console.ResetColor();
 	Console.ResetColor();
 	}
 	
-	if (me.ItemCount("Conjured Water") > 1)
+
+
+// Define food and water types
+string[] foodTypes = { "Conjured Muffin", "Conjured Bread", "Conjured Rye" };
+string[] waterTypes = { "Conjured Fresh Water", "Conjured Water", "Conjured Purified Water" };
+
+// Count food items in the inventory
+int foodCount = 0;
+foreach (string foodType in foodTypes)
 {
-    var itemCount = me.ItemCount("Conjured Water"); // Replace "Conjured Water" with the name of your item
-    Console.ForegroundColor = ConsoleColor.Blue;
-    Console.WriteLine($"Number of Conjured Water items: {itemCount}");
-    Console.ResetColor();
+    int count = shadowApi.Inventory.ItemCount(foodType);
+    foodCount += count;
 }
 
-if (me.ItemCount("Conjured Muffin") > 1)
+// Count water items in the inventory
+int waterCount = 0;
+foreach (string waterType in waterTypes)
 {
-    var itemCount = me.ItemCount("Conjured Muffin"); // Replace "Conjured Water" with the name of your item
-    Console.ForegroundColor = ConsoleColor.Blue;
-    Console.WriteLine($"Number of Conjured Muffin items: {itemCount}");
-    Console.ResetColor();
+    int count = shadowApi.Inventory.ItemCount(waterType);
+    waterCount += count;
 }
 
-
-	if (me.HasPermanent("Devotion Aura")) // Replace "Thorns" with the actual aura name
-	{
-		 Console.ForegroundColor = ConsoleColor.Yellow;
+// Display the counts of food and water items
+Console.ForegroundColor = ConsoleColor.Green;
+Console.WriteLine("Current Food Count: " + foodCount);
+Console.WriteLine("Current Water Count: " + waterCount);
 Console.ResetColor();
-   
-		Console.WriteLine($"Have  Devotion Aura");
-	}
-if (me.HasAura("Blessing of Might")) // Replace "Thorns" with the actual aura name
-{
-		 Console.ForegroundColor = ConsoleColor.Blue;
 
-   var remainingTimeSeconds = me.AuraRemains("Blessing of Might");
-    var remainingTimeMinutes = remainingTimeSeconds / 60; // Convert seconds to minutes
-    var roundedMinutes = Math.Round(remainingTimeMinutes/ 1000,1); // Round to one decimal place
 
-    Console.WriteLine($"Remaining time for Blessing of Might: {roundedMinutes} minutes");
-}
 
 Console.ResetColor();
     }
