@@ -214,13 +214,13 @@ var targethealth = target.HealthPercent;
     // Single Target Abilities
     if (!target.IsDead())
     {
-		if (Api.Spellbook.CanCast("Fireblast") && mana>30 && targethealth<50  && !Api.Spellbook.OnCooldown("Fireblast"))
+		if (Api.Spellbook.CanCast("Fire Blast") && mana>30 && targethealth<50  && !Api.Spellbook.OnCooldown("Fire Blast"))
 	{
     Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine("Casting Fireblast");
+    Console.WriteLine("Casting Fire Blast");
     Console.ResetColor();
 
-    if (Api.Spellbook.Cast("Fireblast"))
+    if (Api.Spellbook.Cast("Fire Blast"))
         return true;
 	}
         if (Api.Spellbook.CanCast("Fireball") && mana>30 && targethealth>20)
