@@ -4,10 +4,6 @@ using wShadow.Templates;
 using wShadow.Warcraft.Classes;
 using wShadow.Warcraft.Defines;
 using wShadow.Warcraft.Managers;
-using wShadow.Warcraft.Structures.Wow_Player;
-using wShadow.Warcraft.Defines.Wow_Player;
-using wShadow.Warcraft.Defines.Wow_Spell;
-
 
 
 public class Warrior : Rotation
@@ -57,18 +53,64 @@ public class Warrior : Rotation
     }
 	public override bool PassivePulse()
 	{
-		var me = Api.Player;
-		var healthPercentage = me.HealthPercent;
-		var target = Api.Target;
-		var rage = me.Rage;
+var me = Api.Player;
+var mana = me.Mana;
 
-	    if(!IsValid(target))
-			 return true;
+if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
+        {
+            LogPlayerStats();
+            lastDebugTime = DateTime.Now; // Update lastDebugTime
+        }
+// Health percentage of the player
+var healthPercentage = me.HealthPercent;
 
-		if (me.IsDead() || me.IsGhost() || me.IsCasting() ) return false;
+// Power percentages for different resources
+
+// Target distance from the player
+
+if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsLooting() ) return false;
         if (me.HasAura("Drink") || me.HasAura("Food")) return false;
-		var targetDistance = target.Position.Distance2D(me.Position);
 
+		if (Api.Spellbook.CanCast("Renew") && !me.HasAura("Renew") && healthPercentage<80) 
+			{
+              Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("Casting Renew");
+    Console.ResetColor();
+    if (Api.Spellbook.Cast("Renew"))
+    {
+        return true;
+    } 
+	}
+	if (Api.Spellbook.CanCast("Power Word: Fortitude") && !me.HasAura("Power Word: Fortitude") ) 
+			{
+              Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("Casting Power Word: Fortitude");
+    Console.ResetColor();
+    if (Api.Spellbook.Cast("Power Word: Fortitude"))
+    {
+        return true;
+    } 
+	}
+	if (Api.Spellbook.CanCast("Inner Fire") && !me.HasAura("Inner Fire") ) 
+			{
+              Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("Casting Inner Fire");
+    Console.ResetColor();
+    if (Api.Spellbook.Cast("Inner Fire"))
+    {
+        return true;
+    } 
+	} 
+	if (Api.Spellbook.CanCast("Power Word: Shield") && !me.HasAura("Power Word: Shield") ) 
+			{
+              Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("Casting Power Word: Shield");
+    Console.ResetColor();
+    if (Api.Spellbook.Cast("Power Word: Shield"))
+    {
+        return true;
+    } 
+	} 	
 		if (Api.Spellbook.CanCast("Smite")   )
 {
     Console.ForegroundColor = ConsoleColor.Green;
@@ -86,11 +128,54 @@ public class Warrior : Rotation
 	public override bool CombatPulse()
     {
         var me = Api.Player;
-		var healthPercentage = me.HealthPercent;
-		var rage = me.Rage;
-		var target = Api.Target;
+var target = Api.Target;
+var mana = me.Mana;
+
+ if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
+        {
+            LogPlayerStats();
+            lastDebugTime = DateTime.Now; // Update lastDebugTime
+        }
+// Health percentage of the player
+var healthPercentage = me.HealthPercent;
 var targethealth = target.HealthPercent;
-		if (Api.Spellbook.CanCast("Smite")   )
+
+
+// Target distance from the player
+	var targetDistance = target.Position.Distance2D(me.Position);
+	if (Api.Spellbook.CanCast("Power Word: Shield") && !me.HasAura("Power Word: Shield") && mana>15) 
+			{
+              Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("Casting Power Word: Shield");
+    Console.ResetColor();
+    if (Api.Spellbook.Cast("Power Word: Shield"))
+    {
+        return true;
+    } 
+	} 
+
+if (Api.Spellbook.CanCast("Shadow Word: Pain") && !target.HasAura("Shadow Word: Pain") && targethealth>=30&& mana>10) 
+			{
+              Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("Casting Shadow Word: Pain");
+    Console.ResetColor();
+    if (Api.Spellbook.Cast("Shadow Word: Pain"))
+    {
+        return true;
+    } 
+	}
+if (Api.Spellbook.CanCast("Mind Blast") && targethealth>=30&& mana>10) 
+			{
+              Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("Casting Mind Blast");
+    Console.ResetColor();
+    if (Api.Spellbook.Cast("Mind Blast"))
+    {
+        return true;
+    } 
+	}
+
+		if (Api.Spellbook.CanCast("Smite")  && mana>10 )
 {
     Console.ForegroundColor = ConsoleColor.Green;
     Console.WriteLine("Casting Smite");
@@ -99,7 +184,21 @@ var targethealth = target.HealthPercent;
    
         return true;
     }
-
+	if (Api.HasMacro("Shoot"))
+  
+    
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Casting Shoot");
+            Console.ResetColor();
+            
+            if (Api.UseMacro("Shoot"))
+            {
+                return true;
+            }
+        }
+		
+		
 			
 		return base.CombatPulse();
     }
