@@ -88,9 +88,9 @@ var healthPercentage = me.HealthPercent;
 	var targetDistance = target.Position.Distance2D(me.Position);
 
 if (me.IsDead() || me.IsGhost() || me.IsCasting() ||  me.IsChanneling() ) return false;
-        if (me.HasAura("Drink") || me.HasAura("Food")) return false;
+        if (me.HasAura("Drink") || me.HasAura("Food") || me.IsMounted()) return false;
 		
-		
+
 		if (Api.HasMacro("Lion") && !me.HasPermanent("Aspect of the Lion") )
 			
 					{
