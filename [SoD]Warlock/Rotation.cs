@@ -95,13 +95,13 @@ if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsChanneling() ) return 
 		//if (Api.HasMacro("Hands") && reaction != UnitReaction.Friendly && targethealth>=1)
 
 var petFamily = Api.Pet.Info.UnitFamily;
-var isImp = petFamily == CreatureFamily.Imp || petFamily == CreatureFamily.Felimp;
-var isVoid = petFamily == CreatureFamily.Voidwalker || petFamily == CreatureFamily.Voidlord;
+var isImp = petFamily == CreatureFamily.Imp; //|| petFamily == CreatureFamily.Felimp;
+var isVoid = petFamily == CreatureFamily.Voidwalker; //|| petFamily == CreatureFamily.Voidlord;
 var isGuard = petFamily == CreatureFamily.Felguard;
 var isHunter = petFamily == CreatureFamily.Felhunter;
 var isSuccubus = petFamily == CreatureFamily.Succubus;
-
-    if ((!IsValid(pet) || !isVoid) && Api.Spellbook.CanCast("Summon Voidwalker") && HasItem("Soul Shard") && mana > 30 && Api.Spellbook.HasSpell("Summon Voidwalker"))
+//|| !isVoid
+    if ((!IsValid(pet) ) && Api.Spellbook.CanCast("Summon Voidwalker") && HasItem("Soul Shard") && mana > 30 && Api.Spellbook.HasSpell("Summon Voidwalker"))
     {
         Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine("Casting Summon Voidwalker.");
@@ -384,24 +384,41 @@ var healthPercentage = me.HealthPercent;
 
 // Target distance from the player
 		var targetDistance = target.Position.Distance2D(me.Position);
-		
+		var petFamily = Api.Pet.Info.UnitFamily;
+
+// Log the summoned pet family
+if (petFamily == CreatureFamily.Imp || petFamily == CreatureFamily.Felimp)
+{
+    Console.WriteLine("Imp or Felimp is summoned");
+}
+else if (petFamily == CreatureFamily.Voidwalker)
+{
+    Console.WriteLine("Voidwalker or Voidlord is summoned");
+}
+else if (petFamily == CreatureFamily.Felguard)
+{
+    Console.WriteLine("Felguard is summoned");
+}
+else if (petFamily == CreatureFamily.Felhunter)
+{
+    Console.WriteLine("Felhunter is summoned");
+}
+else if (petFamily == CreatureFamily.Succubus)
+{
+    Console.WriteLine("Succubus is summoned");
+}
+else
+{
+    Console.WriteLine("Unknown pet family is summoned");
+}
+
 
         Console.ForegroundColor = ConsoleColor.Red;
         Console.WriteLine($"{mana}% Mana available");
         Console.WriteLine($"{healthPercentage}% Health available");
 		Console.ResetColor();
 
-	if (me.HasAura("Demon Skin")) // Replace "Thorns" with the actual aura name
-	{
-		 Console.ForegroundColor = ConsoleColor.Blue;
-Console.ResetColor();
-    var remainingTimeSeconds = me.AuraRemains("Frost Armor");
-    var remainingTimeMinutes = remainingTimeSeconds / 60; // Convert seconds to minutes
-    var roundedMinutes = Math.Round(remainingTimeMinutes/ 1000,1); // Round to one decimal place
-
-    Console.WriteLine($"Remaining time for Demon Skin: {roundedMinutes} minutes");
-	Console.ResetColor();
-	}
+	
 	
 ShadowApi shadowApi = new ShadowApi();
 // Access the Bank property and use its methods
