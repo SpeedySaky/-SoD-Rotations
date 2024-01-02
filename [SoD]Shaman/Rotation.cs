@@ -90,7 +90,17 @@ if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChann
     if (Api.Spellbook.Cast("Healing Wave"))
         return true;
 	}
-	
+	if (Api.Spellbook.CanCast("Lightning Shield") && !me.HasAura("Lightning Shield") && mana > 30 )
+{
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("Casting Lighting Shield");
+    Console.ResetColor();
+    if (Api.Spellbook.Cast("Lightning Shield"))
+    {
+        return true;
+    }
+}
+
 
 				return base.PassivePulse();
 
@@ -136,6 +146,26 @@ var targethealth = target.HealthPercent;
     if (Api.Spellbook.Cast("Healing Wave"))
         return true;
 	}
+	if (Api.Spellbook.CanCast("Lightning Shield") && !me.HasAura("Lightning Shield") && mana > 30 )
+{
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("Casting Lighting Shield");
+    Console.ResetColor();
+    if (Api.Spellbook.Cast("Lightning Shield"))
+    {
+        return true;
+    }
+}
+if (Api.Spellbook.CanCast("Flame Shock") && !Api.Spellbook.OnCooldown("Flame Shock") && !target.HasAura("Flame Shock"))
+		{
+			Console.ForegroundColor = ConsoleColor.Green;
+			Console.WriteLine("Casting Flame Shock");
+			Console.ResetColor();
+			if (Api.Spellbook.Cast("Flame Shock"))
+			{
+				return true;
+			}
+		}
 	if (Api.Spellbook.CanCast("Earth Shock") && !Api.Spellbook.OnCooldown("Earth Shock") && (target.IsCasting() || target.IsChanneling()))
 {
     Console.ForegroundColor = ConsoleColor.Green;
@@ -160,27 +190,7 @@ var targethealth = target.HealthPercent;
     }
 	}
 
-// Check if in combat and if there are multiple targets nearby
-if (me.InCombat() && Api.EnemiesNearby(10, true, true) >= 2)
-{
-    
-    // Multi-Target Abilities
-    
-    if (!target.IsDead())
-        {
-            // Logic for multi-target abilities, e.g. AoE spells, debuffs, etc.
-            // Example: if (me.CanCast("AoE_Spell") && target.Distance < 8)
-            // {
-            //     me.Cast("AoE_Spell");
-            // }
-        }
-    
 
-		
-			
-    	
-	
-    }
 
 return base.CombatPulse();
 }
@@ -205,27 +215,6 @@ var healthPercentage = me.HealthPercent;
 		Console.ResetColor();
 		
 		
-if (me.HasItem("Minor Healing Potion"))
-{
-    if (Api.Inventory.OnCooldown("Minor Healing Potion"))
-    {
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine("Have Minor Healing Potion but it's on cooldown");
-        Console.ResetColor();
-    }
-    else
-    {
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine("Have Minor Healing Potion and it's available");
-        Console.ResetColor();
-    }
-}
-else
-{
-    Console.ForegroundColor = ConsoleColor.Yellow;
-    Console.WriteLine("Don't have Minor Healing Potion");
-    Console.ResetColor();
-}
 	
 	
 
