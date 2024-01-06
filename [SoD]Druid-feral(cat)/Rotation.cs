@@ -51,7 +51,7 @@ public class Druid : Rotation
 
 		 var me = Api.Player;
 		var healthPercentage = me.HealthPercent;
-		var mana = me.Mana;
+		var mana = me.ManaPercent;
 
 			if (me.IsDead() || me.IsGhost() || me.IsCasting()|| me.IsMoving() ) return false;
         if (me.HasAura("Drink") || me.HasAura("Food")) return false;
@@ -117,7 +117,7 @@ if (Api.Spellbook.CanCast("Mark of the Wild") && !me.HasAura("Mark of the Wild")
 
         var me = Api.Player;
 		var healthPercentage = me.HealthPercent;
-		var mana = me.Mana;
+		var mana = me.ManaPercent;
 		 var target = Api.Target;
 		var targethealth = target.HealthPercent;
 		var energy = me.Energy;
@@ -250,7 +250,7 @@ if (Api.Spellbook.CanCast("Mark of the Wild") && !me.HasAura("Mark of the Wild")
     {
         var me = Api.Player;
 
-		var mana = me.Mana;
+		var mana = me.ManaPercent;
         var healthPercentage = me.HealthPercent;
 		
 

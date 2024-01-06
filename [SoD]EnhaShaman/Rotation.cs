@@ -178,7 +178,27 @@ if (Api.Spellbook.CanCast("Lightning Shield") && !me.HasAura("Lightning Shield")
     }
 }	
 
-
+if (Api.Spellbook.CanCast("Lightning Bolt") )
+		{
+			Console.ForegroundColor = ConsoleColor.Green;
+			Console.WriteLine("Casting Lightning Bolt");
+			Console.ResetColor();
+			if (Api.Spellbook.Cast("Lightning Bolt"))
+			{
+				return true;
+			}
+		}
+		
+		if (Api.Spellbook.CanCast("Attack") )
+		{
+			Console.ForegroundColor = ConsoleColor.Green;
+			Console.WriteLine("Casting Attack");
+			Console.ResetColor();
+			if (Api.Spellbook.Cast("Attack"))
+			{
+				return true;
+			}
+		}
 	
 		return base.CombatPulse();
     }

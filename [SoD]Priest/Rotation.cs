@@ -54,7 +54,7 @@ public class Warrior : Rotation
 	public override bool PassivePulse()
 	{
 var me = Api.Player;
-var mana = me.Mana;
+var mana = me.ManaPercent;
 
 if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
         {
@@ -113,6 +113,11 @@ if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChann
 	} 	
 		if (Api.Spellbook.CanCast("Smite")   )
 {
+	 {
+        var reaction = me.GetReaction(target);
+        
+        if (reaction != UnitReaction.Friendly)
+			{
     Console.ForegroundColor = ConsoleColor.Green;
     Console.WriteLine("Casting Smite");
     Console.ResetColor();
@@ -120,8 +125,8 @@ if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChann
    
         return true;
     }
-
-		return base.PassivePulse();
+ }
+	 }	return base.PassivePulse();
 		}
 		
 		
@@ -129,7 +134,7 @@ if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChann
     {
         var me = Api.Player;
 var target = Api.Target;
-var mana = me.Mana;
+var mana = me.ManaPercent;
 
  if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
         {
