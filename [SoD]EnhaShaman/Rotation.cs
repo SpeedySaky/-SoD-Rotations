@@ -12,17 +12,19 @@ using wShadow.Warcraft.Defines.Wow_Spell;
 
 public class EnhaShaman : Rotation
 {
-private bool HasEnchantment(EquipmentSlot slot, string enchantmentName)
-{
-    return Api.Equipment.HasEnchantment(slot, enchantmentName);
-}
+	
     private int debugInterval = 5; // Set the debug interval in seconds
     private DateTime lastDebugTime = DateTime.MinValue;
 	 private DateTime lastRockbiterTime = DateTime.MinValue;   
 	private DateTime lastlash = DateTime.MinValue;
-	private TimeSpan lashCooldown = TimeSpan.FromSeconds(6.5);
+	private TimeSpan lashCooldown = TimeSpan.FromSeconds(8);
+	private DateTime lastHands = DateTime.MinValue;
+	private TimeSpan HandsCooldown = TimeSpan.FromSeconds(8);
+	    private bool HasEnchantment(EquipmentSlot slot, string enchantmentName)
+{
+    return Api.Equipment.HasEnchantment(slot, enchantmentName);
+}
 
-	
     public override void Initialize()
     {
         // Can set min/max levels required for this rotation.
@@ -56,20 +58,34 @@ private bool HasEnchantment(EquipmentSlot slot, string enchantmentName)
 		 var me = Api.Player;
 		var healthPercentage = me.HealthPercent;
 		var mana = me.Mana;
-
+		var Level = me.Level;
+		
 		if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
         {
             LogPlayerStats();
             lastDebugTime = DateTime.Now; // Update lastDebugTime
         }
+if (me.IsDead() || me.IsGhost() || me.IsCasting() ||  me.IsChanneling() ) return false;
+        if (me.HasAura("Drink") || me.HasAura("Food") || me.IsMounted()) return false;
 
+bool hasFlametongueEnchantment = HasEnchantment(EquipmentSlot.MainHand, "Flametongue 1");
 	bool hasRockbiterEnchantment1 = HasEnchantment(EquipmentSlot.MainHand, "Rockbiter 1");
 	bool hasRockbiterEnchantment2 = HasEnchantment(EquipmentSlot.MainHand, "Rockbiter 2");
 	bool hasRockbiterEnchantment3 = HasEnchantment(EquipmentSlot.MainHand, "Rockbiter 3");
 
 bool hasAnyRockbiterEnchantment = hasRockbiterEnchantment1 || hasRockbiterEnchantment2 || hasRockbiterEnchantment3;
 
-if (Api.Spellbook.CanCast("Rockbiter Weapon") && !hasAnyRockbiterEnchantment)
+if (!hasFlametongueEnchantment && Api.Spellbook.CanCast("Flametongue Weapon"))
+{
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("Casting Flametongue Weapon");
+    Console.ResetColor();
+    if (Api.Spellbook.Cast("Flametongue Weapon"))
+    {
+        return true;
+    }
+}
+else if (!hasFlametongueEnchantment && !hasAnyRockbiterEnchantment && Api.Spellbook.CanCast("Rockbiter Weapon"))
 {
     Console.ForegroundColor = ConsoleColor.Green;
     Console.WriteLine("Casting Rockbiter Weapon");
@@ -79,14 +95,13 @@ if (Api.Spellbook.CanCast("Rockbiter Weapon") && !hasAnyRockbiterEnchantment)
         return true;
     }
 }
-
-	bool hasRockbiterEnchantment1off = HasEnchantment(EquipmentSlot.OffHand, "Rockbiter 1");
+bool hasRockbiterEnchantment1off = HasEnchantment(EquipmentSlot.OffHand, "Rockbiter 1");
 	bool hasRockbiterEnchantment2off = HasEnchantment(EquipmentSlot.OffHand, "Rockbiter 2");
 	bool hasRockbiterEnchantment3off = HasEnchantment(EquipmentSlot.OffHand, "Rockbiter 3");
 
 bool hasAnyRockbiterEnchantment2 = hasRockbiterEnchantment1off || hasRockbiterEnchantment2off || hasRockbiterEnchantment3off;
 
-if (Api.Spellbook.CanCast("Rockbiter Weapon") && !hasAnyRockbiterEnchantment2)
+if (Api.Spellbook.CanCast("Rockbiter Weapon") && !hasAnyRockbiterEnchantment2 && Level>=20)
 {
     Console.ForegroundColor = ConsoleColor.Green;
     Console.WriteLine("Casting Rockbiter Weapon");
@@ -96,8 +111,6 @@ if (Api.Spellbook.CanCast("Rockbiter Weapon") && !hasAnyRockbiterEnchantment2)
         return true;
     }
 }
-
-
 if (Api.Spellbook.CanCast("Ghost Wolf") && !me.HasPermanent("Ghost Wolf"))
 {
     Console.ForegroundColor = ConsoleColor.Green;
@@ -130,8 +143,18 @@ if (Api.Spellbook.CanCast("Lightning Shield") && !me.HasAura("Lightning Shield")
 		var healthPercentage = me.HealthPercent;
 		var mana = me.Mana;
 		 var target = Api.Target;
+		 var targetDistance = target.Position.Distance2D(me.Position);
 
-		
+		if (Api.Spellbook.CanCast("Lightning Shield") && !me.HasAura("Lightning Shield") && mana > 30 )
+{
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("Casting Lighting Shield");
+    Console.ResetColor();
+    if (Api.Spellbook.Cast("Lightning Shield"))
+    {
+        return true;
+    }
+}
 		
 		if (Api.Spellbook.CanCast("Healing Wave") && healthPercentage <= 50 && mana > 20)
         {
@@ -153,6 +176,18 @@ if (Api.Spellbook.CanCast("Lightning Shield") && !me.HasAura("Lightning Shield")
         return true;
     }
 }
+	if (Api.HasMacro("Hands") && mana >=30 && (DateTime.Now - lastHands) >= HandsCooldown &&  targetDistance<=5)
+{
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("Casting Blast.");
+    Console.ResetColor();
+
+    if (Api.UseMacro("Blast"))
+    {
+        lastHands = DateTime.Now; // Update the lastCallPetTime after successful casting
+        return true;
+    }
+}
 	
 		if (Api.Spellbook.CanCast("Flame Shock") && !Api.Spellbook.OnCooldown("Flame Shock") && !target.HasAura("Flame Shock"))
 		{
@@ -165,20 +200,10 @@ if (Api.Spellbook.CanCast("Lightning Shield") && !me.HasAura("Lightning Shield")
 			}
 		}
 
-		if (Api.HasMacro("Lash") && mana >=30 && (DateTime.Now - lastlash) >= lashCooldown)
-{
-    Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine("Casting Lash.");
-    Console.ResetColor();
 
-    if (Api.UseMacro("Lash"))
-    {
-        lastlash = DateTime.Now; // Update the lastCallPetTime after successful casting
-        return true;
-    }
-}	
 
-if (Api.Spellbook.CanCast("Lightning Bolt") )
+	
+if (Api.Spellbook.CanCast("Lightning Bolt") &&  targetDistance>10 )
 		{
 			Console.ForegroundColor = ConsoleColor.Green;
 			Console.WriteLine("Casting Lightning Bolt");
@@ -188,8 +213,7 @@ if (Api.Spellbook.CanCast("Lightning Bolt") )
 				return true;
 			}
 		}
-		
-		if (Api.Spellbook.CanCast("Attack") )
+	if (Api.Spellbook.CanCast("Attack") )
 		{
 			Console.ForegroundColor = ConsoleColor.Green;
 			Console.WriteLine("Casting Attack");
@@ -199,43 +223,23 @@ if (Api.Spellbook.CanCast("Lightning Bolt") )
 				return true;
 			}
 		}
+
 	
 		return base.CombatPulse();
     }
 	
 	private void LogPlayerStats()
-{
-    var me = Api.Player;
+    {
+        var me = Api.Player;
 
-    var mana = me.Mana;
-    var healthPercentage = me.HealthPercent;
+		var mana = me.Mana;
+        var healthPercentage = me.HealthPercent;
+		
 
-    Console.ForegroundColor = ConsoleColor.Red;
-    Console.WriteLine($"{mana} Mana available");
-    Console.WriteLine($"{healthPercentage}% Health available");
-    Console.ResetColor();
-
-bool hasRockbiterEnchantment1 = HasEnchantment(EquipmentSlot.MainHand, "Rockbiter 1");
-bool hasRockbiterEnchantment2 = HasEnchantment(EquipmentSlot.MainHand, "Rockbiter 2");
-bool hasRockbiterEnchantment3 = HasEnchantment(EquipmentSlot.MainHand, "Rockbiter 3");
-
-if (hasRockbiterEnchantment1)
-{
-    Console.WriteLine("Rockbiter 1 enchantment found on weapon");
-}
-if (hasRockbiterEnchantment2)
-{
-    Console.WriteLine("Rockbiter 2 enchantment found on weapon");
-}
-if (hasRockbiterEnchantment3)
-{
-    Console.WriteLine("Rockbiter 3 enchantment found on weapon");
-}
-
-
-
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine($"{mana} Mana available");
+        Console.WriteLine($"{healthPercentage}% Health available");
+		Console.ResetColor();
 Console.ResetColor();
-
-}
-
+    }
 }

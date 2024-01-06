@@ -147,7 +147,7 @@ if (hasPoisonDebuff && Api.Spellbook.CanCast("Purify") && mana >32)
         
             return true;
 }
-if ( Api.HasMacro("Crusader"))
+if ( Api.HasMacro("Hands"))
         {
             if ((DateTime.Now - lastcrusaderShotTime) >= crusader)
             {
@@ -155,7 +155,7 @@ if ( Api.HasMacro("Crusader"))
                 Console.WriteLine("Casting Crusader Strike");
                 Console.ResetColor();
 
-                if (Api.UseMacro("Crusader"))
+                if (Api.UseMacro("Hands"))
                 {
                     lastcrusaderShotTime = DateTime.Now;
                     return true;
