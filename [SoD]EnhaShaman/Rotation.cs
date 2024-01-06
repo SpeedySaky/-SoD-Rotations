@@ -176,13 +176,13 @@ if (Api.Spellbook.CanCast("Lightning Shield") && !me.HasAura("Lightning Shield")
         return true;
     }
 }
-	if (Api.HasMacro("Hands") && mana >=30 && (DateTime.Now - lastHands) >= HandsCooldown &&  targetDistance<=5)
+	if (Api.HasMacro("Hands") && mana >=10 && (DateTime.Now - lastHands) >= HandsCooldown &&  targetDistance<=5)
 {
     Console.ForegroundColor = ConsoleColor.Green;
     Console.WriteLine("Casting Blast.");
     Console.ResetColor();
 
-    if (Api.UseMacro("Blast"))
+    if (Api.UseMacro("Hands"))
     {
         lastHands = DateTime.Now; // Update the lastCallPetTime after successful casting
         return true;
