@@ -69,13 +69,14 @@ if (me.IsDead() || me.IsGhost() || me.IsCasting() ||  me.IsChanneling() ) return
         if (me.HasAura("Drink") || me.HasAura("Food") || me.IsMounted()) return false;
 
 bool hasFlametongueEnchantment = HasEnchantment(EquipmentSlot.MainHand, "Flametongue 1");
+bool hasFlametongueEnchantment2 = HasEnchantment(EquipmentSlot.MainHand, "Flametongue 2");
 	bool hasRockbiterEnchantment1 = HasEnchantment(EquipmentSlot.MainHand, "Rockbiter 1");
 	bool hasRockbiterEnchantment2 = HasEnchantment(EquipmentSlot.MainHand, "Rockbiter 2");
 	bool hasRockbiterEnchantment3 = HasEnchantment(EquipmentSlot.MainHand, "Rockbiter 3");
 
 bool hasAnyRockbiterEnchantment = hasRockbiterEnchantment1 || hasRockbiterEnchantment2 || hasRockbiterEnchantment3;
 
-if (!hasFlametongueEnchantment && Api.Spellbook.CanCast("Flametongue Weapon"))
+if (!hasFlametongueEnchantment && !hasFlametongueEnchantment2 && Api.Spellbook.CanCast("Flametongue Weapon"))
 {
     Console.ForegroundColor = ConsoleColor.Green;
     Console.WriteLine("Casting Flametongue Weapon");
@@ -85,7 +86,7 @@ if (!hasFlametongueEnchantment && Api.Spellbook.CanCast("Flametongue Weapon"))
         return true;
     }
 }
-else if (!hasFlametongueEnchantment && !hasAnyRockbiterEnchantment && Api.Spellbook.CanCast("Rockbiter Weapon"))
+else if (!hasFlametongueEnchantment && !hasFlametongueEnchantment2 && !hasAnyRockbiterEnchantment && Api.Spellbook.CanCast("Rockbiter Weapon"))
 {
     Console.ForegroundColor = ConsoleColor.Green;
     Console.WriteLine("Casting Rockbiter Weapon");
