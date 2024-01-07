@@ -11,7 +11,7 @@ public class Warlock : Rotation
         => Api.Inventory.HasItem(item);
     private int debugInterval = 5; // Set the debug interval in seconds
     private DateTime lastDebugTime = DateTime.MinValue;
-	private TimeSpan HauntCooldown = TimeSpan.FromSeconds(12);
+	private TimeSpan HauntCooldown = TimeSpan.FromSeconds(14);
 	private DateTime lastHaunt = DateTime.MinValue;
 	public bool IsValid(WowUnit unit)
 	{
@@ -218,7 +218,7 @@ ShadowApi shadowApi = new ShadowApi();
             }
         }
 		
-		if (Api.Spellbook.CanCast("Drain Soul") && shadowApi.Inventory.ItemCount("Soul Shard") <= 2 && targethealth <= 30)
+		if (Api.Spellbook.CanCast("Drain Soul") && shadowApi.Inventory.ItemCount("Soul Shard") <= 2 && targethealth <= 30 && mana>10)
 {
     Console.ForegroundColor = ConsoleColor.Green;
     Console.WriteLine("Casting Drain Soul");
@@ -261,7 +261,49 @@ else if (!IsValid(pet) && Api.Spellbook.CanCast("Summon Imp") && !Api.Spellbook.
 
 
 
-		if (!target.HasAura("Haunt") && Api.HasMacro("Hands") && targethealth>=30 && mana>=12)
+		
+		if (Api.Spellbook.CanCast("Drain Life") && healthPercentage<=50 && mana>=5 )
+	{
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("Casting Drain Life");
+    Console.ResetColor();
+
+    if (Api.Spellbook.Cast("Drain Life"))
+        return true;
+	}
+		
+if (Api.Spellbook.CanCast("Curse of Agony") && !target.HasAura("Curse of Agony") && mana>=10 && targethealth>=30)
+	{
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("Casting Curse of Agony");
+    Console.ResetColor();
+
+    if (Api.Spellbook.Cast("Curse of Agony"))
+        return true;
+	}
+	
+	if (Api.Spellbook.CanCast("Corruption") && !target.HasAura("Corruption") && mana>=10&& targethealth>=30 )
+	{
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("Casting Corruption");
+    Console.ResetColor();
+
+    if (Api.Spellbook.Cast("Corruption"))
+        return true;
+	}
+	
+	
+	
+	if (Api.Spellbook.CanCast("Shadow Bolt") && mana>=10 && targethealth>=15 )
+	{
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("Casting Shadow Bolt");
+    Console.ResetColor();
+
+    if (Api.Spellbook.Cast("Shadow Bolt"))
+        return true;
+	}
+	if (!target.HasAura("Haunt") && Api.HasMacro("Hands") && targethealth>=30 && mana>=12)
   {
             if ((DateTime.Now - lastHaunt) >=HauntCooldown )
     {
@@ -280,47 +322,6 @@ else if (!IsValid(pet) && Api.Spellbook.CanCast("Summon Imp") && !Api.Spellbook.
         }
 		}
 		}
-		if (Api.Spellbook.CanCast("Drain Life") && healthPercentage<=50 && mana>=5 )
-	{
-    Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine("Casting Drain Life");
-    Console.ResetColor();
-
-    if (Api.Spellbook.Cast("Drain Life"))
-        return true;
-	}
-		
-if (Api.Spellbook.CanCast("Curse of Agony") && !target.HasAura("Curse of Agony") && mana>=10 )
-	{
-    Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine("Casting Curse of Agony");
-    Console.ResetColor();
-
-    if (Api.Spellbook.Cast("Curse of Agony"))
-        return true;
-	}
-	
-	if (Api.Spellbook.CanCast("Corruption") && !target.HasAura("Corruption") && mana>=10 )
-	{
-    Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine("Casting Corruption");
-    Console.ResetColor();
-
-    if (Api.Spellbook.Cast("Corruption"))
-        return true;
-	}
-	
-	
-	
-	if (Api.Spellbook.CanCast("Shadow Bolt") && mana>=10 )
-	{
-    Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine("Casting Shadow Bolt");
-    Console.ResetColor();
-
-    if (Api.Spellbook.Cast("Shadow Bolt"))
-        return true;
-	}
 	if (Api.Spellbook.CanCast("Shoot")  )
 	{
     Console.ForegroundColor = ConsoleColor.Green;
