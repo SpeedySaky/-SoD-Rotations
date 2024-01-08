@@ -11,6 +11,8 @@ public class Warrior : Rotation
 	
     private int debugInterval = 5; // Set the debug interval in seconds
     private DateTime lastDebugTime = DateTime.MinValue;
+	private DateTime lastHands = DateTime.MinValue;
+    private TimeSpan Hands = TimeSpan.FromSeconds(14);
 
 
 	public bool IsValid(WowUnit unit)
@@ -158,7 +160,26 @@ var targethealth = target.HealthPercent;
         return true;
     } 
 	} 
+if ( Api.HasMacro("Hands"))
+        {
+            if ((DateTime.Now - lastHands) >= Hands)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Hands rune");
+                Console.ResetColor();
 
+                if (Api.UseMacro("Hands"))
+                {
+                    lastHands= DateTime.Now;
+                    return true;
+                }
+            }
+            else
+            {
+                // If the cooldown period for Chimera Shot hasn't elapsed yet
+                Console.WriteLine("Hands rune is on cooldown. Skipping cast.");
+            }
+        }
 if (Api.Spellbook.CanCast("Shadow Word: Pain") && !target.HasAura("Shadow Word: Pain") && targethealth>=30&& mana>10) 
 			{
               Console.ForegroundColor = ConsoleColor.Green;
