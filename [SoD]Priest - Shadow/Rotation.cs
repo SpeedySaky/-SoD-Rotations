@@ -13,8 +13,9 @@ public class Warrior : Rotation
     private DateTime lastDebugTime = DateTime.MinValue;
 	private DateTime lastHands = DateTime.MinValue;
     private TimeSpan Hands = TimeSpan.FromSeconds(14);
-	private DateTime lastPants = DateTime.MinValue;
+		private DateTime lastPants = DateTime.MinValue;
     private TimeSpan Pants = TimeSpan.FromSeconds(60);
+
 
 
 	public bool IsValid(WowUnit unit)
@@ -115,7 +116,7 @@ if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChann
         return true;
     } 
 	} 	
-		if (Api.Spellbook.CanCast("Smite")   )
+		if (Api.Spellbook.CanCast("Mind Blast")   )
 {
 	 {
         var reaction = me.GetReaction(target);
@@ -123,9 +124,9 @@ if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChann
         if (reaction != UnitReaction.Friendly)
 			{
     Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine("Casting Smite");
+    Console.WriteLine("Casting Mind Blast");
     Console.ResetColor();
-    if (Api.Spellbook.Cast("Smite"))
+    if (Api.Spellbook.Cast("Mind Blast"))
    
         return true;
     }
@@ -136,6 +137,8 @@ if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChann
 		
 	public override bool CombatPulse()
     {
+		if ( me.IsCasting() || me.IsChanneling() || me.IsLooting() ) return false;
+
         var me = Api.Player;
 var target = Api.Target;
 var mana = me.ManaPercent;
@@ -183,7 +186,7 @@ if ( Api.HasMacro("Hands"))
             }
         }
 		
-if ( Api.HasMacro("Legs"))
+		if ( Api.HasMacro("Legs"))
         {
             if ((DateTime.Now - lastPants) >= Pants)
             {
@@ -224,15 +227,7 @@ if (Api.Spellbook.CanCast("Mind Blast") && targethealth>=30&& mana>10)
     } 
 	}
 
-		if (Api.Spellbook.CanCast("Smite")  && mana>10 )
-{
-    Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine("Casting Smite");
-    Console.ResetColor();
-    if (Api.Spellbook.Cast("Smite"))
-   
-        return true;
-    }
+	
 	if (Api.HasMacro("Shoot"))
   
     
