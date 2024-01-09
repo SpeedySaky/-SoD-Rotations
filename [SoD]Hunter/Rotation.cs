@@ -108,7 +108,7 @@ if (me.IsDead() || me.IsGhost() || me.IsCasting() ||  me.IsChanneling() ) return
         // Add logic here for actions when pet's health is low, e.g., healing spells
     		
 		 
-		if (Api.Spellbook.CanCast("Aspect of the Cheetah") && !me.HasPermanent("Aspect of the Cheetah") )
+		if (Api.Spellbook.CanCast("Aspect of the Cheetah") && !me.HasPermanent("Aspect of the Cheetah") && !me.IsMounted())
 			
 					{
 						Console.ForegroundColor = ConsoleColor.Green;
