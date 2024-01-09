@@ -137,7 +137,7 @@ if (Api.Spellbook.CanCast("Devotion Aura") && !me.HasPermanent("Devotion Aura") 
 					return true;
 						}
 					}
-		var hasPoisonDebuff = me.HasDebuff("Poison") || me.HasDebuff("Rabies")|| me.HasDebuff("Tetanus");
+		var hasPoisonDebuff = me.HasDebuff("Poison") || me.HasDebuff("Rabies")|| me.HasDebuff("Tetanus")|| me.HasDebuff("Poisonous Stab");
 
 if (hasPoisonDebuff && Api.Spellbook.CanCast("Purify") && mana >32)
 {
