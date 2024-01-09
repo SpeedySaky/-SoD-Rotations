@@ -116,7 +116,7 @@ if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChann
         return true;
     } 
 	} 	
-		if (Api.Spellbook.CanCast("Smite")   )
+		if (Api.Spellbook.CanCast("Smite") && target.IsValid()   )
 {
 	 {
         var reaction = me.GetReaction(target);
