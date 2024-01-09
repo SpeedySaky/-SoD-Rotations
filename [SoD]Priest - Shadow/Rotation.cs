@@ -138,11 +138,11 @@ if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChann
 		
 	public override bool CombatPulse()
     {
-		if ( me.IsCasting() || me.IsChanneling() || me.IsLooting() ) return false;
 
         var me = Api.Player;
 var target = Api.Target;
 var mana = me.ManaPercent;
+		if ( me.IsCasting() || me.IsChanneling() || me.IsLooting() ) return false;
 
  if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
         {
