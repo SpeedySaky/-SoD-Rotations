@@ -60,6 +60,7 @@ public class Warrior : Rotation
 	{
 var me = Api.Player;
 var mana = me.ManaPercent;
+var target = Api.Target;
 
 if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
         {
