@@ -6,7 +6,7 @@ using wShadow.Warcraft.Defines;
 using wShadow.Warcraft.Managers;
 
 
-public class Warrior : Rotation
+public class Priest : Rotation
 {
 	
     private int debugInterval = 5; // Set the debug interval in seconds
@@ -107,16 +107,7 @@ if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChann
         return true;
     } 
 	} 
-	if (Api.Spellbook.CanCast("Power Word: Shield") && !me.HasAura("Power Word: Shield") ) 
-			{
-              Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine("Casting Power Word: Shield");
-    Console.ResetColor();
-    if (Api.Spellbook.Cast("Power Word: Shield"))
-    {
-        return true;
-    } 
-	} 	
+	 	
 		if (Api.Spellbook.CanCast("Mind Blast") && target.IsValid()  )
 {
 	 {
@@ -166,7 +157,7 @@ var targethealth = target.HealthPercent;
         return true;
     } 
 	} 
-if ( Api.HasMacro("Hands"))
+if ( Api.HasMacro("Hands")&& targethealth>=30)
         {
             if ((DateTime.Now - lastHands) >= Hands)
             {
@@ -187,7 +178,7 @@ if ( Api.HasMacro("Hands"))
             }
         }
 		
-		if ( Api.HasMacro("Legs"))
+		if ( Api.HasMacro("Legs")&& targethealth>=30)
         {
             if ((DateTime.Now - lastPants) >= Pants)
             {
@@ -207,7 +198,7 @@ if ( Api.HasMacro("Hands"))
                 Console.WriteLine("Hands rune is on cooldown. Skipping cast.");
             }
         }
-if (Api.Spellbook.CanCast("Shadow Word: Pain") && !target.HasAura("Shadow Word: Pain") && targethealth>=30&& mana>10) 
+if (Api.Spellbook.CanCast("Shadow Word: Pain") && !target.HasAura("Shadow Word: Pain") && targethealth>=30 && mana>10) 
 			{
               Console.ForegroundColor = ConsoleColor.Green;
     Console.WriteLine("Casting Shadow Word: Pain");
@@ -217,7 +208,7 @@ if (Api.Spellbook.CanCast("Shadow Word: Pain") && !target.HasAura("Shadow Word: 
         return true;
     } 
 	}
-if (Api.Spellbook.CanCast("Mind Blast") && targethealth>=30&& mana>10) 
+if (Api.Spellbook.CanCast("Mind Blast") && targethealth>=30 && mana>10) 
 			{
               Console.ForegroundColor = ConsoleColor.Green;
     Console.WriteLine("Casting Mind Blast");
