@@ -9,7 +9,7 @@ using wShadow.Warcraft.Defines.Wow_Player;
 using wShadow.Warcraft.Defines.Wow_Spell;
 
 
-public class Hunter : Rotation
+public class SoDHunter : Rotation
 {
 	
 	
@@ -24,13 +24,17 @@ public class Hunter : Rotation
 		
     private int debugInterval = 5; // Set the debug interval in seconds
     private DateTime lastDebugTime = DateTime.MinValue;
+    private DateTime lastCallPetTime = DateTime.MinValue;
+		private TimeSpan callPetCooldown = TimeSpan.FromSeconds(10);
 	private DateTime lastFeedTime = DateTime.MinValue;
 	private DateTime lastChimeraShotTime = DateTime.MinValue;
     private TimeSpan chimeraShotCooldown = TimeSpan.FromSeconds(6.5);
-	private DateTime lastCallPetTime = DateTime.MinValue;
-	private TimeSpan callPetCooldown = TimeSpan.FromSeconds(10);
 	private DateTime lastFlanking = DateTime.MinValue;
 	private TimeSpan FlankingCooldown = TimeSpan.FromSeconds(30);
+	private DateTime lastMarkLogTime = DateTime.MinValue;
+private TimeSpan markCooldown = TimeSpan.FromSeconds(10);
+
+
     public override void Initialize()
     {  
 	// Can set min/max levels required for this rotation.
@@ -41,8 +45,8 @@ public class Hunter : Rotation
         // The simplest calculation for optimal ticks (to avoid key spam and false attempts)
 
 		// Assuming wShadow is an instance of some class containing UnitRatings property
-        SlowTick = 600;
-        FastTick = 200;
+        SlowTick = 800;
+        FastTick = 300;
 
         // You can also use this method to add to various action lists.
 
@@ -62,43 +66,44 @@ public class Hunter : Rotation
 	public override bool PassivePulse()
 	{
 	 // Variables for player and target instances
-var me = Api.Player;
+	 var me = Api.Player;
 var target = Api.Target;
-    var pet = me.Pet();
-	  var PetHealth  = 0.0f;
+		var mana = me.ManaPercent;
+var pet = me.Pet();
+var PetHealth  = 0.0f;
 	     if(IsValid(pet))
 		 {
 		   PetHealth = pet.HealthPercent;
-		 }        
+		 }  
+var healthPercentage = me.HealthPercent;
+var targethealth = target.HealthPercent;
 
+ShadowApi shadowApi = new ShadowApi();
 
 if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
         {
             LogPlayerStats();
             lastDebugTime = DateTime.Now; // Update lastDebugTime
         }
-// Health percentage of the player
-var healthPercentage = me.HealthPercent;
 
 // Power percentages for different resources
-		var mana = me.Mana;
 
 
 // Target distance from the player
 	var targetDistance = target.Position.Distance2D(me.Position);
 
-if (me.IsDead() || me.IsGhost() || me.IsCasting() ||  me.IsChanneling() ) return false;
-        if (me.HasAura("Drink") || me.HasAura("Food") || me.IsMounted()) return false;
+if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsLooting() || me.IsFlying()) return false;
+        if (me.HasAura("Drink") || me.HasAura("Food")) return false;
 		
-
-		if (Api.HasMacro("Lion") && !me.HasPermanent("Aspect of the Lion") )
+		
+		if (Api.HasMacro("Chest") && !me.HasPermanent("Aspect of the Lion") )
 			
 					{
 						Console.ForegroundColor = ConsoleColor.Green;
-						Console.WriteLine("Casting Aspect of the Lion");
+						Console.WriteLine("Casting Chest Rune");
 						Console.ResetColor();
 
-					if (Api.UseMacro("Lion"))
+					if (Api.UseMacro("Chest"))
 						
 					return true;
 						
@@ -108,7 +113,7 @@ if (me.IsDead() || me.IsGhost() || me.IsCasting() ||  me.IsChanneling() ) return
         // Add logic here for actions when pet's health is low, e.g., healing spells
     		
 		 
-		if (Api.Spellbook.CanCast("Aspect of the Cheetah") && !me.HasPermanent("Aspect of the Cheetah") && !me.IsMounted())
+		if (Api.Spellbook.CanCast("Aspect of the Cheetah") && !me.HasPermanent("Aspect of the Cheetah")  && !me.IsMounted())
 			
 					{
 						Console.ForegroundColor = ConsoleColor.Green;
@@ -121,75 +126,34 @@ if (me.IsDead() || me.IsGhost() || me.IsCasting() ||  me.IsChanneling() ) return
 						
 					}
 			
-if (!target.IsDead())
 
-if (Api.Spellbook.CanCast("Hunter's Mark") &&!target.HasAura("Hunter's Mark") && healthPercentage > 50 &&  mana > 20 && PetHealth>50)
-  
+
+if ((DateTime.Now - lastCallPetTime) >= callPetCooldown && !IsValid(pet) && Api.Spellbook.CanCast("Call Pet"))
     {
-        var reaction = me.GetReaction(target);
-        
-        if (reaction != UnitReaction.Friendly)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Mark");
-            Console.ResetColor();
-            
-           if (Api.UseMacro("Mark"))
-            {
-                return true;
-            }
-        }
-        else
-        {
-            // Handle if the target is friendly
-			 Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Target is friendly. Skipping marking cast.");
-			            Console.ResetColor();
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Casting Call Pet.");
+        Console.ResetColor();
 
+        if (Api.Spellbook.Cast("Call Pet"))
+        {
+            lastCallPetTime = DateTime.Now; // Update the lastCallPetTime after successful casting
+            return true;
         }
     }
-    else
+    // Additional actions for when the pet is dead
+ if (!IsValid(pet) && Api.Spellbook.CanCast("Revive Pet"))
     {
-        // Handle if the target is not valid
-        Console.WriteLine("Invalid target. Skipping marking cast.");
-		            Console.ResetColor();
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.WriteLine("Casting Revive Pet");
+        Console.ResetColor();
 
+        if (Api.Spellbook.Cast("Revive Pet"))
+        {
+            return true;
+        }
     }
-		
-		if (Api.Spellbook.CanCast("Serpent Sting") && target.HasAura("Hunter's Mark") && healthPercentage > 50 &&  mana > 20)
-{
-    Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine("Casting Serpent Sting");
-    Console.ResetColor();
 
-    if (Api.Spellbook.Cast("Serpent Sting"))
-        return true;
-	}
-	if (Api.Spellbook.CanCast("Call Pet")  && (DateTime.Now - lastCallPetTime) >= callPetCooldown)
-{
-    Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine("Casting Call Pet.");
-    Console.ResetColor();
-
-    if (Api.Spellbook.Cast("Call Pet"))
-    {
-        lastCallPetTime = DateTime.Now; // Update the lastCallPetTime after successful casting
-        return true;
-    }
-}
-// Additional actions for when the pet is dead
-else if (pet.IsDead() && Api.Spellbook.CanCast("Revive Pet"))
-{
-    Console.ForegroundColor = ConsoleColor.Yellow;
-    Console.WriteLine("Casting Revive Pet");
-    Console.ResetColor();
-
-    if (Api.Spellbook.Cast("Revive Pet"))
-    {
-        return true;
-    }
- }
- if (IsValid(pet) && !pet.IsDead() && (DateTime.Now - lastFeedTime).TotalMinutes >= 10 && Api.HasMacro("Feed"))
+if (IsValid(pet) && (DateTime.Now - lastFeedTime).TotalMinutes >= 10 && Api.HasMacro("Feed"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Feeding pet.");
@@ -210,7 +174,7 @@ else if (pet.IsDead() && Api.Spellbook.CanCast("Revive Pet"))
                 return true;
             }
         }
-	if (!pet.IsDead() && PetHealth < 40  &&  Api.Spellbook.CanCast("Mend Pet") && !pet.HasAura("Mend Pet") && mana >10 )
+	if (IsValid(pet) && PetHealth < 40  &&  Api.Spellbook.CanCast("Mend Pet") && !pet.HasAura("Mend Pet") && mana >10 )
     {
         Console.ForegroundColor = ConsoleColor.Yellow;
         Console.WriteLine("Pet health is low healing him");
@@ -219,6 +183,54 @@ else if (pet.IsDead() && Api.Spellbook.CanCast("Revive Pet"))
             
                 return true;
 }
+ if (IsValid(pet) && PetHealth < 40  &&  Api.Spellbook.CanCast("Mend Pet") && !pet.HasAura("Mend Pet") && mana >10 )
+    {
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.WriteLine("Pet health is low healing him");
+        Console.ResetColor();
+		if (Api.Spellbook.Cast("Mend Pet"))
+            
+                return true;
+}
+if (Api.Spellbook.CanCast("Aspect of the Hawk") && !me.HasPermanent("Aspect of the Hawk") && !me.IsMounted()  && !me.HasPermanent("Aspect of the Cheetah"))
+			
+					{
+						Console.ForegroundColor = ConsoleColor.Green;
+						Console.WriteLine("Casting Aspect of the Hawk");
+						Console.ResetColor();
+
+					if (Api.Spellbook.Cast("Aspect of the Hawk"))
+						
+					return true;
+					}
+if ((DateTime.Now - lastMarkLogTime) >= markCooldown && !target.IsDead() && Api.Spellbook.CanCast("Hunter's Mark") && !target.HasAura("Hunter's Mark") && healthPercentage > 50 && mana > 20 && PetHealth > 50)  
+    {
+        var reaction = me.GetReaction(target);
+        
+        if (reaction != UnitReaction.Friendly)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Casting Mark");
+            Console.ResetColor();
+            
+           if (Api.UseMacro("Mark"))
+            {
+				lastMarkLogTime = DateTime.Now; // Update the lastMarkTime after successful casting
+                return true;
+            }
+        }
+        else
+        {
+           if ((DateTime.Now - lastMarkLogTime) >= markCooldown)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Target is friendly. Skipping marking cast.");
+                Console.ResetColor();
+                lastMarkLogTime = DateTime.Now; // Update the lastMarkLogTime after successful logging
+            }
+
+        }
+    }
 				return base.PassivePulse();
 
 		}
@@ -345,15 +357,15 @@ if (Api.Spellbook.CanCast("Hunter's Mark") &&!target.HasAura("Hunter's Mark") &&
         return true;
 	}
 	
-	if (target.HasAura("Serpent Sting") && Api.HasMacro("Chimera"))
+	if (target.HasAura("Serpent Sting") && Api.HasMacro("Hands"))
         {
             if ((DateTime.Now - lastChimeraShotTime) >= chimeraShotCooldown)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Casting Chimera Shot");
+                Console.WriteLine("Casting Hands rune");
                 Console.ResetColor();
 
-                if (Api.UseMacro("Chimera"))
+                if (Api.UseMacro("Hands"))
                 {
                     lastChimeraShotTime = DateTime.Now;
                     return true;
