@@ -14,7 +14,7 @@ public class Priest : Rotation
 	private DateTime lastHands = DateTime.MinValue;
     private TimeSpan Hands = TimeSpan.FromSeconds(14);
 		private DateTime lastPants = DateTime.MinValue;
-    private TimeSpan Pants = TimeSpan.FromSeconds(60);
+    private TimeSpan Pants = TimeSpan.FromSeconds(65);
 
 
 
@@ -38,7 +38,7 @@ public class Priest : Rotation
         // The simplest calculation for optimal ticks (to avoid key spam and false attempts)
 
 		// Assuming wShadow is an instance of some class containing UnitRatings property
-        SlowTick = 600;
+        SlowTick = 800;
         FastTick = 200;
 
         // You can also use this method to add to various action lists.
@@ -147,7 +147,7 @@ var targethealth = target.HealthPercent;
 
 // Target distance from the player
 	var targetDistance = target.Position.Distance2D(me.Position);
-	if (Api.Spellbook.CanCast("Power Word: Shield") && !me.HasAura("Power Word: Shield") && mana>15) 
+	if (Api.Spellbook.CanCast("Power Word: Shield") && !me.HasAura("Power Word: Shield") && mana>15 && !me.HasAura("Weakened Soul")) 
 			{
               Console.ForegroundColor = ConsoleColor.Green;
     Console.WriteLine("Casting Power Word: Shield");
@@ -178,7 +178,7 @@ if ( Api.HasMacro("Hands")&& targethealth>=30)
             }
         }
 		
-		if ( Api.HasMacro("Legs")&& targethealth>=30)
+		if ( Api.HasMacro("Legs") && targethealth>=30)
         {
             if ((DateTime.Now - lastPants) >= Pants)
             {
