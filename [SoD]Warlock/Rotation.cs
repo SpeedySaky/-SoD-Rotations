@@ -4,7 +4,7 @@ using wShadow.Warcraft.Classes;
 using wShadow.Warcraft.Defines;
 using wShadow.Warcraft.Managers;
 
-public class Warlock : Rotation
+public class WarlockSoD : Rotation
 {
 	
 	private bool HasItem(object item)
@@ -156,7 +156,7 @@ var isSuccubus = petFamily == CreatureFamily.Succubus;
 
 	
 		var reaction = me.GetReaction(target);
-	if (Api.HasMacro("Hands") && reaction != UnitReaction.Friendly && targethealth>=1)
+	if (Api.HasMacro("Hands") && reaction != UnitReaction.Friendly && !target.IsDead())
   
 		{
             if ((DateTime.Now - lastHaunt) >= HauntCooldown)
@@ -235,31 +235,7 @@ ShadowApi shadowApi = new ShadowApi();
     // Single Target Abilities
     if (!target.IsDead())
     {
-		if (!IsValid(pet)  && Api.Spellbook.CanCast("Summon Voidwalker") && shadowApi.Inventory.HasItem("Soul Shard") && mana >=30)
-{
-    Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine("Casting Summon VoidWalker.");
-    Console.ResetColor();
-
-    if (Api.Spellbook.Cast("Summon Voidwalker"))
-    {
-        return true;
-    }
-}
-else if (!IsValid(pet) && Api.Spellbook.CanCast("Summon Imp") && !Api.Spellbook.CanCast("Summon Voidwalker") && mana >=30)
-{
-    Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine("Casting Summon Imp.");
-    Console.ResetColor();
-
-    if (Api.Spellbook.Cast("Summon Imp"))
-    {
-        return true;
-    }
-}
-
-
-
+		
 
 		
 		if (Api.Spellbook.CanCast("Drain Life") && healthPercentage<=50 && mana>=5 )
@@ -304,13 +280,11 @@ if (Api.Spellbook.CanCast("Curse of Agony") && !target.HasAura("Curse of Agony")
         return true;
 	}
 	if (!target.HasAura("Haunt") && Api.HasMacro("Hands") && targethealth>=30 && mana>=12)
-  {
+	{
             if ((DateTime.Now - lastHaunt) >=HauntCooldown )
     {
-        var reaction = me.GetReaction(target);
         
-        if (reaction != UnitReaction.Friendly)
-        {
+        
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Haunt");
             Console.ResetColor();
@@ -321,7 +295,7 @@ if (Api.Spellbook.CanCast("Curse of Agony") && !target.HasAura("Curse of Agony")
             }
         }
 		}
-		}
+		
 	if (Api.Spellbook.CanCast("Shoot")  )
 	{
     Console.ForegroundColor = ConsoleColor.Green;
