@@ -235,8 +235,9 @@ ShadowApi shadowApi = new ShadowApi();
 		{
 
     // Single Target Abilities
-    if (!target.IsDead())
-    {
+    	if (Api.HasMacro("Legs"))
+	{
+
 		if ((DateTime.Now - lastLegs) >= LegsCD)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
@@ -254,7 +255,7 @@ ShadowApi shadowApi = new ShadowApi();
                 // If the cooldown period for Chimera Shot hasn't elapsed yet
                 Console.WriteLine("Legs rune is on cooldown. Skipping cast.");
             }
-        
+        }
 
 		
 		if (Api.Spellbook.CanCast("Drain Life") && healthPercentage<=50 && mana>=5 )
@@ -352,7 +353,7 @@ if (me.InCombat() && Api.UnfriendlyUnitsNearby(10, true) >= 2)
         }
     
    }
-}
+
 return base.CombatPulse();
 }
 
