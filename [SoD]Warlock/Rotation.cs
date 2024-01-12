@@ -279,7 +279,7 @@ if (Api.Spellbook.CanCast("Curse of Agony") && !target.HasAura("Curse of Agony")
     if (Api.Spellbook.Cast("Shadow Bolt"))
         return true;
 	}
-	if (!target.HasAura("Haunt") && Api.HasMacro("Hands") && targethealth>=30 && mana>=12)
+	if (Api.HasMacro("Hands") && targethealth>=30 && mana>=12)
 	{
             if ((DateTime.Now - lastHaunt) >=HauntCooldown )
     {
