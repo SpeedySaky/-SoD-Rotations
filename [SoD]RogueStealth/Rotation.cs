@@ -12,6 +12,14 @@ using wShadow.Warcraft.Defines.Wow_Spell;
 public class Rogue : Rotation
 {
 	
+	public bool IsValid(WowUnit unit)
+	{
+		if (unit == null || unit.Address == null)
+		{
+			return false;
+		}
+		return true;
+	}
     private int debugInterval = 5; // Set the debug interval in seconds
     private DateTime lastDebugTime = DateTime.MinValue;
     private int pickPocketDelay = 3000; // Delay in milliseconds (3 seconds)
@@ -93,8 +101,13 @@ if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChann
             return true;
         
     }
-    if (!target.IsDead() && targetDistance<=25 && Api.HasMacro("Hands"))
-					{
+    if (target.IsValid() && targetDistance<=25 && Api.HasMacro("Hands"))
+		
+	 {
+        var reaction = me.GetReaction(target);
+        
+        if (reaction != UnitReaction.Friendly)
+			{
       
 					Console.ForegroundColor = ConsoleColor.Green;
 						Console.WriteLine("Casting Shadowstrike");
@@ -106,7 +119,7 @@ if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChann
 					}
 
                     
-                
+                 }
             
         
 

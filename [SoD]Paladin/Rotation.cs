@@ -17,7 +17,8 @@ public class RetPala : Rotation
     private DateTime lastDebugTime = DateTime.MinValue;
 	private DateTime lastcrusaderShotTime = DateTime.MinValue;
     private TimeSpan crusader = TimeSpan.FromSeconds(6.5);
-
+	private DateTime lastDivine = DateTime.MinValue;
+    private TimeSpan divine = TimeSpan.FromSeconds(14);
 	
     public override void Initialize()
     {
@@ -136,7 +137,7 @@ if (Api.Spellbook.CanCast("Devotion Aura") && !me.HasPermanent("Devotion Aura") 
 					return true;
 						}
 					}
-		var hasPoisonDebuff = me.HasDebuff("Poison") || me.HasDebuff("Rabies")|| me.HasDebuff("Tetanus");
+		var hasPoisonDebuff = me.HasDebuff("Poison") || me.HasDebuff("Rabies")|| me.HasDebuff("Tetanus")|| me.HasDebuff("Poisonous Stab");
 
 if (hasPoisonDebuff && Api.Spellbook.CanCast("Purify") && mana >32)
 {
@@ -147,6 +148,27 @@ if (hasPoisonDebuff && Api.Spellbook.CanCast("Purify") && mana >32)
         
             return true;
 }
+
+if ( Api.HasMacro("Chest") && Api.UnfriendlyUnitsNearby(5, true) >= 2)
+        {
+            if ((DateTime.Now - lastDivine) >= divine)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Divine Storm");
+                Console.ResetColor();
+
+                if (Api.UseMacro("Chest"))
+                {
+                    lastDivine = DateTime.Now;
+                    return true;
+                }
+            }
+            else
+            {
+                // If the cooldown period for Chimera Shot hasn't elapsed yet
+                Console.WriteLine("Crusader Strike is on cooldown. Skipping cast.");
+            }
+        }
 if ( Api.HasMacro("Hands"))
         {
             if ((DateTime.Now - lastcrusaderShotTime) >= crusader)

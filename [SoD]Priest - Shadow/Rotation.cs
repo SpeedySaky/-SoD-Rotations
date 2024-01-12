@@ -6,15 +6,16 @@ using wShadow.Warcraft.Defines;
 using wShadow.Warcraft.Managers;
 
 
-public class Warrior : Rotation
+public class Priest : Rotation
 {
 	
     private int debugInterval = 5; // Set the debug interval in seconds
     private DateTime lastDebugTime = DateTime.MinValue;
 	private DateTime lastHands = DateTime.MinValue;
     private TimeSpan Hands = TimeSpan.FromSeconds(14);
-	private DateTime lastPants = DateTime.MinValue;
-    private TimeSpan Pants = TimeSpan.FromSeconds(60);
+		private DateTime lastPants = DateTime.MinValue;
+    private TimeSpan Pants = TimeSpan.FromSeconds(65);
+
 
 
 	public bool IsValid(WowUnit unit)
@@ -37,7 +38,7 @@ public class Warrior : Rotation
         // The simplest calculation for optimal ticks (to avoid key spam and false attempts)
 
 		// Assuming wShadow is an instance of some class containing UnitRatings property
-        SlowTick = 600;
+        SlowTick = 800;
         FastTick = 200;
 
         // You can also use this method to add to various action lists.
@@ -106,17 +107,8 @@ if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChann
         return true;
     } 
 	} 
-	if (Api.Spellbook.CanCast("Power Word: Shield") && !me.HasAura("Power Word: Shield") ) 
-			{
-              Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine("Casting Power Word: Shield");
-    Console.ResetColor();
-    if (Api.Spellbook.Cast("Power Word: Shield"))
-    {
-        return true;
-    } 
-	} 	
-		if (Api.Spellbook.CanCast("Smite") && target.IsValid()   )
+	 	
+		if (Api.Spellbook.CanCast("Mind Blast") && target.IsValid()  )
 {
 	 {
         var reaction = me.GetReaction(target);
@@ -124,9 +116,9 @@ if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChann
         if (reaction != UnitReaction.Friendly)
 			{
     Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine("Casting Smite");
+    Console.WriteLine("Casting Mind Blast");
     Console.ResetColor();
-    if (Api.Spellbook.Cast("Smite"))
+    if (Api.Spellbook.Cast("Mind Blast"))
    
         return true;
     }
@@ -137,9 +129,11 @@ if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChann
 		
 	public override bool CombatPulse()
     {
+
         var me = Api.Player;
 var target = Api.Target;
 var mana = me.ManaPercent;
+		if ( me.IsCasting() || me.IsChanneling() || me.IsLooting() ) return false;
 
  if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
         {
@@ -153,7 +147,7 @@ var targethealth = target.HealthPercent;
 
 // Target distance from the player
 	var targetDistance = target.Position.Distance2D(me.Position);
-	if (Api.Spellbook.CanCast("Power Word: Shield") && !me.HasAura("Power Word: Shield") && mana>15) 
+	if (Api.Spellbook.CanCast("Power Word: Shield") && !me.HasAura("Power Word: Shield") && mana>15 && !me.HasAura("Weakened Soul")) 
 			{
               Console.ForegroundColor = ConsoleColor.Green;
     Console.WriteLine("Casting Power Word: Shield");
@@ -163,7 +157,7 @@ var targethealth = target.HealthPercent;
         return true;
     } 
 	} 
-if ( Api.HasMacro("Hands"))
+if ( Api.HasMacro("Hands")&& targethealth>=30)
         {
             if ((DateTime.Now - lastHands) >= Hands)
             {
@@ -184,7 +178,7 @@ if ( Api.HasMacro("Hands"))
             }
         }
 		
-if ( Api.HasMacro("Legs"))
+		if ( Api.HasMacro("Legs") && targethealth>=30)
         {
             if ((DateTime.Now - lastPants) >= Pants)
             {
@@ -204,7 +198,7 @@ if ( Api.HasMacro("Legs"))
                 Console.WriteLine("Hands rune is on cooldown. Skipping cast.");
             }
         }
-if (Api.Spellbook.CanCast("Shadow Word: Pain") && !target.HasAura("Shadow Word: Pain") && targethealth>=30&& mana>10) 
+if (Api.Spellbook.CanCast("Shadow Word: Pain") && !target.HasAura("Shadow Word: Pain") && targethealth>=30 && mana>10) 
 			{
               Console.ForegroundColor = ConsoleColor.Green;
     Console.WriteLine("Casting Shadow Word: Pain");
@@ -214,7 +208,7 @@ if (Api.Spellbook.CanCast("Shadow Word: Pain") && !target.HasAura("Shadow Word: 
         return true;
     } 
 	}
-if (Api.Spellbook.CanCast("Mind Blast") && targethealth>=30&& mana>10) 
+if (Api.Spellbook.CanCast("Mind Blast") && targethealth>=30 && mana>10) 
 			{
               Console.ForegroundColor = ConsoleColor.Green;
     Console.WriteLine("Casting Mind Blast");
@@ -225,15 +219,7 @@ if (Api.Spellbook.CanCast("Mind Blast") && targethealth>=30&& mana>10)
     } 
 	}
 
-		if (Api.Spellbook.CanCast("Smite")  && mana>10 )
-{
-    Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine("Casting Smite");
-    Console.ResetColor();
-    if (Api.Spellbook.Cast("Smite"))
-   
-        return true;
-    }
+	
 	if (Api.HasMacro("Shoot"))
   
     
