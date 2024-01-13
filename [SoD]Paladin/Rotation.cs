@@ -17,8 +17,7 @@ public class RetPala : Rotation
     private DateTime lastDebugTime = DateTime.MinValue;
 	private DateTime lastcrusaderShotTime = DateTime.MinValue;
     private TimeSpan crusader = TimeSpan.FromSeconds(6.5);
-	private DateTime lastDivine = DateTime.MinValue;
-    private TimeSpan divine = TimeSpan.FromSeconds(14);
+
 	
     public override void Initialize()
     {
@@ -137,7 +136,7 @@ if (Api.Spellbook.CanCast("Devotion Aura") && !me.HasPermanent("Devotion Aura") 
 					return true;
 						}
 					}
-		var hasPoisonDebuff = me.HasDebuff("Poison") || me.HasDebuff("Rabies")|| me.HasDebuff("Tetanus")|| me.HasDebuff("Poisonous Stab");
+		var hasPoisonDebuff = me.HasDebuff("Poison") || me.HasDebuff("Rabies")|| me.HasDebuff("Tetanus");
 
 if (hasPoisonDebuff && Api.Spellbook.CanCast("Purify") && mana >32)
 {
@@ -149,68 +148,7 @@ if (hasPoisonDebuff && Api.Spellbook.CanCast("Purify") && mana >32)
             return true;
 }
 
-if ( Api.HasMacro("Chest") && Api.UnfriendlyUnitsNearby(5, true) >= 2)
-        {
-            if ((DateTime.Now - lastDivine) >= divine)
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Casting Divine Storm");
-                Console.ResetColor();
-
-                if (Api.UseMacro("Chest"))
-                {
-                    lastDivine = DateTime.Now;
-                    return true;
-                }
-            }
-            else
-            {
-                // If the cooldown period for Chimera Shot hasn't elapsed yet
-                Console.WriteLine("Crusader Strike is on cooldown. Skipping cast.");
-            }
-        }
-if ( Api.HasMacro("Hands"))
-        {
-            if ((DateTime.Now - lastcrusaderShotTime) >= crusader)
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Casting Crusader Strike");
-                Console.ResetColor();
-
-                if (Api.UseMacro("Hands"))
-                {
-                    lastcrusaderShotTime = DateTime.Now;
-                    return true;
-                }
-            }
-            else
-            {
-                // If the cooldown period for Chimera Shot hasn't elapsed yet
-                Console.WriteLine("Crusader Strike is on cooldown. Skipping cast.");
-            }
-        }
-		
-		if (Api.Spellbook.CanCast("Divine Protection") && healthPercentage <= 45 && !me.HasAura("Forbearance"))
-    {
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine("Casting Divine Protection");
-        Console.ResetColor();
-        if (Api.Spellbook.Cast("Divine Protection"))
-        
-            return true;
-        
-    }
-		if (Api.Spellbook.CanCast("Lay on Hands") && healthPercentage <= 10 && !me.HasAura("Forbearance"))
-    {
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine("Casting Lay on Hands");
-        Console.ResetColor();
-        if (Api.Spellbook.Cast("Lay on Hands"))
-        
-            return true;
-        
-    }
-		if (Api.Spellbook.CanCast("Holy Light") && healthPercentage <= 45 && mana > 20)
+		if (Api.Spellbook.CanCast("Holy Light") && healthPercentage <= 50 && mana > 20)
     {
         Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine("Casting Holy Light");
@@ -230,16 +168,7 @@ if ( Api.HasMacro("Hands"))
             return true;
         
     }
-	if (Api.Spellbook.CanCast("Crusader Strike") )
-    {
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine("Casting Crusader Strike");
-        Console.ResetColor();
-        if (Api.Spellbook.Cast("Crusader Strike"))
-        
-            return true;
-        
-    }
+	
 	if (!me.HasAura("Seal of Command") && Api.Spellbook.CanCast("Seal of Command") && !Api.Spellbook.OnCooldown("Seal of Command"))
     {
         Console.ForegroundColor = ConsoleColor.Green;
@@ -282,6 +211,26 @@ if (Api.Spellbook.CanCast("Judgement") && !Api.Spellbook.OnCooldown("Judgement")
         return true;
     }
 }
+if ( Api.HasMacro("Crusader"))
+        {
+            if ((DateTime.Now - lastcrusaderShotTime) >= crusader)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Crusader Strike");
+                Console.ResetColor();
+
+                if (Api.UseMacro("Crusader"))
+                {
+                    lastcrusaderShotTime = DateTime.Now;
+                    return true;
+                }
+            }
+            else
+            {
+                // If the cooldown period for Chimera Shot hasn't elapsed yet
+                Console.WriteLine("Crusader Strike is on cooldown. Skipping cast.");
+            }
+        }
 //DPS rotation
 
 
