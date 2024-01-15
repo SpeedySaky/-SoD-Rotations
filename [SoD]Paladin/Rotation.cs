@@ -17,6 +17,9 @@ public class RetPala : Rotation
     private DateTime lastDebugTime = DateTime.MinValue;
 	private DateTime lastcrusaderShotTime = DateTime.MinValue;
     private TimeSpan crusader = TimeSpan.FromSeconds(6.5);
+	private DateTime lastChest = DateTime.MinValue;
+    private TimeSpan ChestCd = TimeSpan.FromSeconds(12);
+
 
 	
     public override void Initialize()
@@ -211,15 +214,35 @@ if (Api.Spellbook.CanCast("Judgement") && !Api.Spellbook.OnCooldown("Judgement")
         return true;
     }
 }
-if ( Api.HasMacro("Crusader"))
+if ( Api.HasMacro("Chest"))
+        {
+            if ((DateTime.Now - lastChest) >= Chest)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Chest rune");
+                Console.ResetColor();
+
+                if (Api.UseMacro(Chest))
+                {
+                    lastChest = DateTime.Now;
+                    return true;
+                }
+            }
+            else
+            {
+                // If the cooldown period for Chimera Shot hasn't elapsed yet
+                Console.WriteLine("Hands rune is on cooldown. Skipping cast.");
+            }
+        }
+if ( Api.HasMacro("Hands"))
         {
             if ((DateTime.Now - lastcrusaderShotTime) >= crusader)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Casting Crusader Strike");
+                Console.WriteLine("Casting Hands rune");
                 Console.ResetColor();
 
-                if (Api.UseMacro("Crusader"))
+                if (Api.UseMacro(Hands))
                 {
                     lastcrusaderShotTime = DateTime.Now;
                     return true;
@@ -228,7 +251,7 @@ if ( Api.HasMacro("Crusader"))
             else
             {
                 // If the cooldown period for Chimera Shot hasn't elapsed yet
-                Console.WriteLine("Crusader Strike is on cooldown. Skipping cast.");
+                Console.WriteLine("Hands rune is on cooldown. Skipping cast.");
             }
         }
 //DPS rotation
