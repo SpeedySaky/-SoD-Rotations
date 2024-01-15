@@ -161,6 +161,46 @@ if (hasPoisonDebuff && Api.Spellbook.CanCast("Purify") && mana >32)
             return true;
         
     }
+	if ( Api.HasMacro("Chest"))
+        {
+            if ((DateTime.Now - lastChest) >= ChestCd)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Chest rune");
+                Console.ResetColor();
+
+                if (Api.UseMacro("Chest"))
+                {
+                    lastChest = DateTime.Now;
+                    return true;
+                }
+            }
+            else
+            {
+                // If the cooldown period for Chimera Shot hasn't elapsed yet
+                Console.WriteLine("Hands rune is on cooldown. Skipping cast.");
+            }
+        }
+if ( Api.HasMacro("Hands"))
+        {
+            if ((DateTime.Now - lastcrusaderShotTime) >= crusader)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Hands rune");
+                Console.ResetColor();
+
+                if (Api.UseMacro("Hands"))
+                {
+                    lastcrusaderShotTime = DateTime.Now;
+                    return true;
+                }
+            }
+            else
+            {
+                // If the cooldown period for Chimera Shot hasn't elapsed yet
+                Console.WriteLine("Hands rune is on cooldown. Skipping cast.");
+            }
+        }
 	if (Api.Spellbook.CanCast("Consecration") && !Api.Spellbook.OnCooldown("Consecration") && targethp>=30 )
     {
         Console.ForegroundColor = ConsoleColor.Green;
@@ -214,46 +254,7 @@ if (Api.Spellbook.CanCast("Judgement") && !Api.Spellbook.OnCooldown("Judgement")
         return true;
     }
 }
-if ( Api.HasMacro("Chest"))
-        {
-            if ((DateTime.Now - lastChest) >= Chest)
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Casting Chest rune");
-                Console.ResetColor();
 
-                if (Api.UseMacro(Chest))
-                {
-                    lastChest = DateTime.Now;
-                    return true;
-                }
-            }
-            else
-            {
-                // If the cooldown period for Chimera Shot hasn't elapsed yet
-                Console.WriteLine("Hands rune is on cooldown. Skipping cast.");
-            }
-        }
-if ( Api.HasMacro("Hands"))
-        {
-            if ((DateTime.Now - lastcrusaderShotTime) >= crusader)
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Casting Hands rune");
-                Console.ResetColor();
-
-                if (Api.UseMacro(Hands))
-                {
-                    lastcrusaderShotTime = DateTime.Now;
-                    return true;
-                }
-            }
-            else
-            {
-                // If the cooldown period for Chimera Shot hasn't elapsed yet
-                Console.WriteLine("Hands rune is on cooldown. Skipping cast.");
-            }
-        }
 //DPS rotation
 
 
