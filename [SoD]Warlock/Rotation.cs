@@ -86,7 +86,16 @@ ShadowApi shadowApi = new ShadowApi();
 if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsChanneling() ) return false;
         if (me.HasAura("Drink") || me.HasAura("Food")) return false;
 		
-		if (Api.Spellbook.CanCast("Demon Skin")  && !me.HasAura("Demon Skin"))
+		if (Api.Spellbook.CanCast("Demon Armor")  && !me.HasAura("Demon Armor"))
+	{
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("Casting Demon Armor");
+    Console.ResetColor();
+
+    if (Api.Spellbook.Cast("Demon Armor"))
+        return true;
+	}
+		if (Api.Spellbook.CanCast("Demon Skin")  && !me.HasAura("Demon Armor") && !me.HasAura("Demon Skin"))
 	{
     Console.ForegroundColor = ConsoleColor.Green;
     Console.WriteLine("Casting Demon Skin");
