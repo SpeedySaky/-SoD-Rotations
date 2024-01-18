@@ -195,7 +195,7 @@ if ( Api.HasMacro("Hands")&& targethealth>=30)
             else
             {
                 // If the cooldown period for Chimera Shot hasn't elapsed yet
-                Console.WriteLine("Hands rune is on cooldown. Skipping cast.");
+                Console.WriteLine("Legs rune is on cooldown. Skipping cast.");
             }
         }
 if (Api.Spellbook.CanCast("Shadow Word: Pain") && !target.HasAura("Shadow Word: Pain") && targethealth>=30 && mana>10) 
