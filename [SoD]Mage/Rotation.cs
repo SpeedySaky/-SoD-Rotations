@@ -99,7 +99,6 @@ foreach (string waterType in waterTypes)
 if (needsWater)
 {
     Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine("Character needs water!");
     Console.ResetColor();
 
     // Add logic here to conjure water or perform any action needed to acquire water
@@ -130,7 +129,6 @@ foreach (string foodType in foodTypes)
 if (needsFood)
 {
     Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine("Character needs food!");
     Console.ResetColor();
 
     // Add logic here to conjure water or perform any action needed to acquire food
@@ -214,13 +212,13 @@ var targethealth = target.HealthPercent;
     // Single Target Abilities
     if (!target.IsDead())
     {
-		if (Api.Spellbook.CanCast("Fireblast") && mana>30 && targethealth<30 && !target.IsDead() && !Api.Spellbook.OnCooldown("Fireblast"))
+		if (Api.Spellbook.CanCast("Fire Blast") && mana>30 && targethealth<30 && !target.IsDead() && !Api.Spellbook.OnCooldown("Fire Blast"))
 	{
     Console.ForegroundColor = ConsoleColor.Green;
     Console.WriteLine("Casting Fireblast");
     Console.ResetColor();
 
-    if (Api.Spellbook.Cast("Fireblast"))
+    if (Api.Spellbook.Cast("Fire Blast"))
         return true;
 	}
         if (Api.Spellbook.CanCast("Fireball") && mana>30 && targethealth>20)
@@ -240,6 +238,15 @@ var targethealth = target.HealthPercent;
     Console.ResetColor();
 
     if (Api.Spellbook.Cast("Frostbolt"))
+        return true;
+	}
+	if (Api.Spellbook.CanCast("Fireball") )
+	{
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("Casting Fireball");
+    Console.ResetColor();
+
+    if (Api.Spellbook.Cast("Fireball"))
         return true;
 	}
     }
