@@ -153,7 +153,7 @@ var targethealth = target.HealthPercent;
 
 // Target distance from the player
 	var targetDistance = target.Position.Distance2D(me.Position);
-	if (Api.Spellbook.CanCast("Power Word: Shield") && !me.HasAura("Power Word: Shield") && mana>15) 
+	if (Api.Spellbook.CanCast("Power Word: Shield") && !me.HasAura("Power Word: Shield") && mana>15 && !me.HasAura("Weakened Soul")) 
 			{
               Console.ForegroundColor = ConsoleColor.Green;
     Console.WriteLine("Casting Power Word: Shield");
@@ -201,7 +201,7 @@ if ( Api.HasMacro("Legs"))
             else
             {
                 // If the cooldown period for Chimera Shot hasn't elapsed yet
-                Console.WriteLine("Hands rune is on cooldown. Skipping cast.");
+                Console.WriteLine("Legs rune is on cooldown. Skipping cast.");
             }
         }
 if (Api.Spellbook.CanCast("Shadow Word: Pain") && !target.HasAura("Shadow Word: Pain") && targethealth>=30&& mana>10) 

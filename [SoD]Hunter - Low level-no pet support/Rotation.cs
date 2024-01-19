@@ -236,15 +236,15 @@ if (Api.Spellbook.CanCast("Hunter's Mark") &&!target.HasAura("Hunter's Mark") &&
         return true;
 	}
 	
-	if (target.HasAura("Serpent Sting") && Api.HasMacro("Chimera"))
+	if (target.HasAura("Serpent Sting") && Api.HasMacro("Hands"))
         {
             if ((DateTime.Now - lastChimeraShotTime) >= chimeraShotCooldown)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Casting Chimera Shot");
+                Console.WriteLine("Casting Hands rune");
                 Console.ResetColor();
 
-                if (Api.UseMacro("Chimera"))
+                if (Api.UseMacro("Hands"))
                 {
                     lastChimeraShotTime = DateTime.Now;
                     return true;
