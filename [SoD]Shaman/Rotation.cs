@@ -11,19 +11,19 @@ using wShadow.Warcraft.Defines.Wow_Spell;
 
 public class Shaman : Rotation
 {
-	
+
     private int debugInterval = 5; // Set the debug interval in seconds
     private DateTime lastDebugTime = DateTime.MinValue;
-	 private DateTime lastRockbiterTime = DateTime.MinValue;    public override void Initialize()
-    {  
-	// Can set min/max levels required for this rotation.
-        
-		 lastDebugTime = DateTime.Now;
+    private DateTime lastRockbiterTime = DateTime.MinValue; public override void Initialize()
+    {
+        // Can set min/max levels required for this rotation.
+
+        lastDebugTime = DateTime.Now;
         LogPlayerStats();
         // Use this method to set your tick speeds.
         // The simplest calculation for optimal ticks (to avoid key spam and false attempts)
 
-		// Assuming wShadow is an instance of some class containing UnitRatings property
+        // Assuming wShadow is an instance of some class containing UnitRatings property
         SlowTick = 600;
         FastTick = 200;
 
@@ -38,34 +38,34 @@ public class Shaman : Rotation
         // bool: needTarget -> If true action will not fire if player does not have a target
         // Func<bool>: function -> Action to attempt, must return true or false.
         CombatActions.Add((true, () => false));
-		
-		
-		
+
+
+
     }
-	public override bool PassivePulse()
-	{
-	 // Variables for player and target instances
-var me = Api.Player;
-var target = Api.Target;
-    var pet = me.Pet();
-		var mana = me.Mana;
+    public override bool PassivePulse()
+    {
+        // Variables for player and target instances
+        var me = Api.Player;
+        var target = Api.Target;
+        var pet = me.Pet();
+        var mana = me.Mana;
 
 
-         if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
+        if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
         {
             LogPlayerStats();
             lastDebugTime = DateTime.Now; // Update lastDebugTime
         }
-// Health percentage of the player
-var healthPercentage = me.HealthPercent;
+        // Health percentage of the player
+        var healthPercentage = me.HealthPercent;
 
-// Target distance from the player
-	var targetDistance = target.Position.Distance2D(me.Position);
+        // Target distance from the player
+        var targetDistance = target.Position.Distance2D(me.Position);
 
-if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() ) return false;
+        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling()) return false;
         if (me.HasAura("Drink") || me.HasAura("Food")) return false;
-		
-		 if ((DateTime.Now - lastRockbiterTime).TotalMinutes >= 5)
+
+        if ((DateTime.Now - lastRockbiterTime).TotalMinutes >= 5)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Rockbiter Weapon");
@@ -81,143 +81,143 @@ if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChann
             }
         }
 
-		if (Api.Spellbook.CanCast("Healing Wave") && healthPercentage<=50  && mana>45)
-	{
-    Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine("Casting Healing Wave");
-    Console.ResetColor();
+        if (Api.Spellbook.CanCast("Healing Wave") && healthPercentage <= 50 && mana > 45)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Casting Healing Wave");
+            Console.ResetColor();
 
-    if (Api.Spellbook.Cast("Healing Wave"))
-        return true;
-	}
-	if (Api.Spellbook.CanCast("Lightning Shield") && !me.HasAura("Lightning Shield") && mana > 30 )
-{
-    Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine("Casting Lighting Shield");
-    Console.ResetColor();
-    if (Api.Spellbook.Cast("Lightning Shield"))
-    {
-        return true;
+            if (Api.Spellbook.Cast("Healing Wave"))
+                return true;
+        }
+        if (Api.Spellbook.CanCast("Lightning Shield") && !me.HasAura("Lightning Shield") && mana > 30)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Casting Lighting Shield");
+            Console.ResetColor();
+            if (Api.Spellbook.Cast("Lightning Shield"))
+            {
+                return true;
+            }
+        }
+
+
+        return base.PassivePulse();
+
     }
-}
 
-
-				return base.PassivePulse();
-
-		}
-		
-public override bool CombatPulse()
+    public override bool CombatPulse()
     {
-	// Variables for player and target instances
-var me = Api.Player;
-var target = Api.Target;
-		var mana = me.Mana;
+        // Variables for player and target instances
+        var me = Api.Player;
+        var target = Api.Target;
+        var mana = me.Mana;
 
- if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
+        if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
         {
             LogPlayerStats();
             lastDebugTime = DateTime.Now; // Update lastDebugTime
         }
-// Health percentage of the player
-var healthPercentage = me.HealthPercent;
-var targethealth = target.HealthPercent;
+        // Health percentage of the player
+        var healthPercentage = me.HealthPercent;
+        var targethealth = target.HealthPercent;
 
 
-// Target distance from the player
-	var targetDistance = target.Position.Distance2D(me.Position);
+        // Target distance from the player
+        var targetDistance = target.Position.Distance2D(me.Position);
 
-		if (me.IsDead() || me.IsGhost() || me.IsCasting()  ) return false;
+        if (me.IsDead() || me.IsGhost() || me.IsCasting()) return false;
         if (me.HasAura("Drink") || me.HasAura("Food")) return false;
-		
-		
-		
-	if (Api.Player.InCombat() && Api.Target != null && Api.Target.IsValid())
-		{
 
-    // Single Target Abilities
-    if (!target.IsDead())
-    {
-		if (Api.Spellbook.CanCast("Healing Wave") && healthPercentage<=30 && mana>=45  )
-	{
-    Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine("Casting Healing Wave");
-    Console.ResetColor();
 
-    if (Api.Spellbook.Cast("Healing Wave"))
-        return true;
-	}
-	if (Api.Spellbook.CanCast("Lightning Shield") && !me.HasAura("Lightning Shield") && mana > 30 )
-{
-    Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine("Casting Lighting Shield");
-    Console.ResetColor();
-    if (Api.Spellbook.Cast("Lightning Shield"))
-    {
-        return true;
+
+        if (Api.Player.InCombat() && Api.Target != null && Api.Target.IsValid())
+        {
+
+            // Single Target Abilities
+            if (!target.IsDead())
+            {
+                if (Api.Spellbook.CanCast("Healing Wave") && healthPercentage <= 30 && mana >= 45)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Casting Healing Wave");
+                    Console.ResetColor();
+
+                    if (Api.Spellbook.Cast("Healing Wave"))
+                        return true;
+                }
+                if (Api.Spellbook.CanCast("Lightning Shield") && !me.HasAura("Lightning Shield") && mana > 30)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Casting Lighting Shield");
+                    Console.ResetColor();
+                    if (Api.Spellbook.Cast("Lightning Shield"))
+                    {
+                        return true;
+                    }
+                }
+                if (Api.Spellbook.CanCast("Flame Shock") && !Api.Spellbook.OnCooldown("Flame Shock") && !target.HasAura("Flame Shock"))
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Casting Flame Shock");
+                    Console.ResetColor();
+                    if (Api.Spellbook.Cast("Flame Shock"))
+                    {
+                        return true;
+                    }
+                }
+                if (Api.Spellbook.CanCast("Earth Shock") && !Api.Spellbook.OnCooldown("Earth Shock") && (target.IsCasting() || target.IsChanneling()))
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Casting Earth Shock");
+                    Console.ResetColor();
+                    if (Api.Spellbook.Cast("Earth Shock"))
+
+                        return true;
+
+                }
+                if (Api.Spellbook.CanCast("Lightning Bolt") && mana > 20)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Casting Lightning Bolt");
+                    Console.ResetColor();
+
+                    if (Api.Spellbook.Cast("Lightning Bolt"))
+                        return true;
+                }
+
+
+            }
+        }
+
+
+
+        return base.CombatPulse();
     }
-}
-if (Api.Spellbook.CanCast("Flame Shock") && !Api.Spellbook.OnCooldown("Flame Shock") && !target.HasAura("Flame Shock"))
-		{
-			Console.ForegroundColor = ConsoleColor.Green;
-			Console.WriteLine("Casting Flame Shock");
-			Console.ResetColor();
-			if (Api.Spellbook.Cast("Flame Shock"))
-			{
-				return true;
-			}
-		}
-	if (Api.Spellbook.CanCast("Earth Shock") && !Api.Spellbook.OnCooldown("Earth Shock") && (target.IsCasting() || target.IsChanneling()))
-{
-    Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine("Casting Earth Shock");
-    Console.ResetColor();
-    if (Api.Spellbook.Cast("Earth Shock"))
-    
-        return true;
-    
-}
-	if (Api.Spellbook.CanCast("Lightning Bolt") && mana>20 )
-	{
-    Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine("Casting Lightning Bolt");
-    Console.ResetColor();
-
-    if (Api.Spellbook.Cast("Lightning Bolt"))
-        return true;
-	}
-	
-	
-    }
-	}
-
-
-
-return base.CombatPulse();
-}
-private void LogPlayerStats()
+    private void LogPlayerStats()
     {
         // Variables for player and target instances
-var me = Api.Player;
-var target = Api.Target;
-		var mana = me.Mana;
+        var me = Api.Player;
+        var target = Api.Target;
+        var mana = me.Mana;
 
-// Health percentage of the player
-var healthPercentage = me.HealthPercent;
+        // Health percentage of the player
+        var healthPercentage = me.HealthPercent;
 
-// Power percentages for different resources
-// Target distance from the player
-		var targetDistance = target.Position.Distance2D(me.Position);
-		
+        // Power percentages for different resources
+        // Target distance from the player
+        var targetDistance = target.Position.Distance2D(me.Position);
+
 
         Console.ForegroundColor = ConsoleColor.Red;
         Console.WriteLine($"{mana} Mana available");
         Console.WriteLine($"{healthPercentage}% Health available");
-		Console.ResetColor();
-		
-		
-	
-	
+        Console.ResetColor();
+
+
+
+
 
 
     }
-	}
+}

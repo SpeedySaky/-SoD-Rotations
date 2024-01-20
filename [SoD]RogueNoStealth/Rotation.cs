@@ -11,24 +11,24 @@ using wShadow.Warcraft.Defines.Wow_Spell;
 
 public class Rogue : Rotation
 {
-	
+
 
     private int pickPocketDelay = 3000; // Delay in milliseconds (3 seconds)
-	private DateTime lastQuickdraw = DateTime.MinValue;
+    private DateTime lastQuickdraw = DateTime.MinValue;
     private TimeSpan QuickdrawCooldown = TimeSpan.FromSeconds(11);
-	private DateTime lastBetween = DateTime.MinValue;
+    private DateTime lastBetween = DateTime.MinValue;
     private TimeSpan BetweenCooldown = TimeSpan.FromSeconds(10);
-	
+
     public override void Initialize()
-    {  
-	// Can set min/max levels required for this rotation.
-        
-		 lastDebugTime = DateTime.Now;
+    {
+        // Can set min/max levels required for this rotation.
+
+        lastDebugTime = DateTime.Now;
         LogPlayerStats();
         // Use this method to set your tick speeds.
         // The simplest calculation for optimal ticks (to avoid key spam and false attempts)
 
-		// Assuming wShadow is an instance of some class containing UnitRatings property
+        // Assuming wShadow is an instance of some class containing UnitRatings property
         SlowTick = 600;
         FastTick = 200;
 
@@ -43,75 +43,75 @@ public class Rogue : Rotation
         // bool: needTarget -> If true action will not fire if player does not have a target
         // Func<bool>: function -> Action to attempt, must return true or false.
         CombatActions.Add((true, () => false));
-		
-		
-		
-    }
-	public override bool PassivePulse()
-	{
-	 // Variables for player and target instances
-var me = Api.Player;
-var target = Api.Target;
-    var pet = me.Pet();
 
-if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
+
+
+    }
+    public override bool PassivePulse()
+    {
+        // Variables for player and target instances
+        var me = Api.Player;
+        var target = Api.Target;
+        var pet = me.Pet();
+
+        if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
         {
             LogPlayerStats();
             lastDebugTime = DateTime.Now; // Update lastDebugTime
         }
-// Health percentage of the player
-var healthPercentage = me.HealthPercent;
+        // Health percentage of the player
+        var healthPercentage = me.HealthPercent;
 
-// Power percentages for different resources
-var energy = me.Energy; // Energy
-		var points =  me.ComboPoints;
+        // Power percentages for different resources
+        var energy = me.Energy; // Energy
+        var points = me.ComboPoints;
 
-// Target distance from the player
-	var targetDistance = target.Position.Distance2D(me.Position);
+        // Target distance from the player
+        var targetDistance = target.Position.Distance2D(me.Position);
 
-if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() ) return false;
+        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling()) return false;
         if (me.HasAura("Drink") || me.HasAura("Food")) return false;
-		
 
 
-				return base.PassivePulse();
 
-		}
-		
-public override bool CombatPulse()
+        return base.PassivePulse();
+
+    }
+
+    public override bool CombatPulse()
     {
-	// Variables for player and target instances
-var me = Api.Player;
-var target = Api.Target;
- if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
+        // Variables for player and target instances
+        var me = Api.Player;
+        var target = Api.Target;
+        if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
         {
             LogPlayerStats();
             lastDebugTime = DateTime.Now; // Update lastDebugTime
         }
-// Health percentage of the player
-var healthPercentage = me.HealthPercent;
-var targethealth = target.HealthPercent;
-var energy = me.Energy; // Energy
-		var points =  me.ComboPoints;
+        // Health percentage of the player
+        var healthPercentage = me.HealthPercent;
+        var targethealth = target.HealthPercent;
+        var energy = me.Energy; // Energy
+        var points = me.ComboPoints;
 
 
-// Target distance from the player
-	var targetDistance = target.Position.Distance2D(me.Position);
+        // Target distance from the player
+        var targetDistance = target.Position.Distance2D(me.Position);
 
-		if (me.IsDead() || me.IsGhost() || me.IsCasting()  ) return false;
+        if (me.IsDead() || me.IsGhost() || me.IsCasting()) return false;
         if (me.HasAura("Drink") || me.HasAura("Food")) return false;
-		
-				if (Api.Spellbook.CanCast("Kick") && !Api.Spellbook.OnCooldown("Kick") && (target.IsCasting() || target.IsChanneling()))
-{
-    Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine("Casting Kick");
-    Console.ResetColor();
-    if (Api.Spellbook.Cast("Kick"))
-    {
-        return true;
-    }
-}
-		if (Api.HasMacro("Chest") && energy>=20)
+
+        if (Api.Spellbook.CanCast("Kick") && !Api.Spellbook.OnCooldown("Kick") && (target.IsCasting() || target.IsChanneling()))
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Casting Kick");
+            Console.ResetColor();
+            if (Api.Spellbook.Cast("Kick"))
+            {
+                return true;
+            }
+        }
+        if (Api.HasMacro("Chest") && energy >= 20)
         {
             if ((DateTime.Now - lastQuickdraw) >= QuickdrawCooldown)
             {
@@ -131,8 +131,8 @@ var energy = me.Energy; // Energy
                 Console.WriteLine("Chest rune is on cooldown. Skipping cast.");
             }
         }
-	
-if (Api.HasMacro("Legs") && energy>=35)
+
+        if (Api.HasMacro("Legs") && energy >= 35)
         {
             if ((DateTime.Now - lastBetween) >= BetweenCooldown)
             {
@@ -152,76 +152,75 @@ if (Api.HasMacro("Legs") && energy>=35)
                 Console.WriteLine("Legs rune is on cooldown. Skipping cast.");
             }
         }
-		if (Api.Spellbook.CanCast("Evasion")  && !me.HasPermanent("Evasion") && Api.UnfriendlyUnitsNearby(10, true) >= 2 && !Api.Spellbook.OnCooldown("Evasion"))
-{
-    Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine($"Casting Evasion");
-    Console.ResetColor();
+        if (Api.Spellbook.CanCast("Evasion") && !me.HasPermanent("Evasion") && Api.UnfriendlyUnitsNearby(10, true) >= 2 && !Api.Spellbook.OnCooldown("Evasion"))
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine($"Casting Evasion");
+            Console.ResetColor();
 
-    if (Api.Spellbook.Cast("Evasion"))
-        return true;
-}
+            if (Api.Spellbook.Cast("Evasion"))
+                return true;
+        }
 
-		
-if (Api.Spellbook.HasSpell("Slice and Dice")  && points >= 2 && !me.HasPermanent("Slice and Dice") && energy>=25)
-{
-    Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine($"Casting Slice and Dice ");
-    Console.ResetColor();
 
-    if (Api.Spellbook.Cast("Slice and Dice"))
-        return true;
-}
-		if (Api.Spellbook.CanCast("Eviscerate")  && points == 5  && energy>=35)
-{
-    Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine($"Casting Eviscerate ");
-    Console.ResetColor();
+        if (Api.Spellbook.HasSpell("Slice and Dice") && points >= 2 && !me.HasPermanent("Slice and Dice") && energy >= 25)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine($"Casting Slice and Dice ");
+            Console.ResetColor();
 
-    if (Api.Spellbook.Cast("Eviscerate"))
-        return true;
-}
-		if (Api.Spellbook.CanCast("Sinister Strike")  && energy >= 45 )
-{
-    Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine($"Casting Sinister Strike ");
-    Console.ResetColor();
+            if (Api.Spellbook.Cast("Slice and Dice"))
+                return true;
+        }
+        if (Api.Spellbook.CanCast("Eviscerate") && points == 5 && energy >= 35)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine($"Casting Eviscerate ");
+            Console.ResetColor();
 
-    if (Api.Spellbook.Cast("Sinister Strike"))
-        return true;
-}
-		
-	
+            if (Api.Spellbook.Cast("Eviscerate"))
+                return true;
+        }
+        if (Api.Spellbook.CanCast("Sinister Strike") && energy >= 45)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine($"Casting Sinister Strike ");
+            Console.ResetColor();
+
+            if (Api.Spellbook.Cast("Sinister Strike"))
+                return true;
+        }
 
 
 
-return base.CombatPulse();
-}
-private void LogPlayerStats()
+
+
+        return base.CombatPulse();
+    }
+    private void LogPlayerStats()
     {
         // Variables for player and target instances
-var me = Api.Player;
-var target = Api.Target;
+        var me = Api.Player;
+        var target = Api.Target;
 
-// Health percentage of the player
-var healthPercentage = me.HealthPercent;
+        // Health percentage of the player
+        var healthPercentage = me.HealthPercent;
 
-var energy = me.Energy; // Energy
-		var points =  me.ComboPoints;
+        var energy = me.Energy; // Energy
+        var points = me.ComboPoints;
 
-// Target distance from the player
-		var targetDistance = target.Position.Distance2D(me.Position);
+        // Target distance from the player
+        var targetDistance = target.Position.Distance2D(me.Position);
 
 
         Console.ForegroundColor = ConsoleColor.Red;
         Console.WriteLine($"{energy}% Energy available");
         Console.WriteLine($"{healthPercentage}% Health available");
-		Console.WriteLine($"{points} points available");
+        Console.WriteLine($"{points} points available");
 
-		Console.ResetColor();
+        Console.ResetColor();
 
-
-}
 
     }
-	
+
+}
