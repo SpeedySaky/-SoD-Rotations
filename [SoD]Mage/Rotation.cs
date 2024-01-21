@@ -187,7 +187,7 @@ var healthPercentage = me.HealthPercent;
 var targethealth = target.HealthPercent;
 
 // Power percentages for different resources
-		var mana = me.Mana;
+		var mana = me.ManaPercent;
 
 // Target distance from the player
 	var targetDistance = target.Position.Distance2D(me.Position);
