@@ -1,5 +1,7 @@
 using System;
+using System.Threading;
 using wShadow.Templates;
+using System.Collections.Generic;
 using wShadow.Warcraft.Classes;
 using wShadow.Warcraft.Defines;
 using wShadow.Warcraft.Managers;
@@ -15,14 +17,22 @@ public class WarlockSoD : Rotation
     private DateTime lastHaunt = DateTime.MinValue;
     private TimeSpan LegsCD = TimeSpan.FromSeconds(22);
     private DateTime lastLegs = DateTime.MinValue;
-    public bool IsValid(WowUnit unit)
+    private List<string> npcConditions = new List<string>
     {
-        if (unit == null || unit.Address == null)
-        {
-            return false;
-        }
-        return true;
-    }
+        "Innkeeper", "Auctioneer", "Banker", "FlightMaster", "GuildBanker",
+        "PlayerVehicle", "StableMaster", "Repair", "Trainer", "TrainerClass",
+        "TrainerProfession", "Vendor", "VendorAmmo", "VendorFood", "VendorPoison",
+        "VendorReagent", "WildBattlePet", "GarrisonMissionNPC", "GarrisonTalentNPC",
+        "QuestGiver"
+    };
+		public bool IsValid(WowUnit unit)
+	{
+		if (unit == null || unit.Address == null)
+		{
+			return false;
+		}
+		return true;
+	}
 
     public override void Initialize()
     {
@@ -167,7 +177,9 @@ public class WarlockSoD : Rotation
 
 
         var reaction = me.GetReaction(target);
-        if (Api.HasMacro("Hands") && reaction != UnitReaction.Friendly && !target.IsDead())
+		
+        if (Api.HasMacro("Hands") && !target.IsDead() && (reaction != UnitReaction.Friendly && reaction != UnitReaction.Honored && reaction != UnitReaction.Revered && reaction != UnitReaction.Exalted) &&
+    mana > 20 && !IsNPC(target))
 
         {
             if ((DateTime.Now - lastHaunt) >= HauntCooldown)
@@ -203,8 +215,7 @@ public class WarlockSoD : Rotation
         // Target distance from the player
         var targetDistance = target.Position.Distance2D(me.Position);
 
-        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsChanneling()) return false;
-        if (me.HasAura("Drink") || me.HasAura("Food")) return false;
+        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsChanneling() ||me.IsMounted() ||me.HasAura("Drink") || me.HasAura("Food") ) return false;
 
         var pet = me.Pet();
         var PetHealth = 0.0f;
@@ -363,6 +374,33 @@ public class WarlockSoD : Rotation
             }
         }
         return base.CombatPulse();
+    }
+	 private bool IsNPC(WowUnit unit)
+{
+    if (!IsValid(unit))
+    {
+        // If the unit is not valid, consider it not an NPC
+        return false;
+    }
+
+        foreach (var condition in npcConditions)
+        {
+            switch (condition)
+            {
+                case "Innkeeper" when unit.IsInnkeeper():
+                case "Auctioneer" when unit.IsAuctioneer():
+                case "Banker" when unit.IsBanker():
+                case "FlightMaster" when unit.IsFlightMaster():
+                case "GuildBanker" when unit.IsGuildBanker():
+                case "StableMaster" when unit.IsStableMaster():
+                case "Trainer" when unit.IsTrainer():
+                case "Vendor" when unit.IsVendor():
+                case "QuestGiver" when unit.IsQuestGiver():
+                    return true;
+            }
+        }
+
+        return false;
     }
 
     private void LogPlayerStats()

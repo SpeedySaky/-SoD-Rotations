@@ -1,25 +1,32 @@
 using System;
 using System.Threading;
 using wShadow.Templates;
+using System.Collections.Generic;
 using wShadow.Warcraft.Classes;
 using wShadow.Warcraft.Defines;
 using wShadow.Warcraft.Managers;
-using wShadow.Warcraft.Structures.Wow_Player;
-using wShadow.Warcraft.Defines.Wow_Player;
-using wShadow.Warcraft.Defines.Wow_Spell;
 
 
-public class Rogue : Rotation
+public class RogueStealth : Rotation
 {
 
-    public bool IsValid(WowUnit unit)
+private List<string> npcConditions = new List<string>
     {
-        if (unit == null || unit.Address == null)
-        {
-            return false;
-        }
-        return true;
-    }
+        "Innkeeper", "Auctioneer", "Banker", "FlightMaster", "GuildBanker",
+        "PlayerVehicle", "StableMaster", "Repair", "Trainer", "TrainerClass",
+        "TrainerProfession", "Vendor", "VendorAmmo", "VendorFood", "VendorPoison",
+        "VendorReagent", "WildBattlePet", "GarrisonMissionNPC", "GarrisonTalentNPC",
+        "QuestGiver"
+    };
+		public bool IsValid(WowUnit unit)
+	{
+		if (unit == null || unit.Address == null)
+		{
+			return false;
+		}
+		return true;
+	}
+    private bool HasItem(object item) => Api.Inventory.HasItem(item);
     private int debugInterval = 5; // Set the debug interval in seconds
     private DateTime lastDebugTime = DateTime.MinValue;
     private int pickPocketDelay = 3000; // Delay in milliseconds (3 seconds)
@@ -60,7 +67,6 @@ public class Rogue : Rotation
         // Variables for player and target instances
         var me = Api.Player;
         var target = Api.Target;
-        var pet = me.Pet();
 
         if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
         {
@@ -77,11 +83,10 @@ public class Rogue : Rotation
         // Target distance from the player
         var targetDistance = target.Position.Distance2D(me.Position);
 
-        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsLooting()) return false;
-        if (me.HasAura("Drink") || me.HasAura("Food")) return false;
+        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsLooting() ||me.IsMounted()||me.HasAura("Drink") || me.HasAura("Food")) return false;
 
 
-        if (Api.Spellbook.CanCast("Sprint") && !Api.Spellbook.OnCooldown("Sprint"))
+        if (Api.Spellbook.CanCast("Sprint") && !Api.Spellbook.OnCooldown("Sprint") )
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Sprint");
@@ -101,13 +106,17 @@ public class Rogue : Rotation
                 return true;
 
         }
-        if (target.IsValid() && targetDistance <= 25 && Api.HasMacro("Hands"))
+		            var reaction = me.GetReaction(target);
+
+        if  (!target.IsDead() && 
+    (reaction != UnitReaction.Friendly &&
+     reaction != UnitReaction.Honored &&
+     reaction != UnitReaction.Revered &&
+     reaction != UnitReaction.Exalted) &&
+     !IsNPC(target) &&  targetDistance <= 25 && Api.HasMacro("Hands"))
 
         {
-            var reaction = me.GetReaction(target);
-
-            if (reaction != UnitReaction.Friendly)
-            {
+            
 
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Casting Shadowstrike");
@@ -116,7 +125,7 @@ public class Rogue : Rotation
                 if (Api.UseMacro("Hands"))
                     return true;
 
-            }
+            
 
 
         }
@@ -244,6 +253,33 @@ public class Rogue : Rotation
 
 
         return base.CombatPulse();
+    }
+	 private bool IsNPC(WowUnit unit)
+{
+    if (!IsValid(unit))
+    {
+        // If the unit is not valid, consider it not an NPC
+        return false;
+    }
+
+        foreach (var condition in npcConditions)
+        {
+            switch (condition)
+            {
+                case "Innkeeper" when unit.IsInnkeeper():
+                case "Auctioneer" when unit.IsAuctioneer():
+                case "Banker" when unit.IsBanker():
+                case "FlightMaster" when unit.IsFlightMaster():
+                case "GuildBanker" when unit.IsGuildBanker():
+                case "StableMaster" when unit.IsStableMaster():
+                case "Trainer" when unit.IsTrainer():
+                case "Vendor" when unit.IsVendor():
+                case "QuestGiver" when unit.IsQuestGiver():
+                    return true;
+            }
+        }
+
+        return false;
     }
     private void LogPlayerStats()
     {

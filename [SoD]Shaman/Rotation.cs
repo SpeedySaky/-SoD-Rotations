@@ -1,17 +1,34 @@
 using System;
 using System.Threading;
 using wShadow.Templates;
+using System.Collections.Generic;
 using wShadow.Warcraft.Classes;
 using wShadow.Warcraft.Defines;
 using wShadow.Warcraft.Managers;
-using wShadow.Warcraft.Structures.Wow_Player;
-using wShadow.Warcraft.Defines.Wow_Player;
-using wShadow.Warcraft.Defines.Wow_Spell;
-
 
 public class Shaman : Rotation
 {
-
+private List<string> npcConditions = new List<string>
+    {
+        "Innkeeper", "Auctioneer", "Banker", "FlightMaster", "GuildBanker",
+        "PlayerVehicle", "StableMaster", "Repair", "Trainer", "TrainerClass",
+        "TrainerProfession", "Vendor", "VendorAmmo", "VendorFood", "VendorPoison",
+        "VendorReagent", "WildBattlePet", "GarrisonMissionNPC", "GarrisonTalentNPC",
+        "QuestGiver"
+    };
+		public bool IsValid(WowUnit unit)
+	{
+		if (unit == null || unit.Address == null)
+		{
+			return false;
+		}
+		return true;
+	}
+	private bool HasEnchantment(EquipmentSlot slot, string enchantmentName)
+    {
+        return Api.Equipment.HasEnchantment(slot, enchantmentName);
+    }
+    private bool HasItem(object item) => Api.Inventory.HasItem(item);
     private int debugInterval = 5; // Set the debug interval in seconds
     private DateTime lastDebugTime = DateTime.MinValue;
     private DateTime lastRockbiterTime = DateTime.MinValue; public override void Initialize()
@@ -47,8 +64,7 @@ public class Shaman : Rotation
         // Variables for player and target instances
         var me = Api.Player;
         var target = Api.Target;
-        var pet = me.Pet();
-        var mana = me.Mana;
+        var mana = me.ManaPercent;
 
 
         if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
@@ -62,22 +78,34 @@ public class Shaman : Rotation
         // Target distance from the player
         var targetDistance = target.Position.Distance2D(me.Position);
 
-        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling()) return false;
-        if (me.HasAura("Drink") || me.HasAura("Food")) return false;
+        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling()||me.IsMounted() || me.HasAura("Drink") || me.HasAura("Food")) return false;
 
-        if ((DateTime.Now - lastRockbiterTime).TotalMinutes >= 5)
+         bool hasFlametongueEnchantment = HasEnchantment(EquipmentSlot.MainHand, "Flametongue 1");
+        bool hasFlametongueEnchantment2 = HasEnchantment(EquipmentSlot.MainHand, "Flametongue 2");
+        bool hasRockbiterEnchantment1 = HasEnchantment(EquipmentSlot.MainHand, "Rockbiter 1");
+        bool hasRockbiterEnchantment2 = HasEnchantment(EquipmentSlot.MainHand, "Rockbiter 2");
+        bool hasRockbiterEnchantment3 = HasEnchantment(EquipmentSlot.MainHand, "Rockbiter 3");
+
+        bool hasAnyRockbiterEnchantment = hasRockbiterEnchantment1 || hasRockbiterEnchantment2 || hasRockbiterEnchantment3;
+
+        if (!hasFlametongueEnchantment && !hasFlametongueEnchantment2 && Api.Spellbook.CanCast("Flametongue Weapon"))
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Casting Flametongue Weapon");
+            Console.ResetColor();
+            if (Api.Spellbook.Cast("Flametongue Weapon"))
+            {
+                return true;
+            }
+        }
+        else if (!hasFlametongueEnchantment && !hasFlametongueEnchantment2 && !hasAnyRockbiterEnchantment && Api.Spellbook.CanCast("Rockbiter Weapon"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Rockbiter Weapon");
             Console.ResetColor();
-
-            if (Api.Spellbook.CanCast("Rockbiter Weapon"))
+            if (Api.Spellbook.Cast("Rockbiter Weapon"))
             {
-                if (Api.Spellbook.Cast("Rockbiter Weapon"))
-                {
-                    lastRockbiterTime = DateTime.Now; // Update lastRockbiterTime
-                    return true;
-                }
+                return true;
             }
         }
 
@@ -111,7 +139,7 @@ public class Shaman : Rotation
         // Variables for player and target instances
         var me = Api.Player;
         var target = Api.Target;
-        var mana = me.Mana;
+        var mana = me.ManaPercent;
 
         if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
         {
@@ -194,12 +222,40 @@ public class Shaman : Rotation
 
         return base.CombatPulse();
     }
+	
+	 private bool IsNPC(WowUnit unit)
+{
+    if (!IsValid(unit))
+    {
+        // If the unit is not valid, consider it not an NPC
+        return false;
+    }
+
+        foreach (var condition in npcConditions)
+        {
+            switch (condition)
+            {
+                case "Innkeeper" when unit.IsInnkeeper():
+                case "Auctioneer" when unit.IsAuctioneer():
+                case "Banker" when unit.IsBanker():
+                case "FlightMaster" when unit.IsFlightMaster():
+                case "GuildBanker" when unit.IsGuildBanker():
+                case "StableMaster" when unit.IsStableMaster():
+                case "Trainer" when unit.IsTrainer():
+                case "Vendor" when unit.IsVendor():
+                case "QuestGiver" when unit.IsQuestGiver():
+                    return true;
+            }
+        }
+
+        return false;
+    }
     private void LogPlayerStats()
     {
         // Variables for player and target instances
         var me = Api.Player;
         var target = Api.Target;
-        var mana = me.Mana;
+        var mana = me.ManaPercent;
 
         // Health percentage of the player
         var healthPercentage = me.HealthPercent;
@@ -210,7 +266,7 @@ public class Shaman : Rotation
 
 
         Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine($"{mana} Mana available");
+        Console.WriteLine($"{mana}% Mana available");
         Console.WriteLine($"{healthPercentage}% Health available");
         Console.ResetColor();
 

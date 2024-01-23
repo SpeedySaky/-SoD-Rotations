@@ -1,18 +1,32 @@
 using System;
 using System.Threading;
 using wShadow.Templates;
+using System.Collections.Generic;
 using wShadow.Warcraft.Classes;
 using wShadow.Warcraft.Defines;
 using wShadow.Warcraft.Managers;
-using wShadow.Warcraft.Structures.Wow_Player;
-using wShadow.Warcraft.Defines.Wow_Player;
-using wShadow.Warcraft.Defines.Wow_Spell;
 
 
 
 public class RetPala : Rotation
 {
-
+private List<string> npcConditions = new List<string>
+    {
+        "Innkeeper", "Auctioneer", "Banker", "FlightMaster", "GuildBanker",
+        "PlayerVehicle", "StableMaster", "Repair", "Trainer", "TrainerClass",
+        "TrainerProfession", "Vendor", "VendorAmmo", "VendorFood", "VendorPoison",
+        "VendorReagent", "WildBattlePet", "GarrisonMissionNPC", "GarrisonTalentNPC",
+        "QuestGiver"
+    };
+		public bool IsValid(WowUnit unit)
+	{
+		if (unit == null || unit.Address == null)
+		{
+			return false;
+		}
+		return true;
+	}
+    private bool HasItem(object item) => Api.Inventory.HasItem(item);
     private int debugInterval = 5; // Set the debug interval in seconds
     private DateTime lastDebugTime = DateTime.MinValue;
     private DateTime lastcrusaderShotTime = DateTime.MinValue;
@@ -54,10 +68,9 @@ public class RetPala : Rotation
     {
         var me = Api.Player;
         var healthPercentage = me.HealthPercent;
-        var mana = me.Mana;
+        var mana = me.ManaPercent;
 
-        if (me.IsDead() || me.IsGhost() || me.IsCasting()) return false;
-        if (me.HasAura("Drink") || me.HasAura("Food")) return false;
+        if (me.IsDead() || me.IsGhost() || me.IsCasting()||me.IsMounted() || me.HasAura("Drink") || me.HasAura("Food")) return false;
 
         if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
         {
@@ -161,46 +174,7 @@ public class RetPala : Rotation
                 return true;
 
         }
-        if (Api.HasMacro("Chest"))
-        {
-            if ((DateTime.Now - lastChest) >= ChestCd)
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Casting Chest rune");
-                Console.ResetColor();
-
-                if (Api.UseMacro("Chest"))
-                {
-                    lastChest = DateTime.Now;
-                    return true;
-                }
-            }
-            else
-            {
-                // If the cooldown period for Chimera Shot hasn't elapsed yet
-                Console.WriteLine("Hands rune is on cooldown. Skipping cast.");
-            }
-        }
-        if (Api.HasMacro("Hands"))
-        {
-            if ((DateTime.Now - lastcrusaderShotTime) >= crusader)
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Casting Hands rune");
-                Console.ResetColor();
-
-                if (Api.UseMacro("Hands"))
-                {
-                    lastcrusaderShotTime = DateTime.Now;
-                    return true;
-                }
-            }
-            else
-            {
-                // If the cooldown period for Chimera Shot hasn't elapsed yet
-                Console.WriteLine("Hands rune is on cooldown. Skipping cast.");
-            }
-        }
+        
         if (Api.Spellbook.CanCast("Consecration") && !Api.Spellbook.OnCooldown("Consecration") && targethp >= 30)
         {
             Console.ForegroundColor = ConsoleColor.Green;
@@ -254,14 +228,79 @@ public class RetPala : Rotation
                 return true;
             }
         }
+if (Api.HasMacro("Chest"))
+        {
+            if ((DateTime.Now - lastChest) >= ChestCd)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Chest rune");
+                Console.ResetColor();
 
+                if (Api.UseMacro("Chest"))
+                {
+                    lastChest = DateTime.Now;
+                    return true;
+                }
+            }
+            else
+            {
+                // If the cooldown period for Chimera Shot hasn't elapsed yet
+                Console.WriteLine("Hands rune is on cooldown. Skipping cast.");
+            }
+        }
+        if (Api.HasMacro("Hands"))
+        {
+            if ((DateTime.Now - lastcrusaderShotTime) >= crusader)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Hands rune");
+                Console.ResetColor();
+
+                if (Api.UseMacro("Hands"))
+                {
+                    lastcrusaderShotTime = DateTime.Now;
+                    return true;
+                }
+            }
+            else
+            {
+                // If the cooldown period for Chimera Shot hasn't elapsed yet
+                Console.WriteLine("Hands rune is on cooldown. Skipping cast.");
+            }
+        }
         //DPS rotation
 
 
 
         return base.CombatPulse();
     }
+ private bool IsNPC(WowUnit unit)
+{
+    if (!IsValid(unit))
+    {
+        // If the unit is not valid, consider it not an NPC
+        return false;
+    }
 
+        foreach (var condition in npcConditions)
+        {
+            switch (condition)
+            {
+                case "Innkeeper" when unit.IsInnkeeper():
+                case "Auctioneer" when unit.IsAuctioneer():
+                case "Banker" when unit.IsBanker():
+                case "FlightMaster" when unit.IsFlightMaster():
+                case "GuildBanker" when unit.IsGuildBanker():
+                case "StableMaster" when unit.IsStableMaster():
+                case "Trainer" when unit.IsTrainer():
+                case "Vendor" when unit.IsVendor():
+                case "QuestGiver" when unit.IsQuestGiver():
+                    return true;
+            }
+        }
+
+        return false;
+    }
     private void LogPlayerStats()
     {
         var me = Api.Player;

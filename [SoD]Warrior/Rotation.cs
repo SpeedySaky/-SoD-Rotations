@@ -1,12 +1,10 @@
 using System;
 using System.Threading;
 using wShadow.Templates;
+using System.Collections.Generic;
 using wShadow.Warcraft.Classes;
 using wShadow.Warcraft.Defines;
 using wShadow.Warcraft.Managers;
-using wShadow.Warcraft.Structures.Wow_Player;
-using wShadow.Warcraft.Defines.Wow_Player;
-using wShadow.Warcraft.Defines.Wow_Spell;
 
 
 
@@ -17,14 +15,23 @@ public class Warrior : Rotation
     private DateTime lastDebugTime = DateTime.MinValue;
 
 
-    public bool IsValid(WowUnit unit)
+   private List<string> npcConditions = new List<string>
     {
-        if (unit == null || unit.Address == null)
-        {
-            return false;
-        }
-        return true;
-    }
+        "Innkeeper", "Auctioneer", "Banker", "FlightMaster", "GuildBanker",
+        "PlayerVehicle", "StableMaster", "Repair", "Trainer", "TrainerClass",
+        "TrainerProfession", "Vendor", "VendorAmmo", "VendorFood", "VendorPoison",
+        "VendorReagent", "WildBattlePet", "GarrisonMissionNPC", "GarrisonTalentNPC",
+        "QuestGiver"
+    };
+		public bool IsValid(WowUnit unit)
+	{
+		if (unit == null || unit.Address == null)
+		{
+			return false;
+		}
+		return true;
+	}
+    private bool HasItem(object item) => Api.Inventory.HasItem(item);
 
 
     public override void Initialize()
@@ -65,12 +72,21 @@ public class Warrior : Rotation
         if (!IsValid(target))
             return true;
 
-        if (me.IsDead() || me.IsGhost() || me.IsCasting()) return false;
-        if (me.HasAura("Drink") || me.HasAura("Food")) return false;
+        if (me.IsDead() || me.IsGhost() || me.IsCasting() ||me.IsMounted() || me.HasAura("Drink") || me.HasAura("Food")) return false;
         var targetDistance = target.Position.Distance2D(me.Position);
+ if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
+        {
+            LogPlayerStats();
+            lastDebugTime = DateTime.Now;
+        }
+var reaction = me.GetReaction(target);
 
-
-        if (!target.IsDead())
+        if (!target.IsDead() && 
+    (reaction != UnitReaction.Friendly &&
+     reaction != UnitReaction.Honored &&
+     reaction != UnitReaction.Revered &&
+     reaction != UnitReaction.Exalted) &&
+     !IsNPC(target))
         {
             if (Api.Spellbook.CanCast("Charge") && targetDistance >= 8 && targetDistance <= 23 && !Api.Spellbook.OnCooldown("Charge"))
             {
@@ -93,7 +109,11 @@ public class Warrior : Rotation
         var rage = me.Rage;
         var target = Api.Target;
         var targethealth = target.HealthPercent;
-
+ if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
+        {
+            LogPlayerStats();
+            lastDebugTime = DateTime.Now;
+        }
 
         if (Api.Spellbook.CanCast("Hamstring") && targethealth <= 30 && !target.HasAura("Hamstring"))
         {
@@ -166,14 +186,44 @@ public class Warrior : Rotation
     }
 
 
+ private bool IsNPC(WowUnit unit)
+{
+    if (!IsValid(unit))
+    {
+        // If the unit is not valid, consider it not an NPC
+        return false;
+    }
 
+        foreach (var condition in npcConditions)
+        {
+            switch (condition)
+            {
+                case "Innkeeper" when unit.IsInnkeeper():
+                case "Auctioneer" when unit.IsAuctioneer():
+                case "Banker" when unit.IsBanker():
+                case "FlightMaster" when unit.IsFlightMaster():
+                case "GuildBanker" when unit.IsGuildBanker():
+                case "StableMaster" when unit.IsStableMaster():
+                case "Trainer" when unit.IsTrainer():
+                case "Vendor" when unit.IsVendor():
+                case "QuestGiver" when unit.IsQuestGiver():
+                    return true;
+            }
+        }
+
+        return false;
+    }
     private void LogPlayerStats()
     {
         var me = Api.Player;
 
         var rage = me.Rage;
         var healthPercentage = me.HealthPercent;
-
+ if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
+        {
+            LogPlayerStats();
+            lastDebugTime = DateTime.Now;
+        }
 
         Console.ForegroundColor = ConsoleColor.Red;
         Console.WriteLine($"{rage} Rage available");

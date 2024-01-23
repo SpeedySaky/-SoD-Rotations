@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using wShadow.Templates;
+using System.Collections.Generic;
 using wShadow.Warcraft.Classes;
 using wShadow.Warcraft.Defines;
 using wShadow.Warcraft.Managers;
@@ -9,7 +10,23 @@ using wShadow.Warcraft.Managers;
 
 public class MageSoD : Rotation
 {
-
+private List<string> npcConditions = new List<string>
+    {
+        "Innkeeper", "Auctioneer", "Banker", "FlightMaster", "GuildBanker",
+        "PlayerVehicle", "StableMaster", "Repair", "Trainer", "TrainerClass",
+        "TrainerProfession", "Vendor", "VendorAmmo", "VendorFood", "VendorPoison",
+        "VendorReagent", "WildBattlePet", "GarrisonMissionNPC", "GarrisonTalentNPC",
+        "QuestGiver"
+    };
+		public bool IsValid(WowUnit unit)
+	{
+		if (unit == null || unit.Address == null)
+		{
+			return false;
+		}
+		return true;
+	}
+    private bool HasItem(object item) => Api.Inventory.HasItem(item);
     private int debugInterval = 5; // Set the debug interval in seconds
     private DateTime lastDebugTime = DateTime.MinValue;
 
@@ -59,8 +76,7 @@ public class MageSoD : Rotation
         var targetDistance = target.Position.Distance2D(me.Position);
         ShadowApi shadowApi = new ShadowApi();
 
-        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling()) return false;
-        if (me.HasAura("Drink") || me.HasAura("Food")) return false;
+        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.HasAura("Drink") || me.HasAura("Food")) return false;
 
         if (Api.Spellbook.CanCast("Frost Armor") && !me.HasAura("Frost Armor"))
         {
@@ -139,35 +155,38 @@ public class MageSoD : Rotation
 
 
 
-        if (!target.IsDead())
+       var reaction = me.GetReaction(target);
 
-            if (Api.Spellbook.CanCast("Frostbolt") && mana > 20)
+if (!target.IsDead() && 
+    (reaction != UnitReaction.Friendly &&
+     reaction != UnitReaction.Honored &&
+     reaction != UnitReaction.Revered &&
+     reaction != UnitReaction.Exalted) &&
+    mana > 20 && !IsNPC(target))
+{
+    Console.WriteLine("Trying to cast Pyroblast");
+    
+    // Try casting Pyroblast
+    if (Api.Spellbook.CanCast("Pyroblast") && Api.Spellbook.Cast("Pyroblast"))
+    {
+        Console.WriteLine("Casting Pyroblast");
+        return true;
+    }
+    else
+    {
+        // If Pyroblast fails, try casting Frostbolt
+        if (Api.Spellbook.CanCast("Frostbolt"))
+        {
+            Console.WriteLine("Casting Frostbolt");
+            Api.Spellbook.Cast("Frostbolt");
+            return true;
+        }
+    }
+}
 
-            {
-                var reaction = me.GetReaction(target);
+// If none of the conditions are met or casting both spells fail
+return false;
 
-                if (reaction != UnitReaction.Friendly)
-                {
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine("Casting Frostbolt");
-                    Console.ResetColor();
-
-                    if (Api.Spellbook.Cast("Frostbolt"))
-                    {
-                        return true;
-                    }
-                }
-                else
-                {
-                    // Handle if the target is friendly
-                    Console.WriteLine("Target is friendly. Skipping Frostbolt cast.");
-                }
-            }
-            else
-            {
-                // Handle if the target is not valid
-                Console.WriteLine("Invalid target. Skipping Frostbolt cast.");
-            }
         return base.PassivePulse();
 
     }
@@ -299,6 +318,34 @@ public class MageSoD : Rotation
         }
 
         return base.CombatPulse();
+    }
+	
+	 private bool IsNPC(WowUnit unit)
+{
+    if (!IsValid(unit))
+    {
+        // If the unit is not valid, consider it not an NPC
+        return false;
+    }
+
+        foreach (var condition in npcConditions)
+        {
+            switch (condition)
+            {
+                case "Innkeeper" when unit.IsInnkeeper():
+                case "Auctioneer" when unit.IsAuctioneer():
+                case "Banker" when unit.IsBanker():
+                case "FlightMaster" when unit.IsFlightMaster():
+                case "GuildBanker" when unit.IsGuildBanker():
+                case "StableMaster" when unit.IsStableMaster():
+                case "Trainer" when unit.IsTrainer():
+                case "Vendor" when unit.IsVendor():
+                case "QuestGiver" when unit.IsQuestGiver():
+                    return true;
+            }
+        }
+
+        return false;
     }
     private void LogPlayerStats()
     {

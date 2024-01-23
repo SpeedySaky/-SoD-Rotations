@@ -1,18 +1,32 @@
 using System;
 using System.Threading;
 using wShadow.Templates;
+using System.Collections.Generic;
 using wShadow.Warcraft.Classes;
 using wShadow.Warcraft.Defines;
 using wShadow.Warcraft.Managers;
-using wShadow.Warcraft.Structures.Wow_Player;
-using wShadow.Warcraft.Defines.Wow_Player;
-using wShadow.Warcraft.Defines.Wow_Spell;
 
 
 
 public class Druid : Rotation
 {
-
+private List<string> npcConditions = new List<string>
+    {
+        "Innkeeper", "Auctioneer", "Banker", "FlightMaster", "GuildBanker",
+        "PlayerVehicle", "StableMaster", "Repair", "Trainer", "TrainerClass",
+        "TrainerProfession", "Vendor", "VendorAmmo", "VendorFood", "VendorPoison",
+        "VendorReagent", "WildBattlePet", "GarrisonMissionNPC", "GarrisonTalentNPC",
+        "QuestGiver"
+    };
+		public bool IsValid(WowUnit unit)
+	{
+		if (unit == null || unit.Address == null)
+		{
+			return false;
+		}
+		return true;
+	}
+    private bool HasItem(object item) => Api.Inventory.HasItem(item);
     private int debugInterval = 5; // Set the debug interval in seconds
     private DateTime lastDebugTime = DateTime.MinValue;
 
@@ -53,8 +67,7 @@ public class Druid : Rotation
         var healthPercentage = me.HealthPercent;
         var mana = me.ManaPercent;
 
-        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving()) return false;
-        if (me.HasAura("Drink") || me.HasAura("Food")) return false;
+        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving()|| me.HasAura("Drink") || me.HasAura("Food")|| me.IsMounted()) return false;
         if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
         {
             LogPlayerStats();
@@ -245,7 +258,33 @@ public class Druid : Rotation
 
         return base.CombatPulse();
     }
+private bool IsNPC(WowUnit unit)
+{
+    if (!IsValid(unit))
+    {
+        // If the unit is not valid, consider it not an NPC
+        return false;
+    }
 
+        foreach (var condition in npcConditions)
+        {
+            switch (condition)
+            {
+                case "Innkeeper" when unit.IsInnkeeper():
+                case "Auctioneer" when unit.IsAuctioneer():
+                case "Banker" when unit.IsBanker():
+                case "FlightMaster" when unit.IsFlightMaster():
+                case "GuildBanker" when unit.IsGuildBanker():
+                case "StableMaster" when unit.IsStableMaster():
+                case "Trainer" when unit.IsTrainer():
+                case "Vendor" when unit.IsVendor():
+                case "QuestGiver" when unit.IsQuestGiver():
+                    return true;
+            }
+        }
+
+        return false;
+    }
     private void LogPlayerStats()
     {
         var me = Api.Player;

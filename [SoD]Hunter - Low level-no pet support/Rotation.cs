@@ -1,26 +1,32 @@
 using System;
 using System.Threading;
 using wShadow.Templates;
+using System.Collections.Generic;
 using wShadow.Warcraft.Classes;
 using wShadow.Warcraft.Defines;
 using wShadow.Warcraft.Managers;
-using wShadow.Warcraft.Structures.Wow_Player;
-using wShadow.Warcraft.Defines.Wow_Player;
-using wShadow.Warcraft.Defines.Wow_Spell;
-
 
 public class Hunter : Rotation
 {
 
 
-    public bool IsValid(WowUnit unit)
+   private List<string> npcConditions = new List<string>
     {
-        if (unit == null || unit.Address == null)
-        {
-            return false;
-        }
-        return true;
-    }
+        "Innkeeper", "Auctioneer", "Banker", "FlightMaster", "GuildBanker",
+        "PlayerVehicle", "StableMaster", "Repair", "Trainer", "TrainerClass",
+        "TrainerProfession", "Vendor", "VendorAmmo", "VendorFood", "VendorPoison",
+        "VendorReagent", "WildBattlePet", "GarrisonMissionNPC", "GarrisonTalentNPC",
+        "QuestGiver"
+    };
+		public bool IsValid(WowUnit unit)
+	{
+		if (unit == null || unit.Address == null)
+		{
+			return false;
+		}
+		return true;
+	}
+    private bool HasItem(object item) => Api.Inventory.HasItem(item);
 
     private int debugInterval = 5; // Set the debug interval in seconds
     private DateTime lastDebugTime = DateTime.MinValue;
@@ -81,7 +87,7 @@ public class Hunter : Rotation
         var healthPercentage = me.HealthPercent;
 
         // Power percentages for different resources
-        var mana = me.Mana;
+        var mana = me.ManaPercent;
 
 
         // Target distance from the player
@@ -98,41 +104,28 @@ public class Hunter : Rotation
 
 
 
-
-        if (!target.IsDead())
-
-            if (Api.Spellbook.CanCast("Hunter's Mark") && !target.HasAura("Hunter's Mark") && healthPercentage > 50 && mana > 20 && PetHealth > 50)
-
-            {
                 var reaction = me.GetReaction(target);
 
-                if (reaction != UnitReaction.Friendly)
+        if (!target.IsDead() && 
+    (reaction != UnitReaction.Friendly &&
+     reaction != UnitReaction.Honored &&
+     reaction != UnitReaction.Revered &&
+     reaction != UnitReaction.Exalted) &&
+    mana > 20 && !IsNPC(target) && Api.Spellbook.CanCast("Hunter's Mark") && !target.HasAura("Hunter's Mark") && healthPercentage > 50 && mana > 20)
+
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine("Casting Mark");
                     Console.ResetColor();
 
                     if (Api.UseMacro("Mark"))
-                    {
+                    
                         return true;
-                    }
+                    
                 }
-                else
-                {
-                    // Handle if the target is friendly
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine("Target is friendly. Skipping marking cast.");
-                    Console.ResetColor();
-
-                }
-            }
-            else
-            {
-                // Handle if the target is not valid
-                Console.WriteLine("Invalid target. Skipping marking cast.");
-                Console.ResetColor();
-
-            }
+               
+            
+           
 
         if (Api.Spellbook.CanCast("Serpent Sting") && target.HasAura("Hunter's Mark") && healthPercentage > 50 && mana > 20)
         {
@@ -170,7 +163,7 @@ public class Hunter : Rotation
         var targethealth = target.HealthPercent;
 
         // Power percentages for different resources
-        var mana = me.Mana;
+        var mana = me.ManaPercent;
 
 
         // Target distance from the player
@@ -312,7 +305,33 @@ public class Hunter : Rotation
         return base.CombatPulse();
     }
 
+private bool IsNPC(WowUnit unit)
+{
+    if (!IsValid(unit))
+    {
+        // If the unit is not valid, consider it not an NPC
+        return false;
+    }
 
+        foreach (var condition in npcConditions)
+        {
+            switch (condition)
+            {
+                case "Innkeeper" when unit.IsInnkeeper():
+                case "Auctioneer" when unit.IsAuctioneer():
+                case "Banker" when unit.IsBanker():
+                case "FlightMaster" when unit.IsFlightMaster():
+                case "GuildBanker" when unit.IsGuildBanker():
+                case "StableMaster" when unit.IsStableMaster():
+                case "Trainer" when unit.IsTrainer():
+                case "Vendor" when unit.IsVendor():
+                case "QuestGiver" when unit.IsQuestGiver():
+                    return true;
+            }
+        }
+
+        return false;
+    }
     private void LogPlayerStats()
     {
         // Variables for player and target instances
