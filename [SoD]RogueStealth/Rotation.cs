@@ -10,7 +10,7 @@ using wShadow.Warcraft.Managers;
 public class RogueStealth : Rotation
 {
 
-private List<string> npcConditions = new List<string>
+    private List<string> npcConditions = new List<string>
     {
         "Innkeeper", "Auctioneer", "Banker", "FlightMaster", "GuildBanker",
         "PlayerVehicle", "StableMaster", "Repair", "Trainer", "TrainerClass",
@@ -18,14 +18,14 @@ private List<string> npcConditions = new List<string>
         "VendorReagent", "WildBattlePet", "GarrisonMissionNPC", "GarrisonTalentNPC",
         "QuestGiver"
     };
-		public bool IsValid(WowUnit unit)
-	{
-		if (unit == null || unit.Address == null)
-		{
-			return false;
-		}
-		return true;
-	}
+    public bool IsValid(WowUnit unit)
+    {
+        if (unit == null || unit.Address == null)
+        {
+            return false;
+        }
+        return true;
+    }
     private bool HasItem(object item) => Api.Inventory.HasItem(item);
     private int debugInterval = 5; // Set the debug interval in seconds
     private DateTime lastDebugTime = DateTime.MinValue;
@@ -83,10 +83,10 @@ private List<string> npcConditions = new List<string>
         // Target distance from the player
         var targetDistance = target.Position.Distance2D(me.Position);
 
-        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsLooting() ||me.IsMounted()||me.HasAura("Drink") || me.HasAura("Food")) return false;
+        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsLooting() || me.IsMounted() || me.HasAura("Drink") || me.HasAura("Food")) return false;
 
 
-        if (Api.Spellbook.CanCast("Sprint") && !Api.Spellbook.OnCooldown("Sprint") )
+        if (Api.Spellbook.CanCast("Sprint") && !Api.Spellbook.OnCooldown("Sprint"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Sprint");
@@ -106,26 +106,26 @@ private List<string> npcConditions = new List<string>
                 return true;
 
         }
-		            var reaction = me.GetReaction(target);
+        var reaction = me.GetReaction(target);
 
-        if  (!target.IsDead() && 
+        if (!target.IsDead() &&
     (reaction != UnitReaction.Friendly &&
      reaction != UnitReaction.Honored &&
      reaction != UnitReaction.Revered &&
      reaction != UnitReaction.Exalted) &&
-     !IsNPC(target) &&  targetDistance <= 25 && Api.HasMacro("Hands"))
+     !IsNPC(target) && targetDistance <= 25 && Api.HasMacro("Hands"))
 
         {
-            
 
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Casting Shadowstrike");
-                Console.ResetColor();
 
-                if (Api.UseMacro("Hands"))
-                    return true;
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Casting Shadowstrike");
+            Console.ResetColor();
 
-            
+            if (Api.UseMacro("Hands"))
+                return true;
+
+
 
 
         }
@@ -151,6 +151,25 @@ private List<string> npcConditions = new List<string>
         var targethealth = target.HealthPercent;
         var energy = me.Energy; // Energy
         var points = me.ComboPoints;
+
+        string[] HP = { "Major Healing Potion", "Superior Healing Potion", "Greater Healing Potion", "Healing Potion", "Lesser Healing Potion", "Minor Healing Potion" };
+
+        if (me.HealthPercent <= 70 && !Api.Inventory.OnCooldown(HP))
+        {
+            foreach (string hpot in HP)
+            {
+                if (HasItem(hpot))
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Using Healing potion");
+                    Console.ResetColor();
+                    if (Api.Inventory.Use(hpot))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
 
 
         // Target distance from the player
@@ -254,13 +273,13 @@ private List<string> npcConditions = new List<string>
 
         return base.CombatPulse();
     }
-	 private bool IsNPC(WowUnit unit)
-{
-    if (!IsValid(unit))
+    private bool IsNPC(WowUnit unit)
     {
-        // If the unit is not valid, consider it not an NPC
-        return false;
-    }
+        if (!IsValid(unit))
+        {
+            // If the unit is not valid, consider it not an NPC
+            return false;
+        }
 
         foreach (var condition in npcConditions)
         {

@@ -9,7 +9,7 @@ using wShadow.Warcraft.Managers;
 
 public class EnhaShaman : Rotation
 {
-private List<string> npcConditions = new List<string>
+    private List<string> npcConditions = new List<string>
     {
         "Innkeeper", "Auctioneer", "Banker", "FlightMaster", "GuildBanker",
         "PlayerVehicle", "StableMaster", "Repair", "Trainer", "TrainerClass",
@@ -17,14 +17,14 @@ private List<string> npcConditions = new List<string>
         "VendorReagent", "WildBattlePet", "GarrisonMissionNPC", "GarrisonTalentNPC",
         "QuestGiver"
     };
-		public bool IsValid(WowUnit unit)
-	{
-		if (unit == null || unit.Address == null)
-		{
-			return false;
-		}
-		return true;
-	}
+    public bool IsValid(WowUnit unit)
+    {
+        if (unit == null || unit.Address == null)
+        {
+            return false;
+        }
+        return true;
+    }
     private bool HasItem(object item) => Api.Inventory.HasItem(item);
     private int debugInterval = 5; // Set the debug interval in seconds
     private DateTime lastDebugTime = DateTime.MinValue;
@@ -158,6 +158,42 @@ private List<string> npcConditions = new List<string>
         var mana = me.ManaPercent;
         var target = Api.Target;
         var targetDistance = target.Position.Distance2D(me.Position);
+        string[] HP = { "Major Healing Potion", "Superior Healing Potion", "Greater Healing Potion", "Healing Potion", "Lesser Healing Potion", "Minor Healing Potion" };
+        string[] MP = { "Major Mana Potion", "Superior Mana Potion", "Greater Mana Potion", "Mana Potion", "Lesser Mana Potion", "Minor Mana Potion" };
+
+        if (me.HealthPercent <= 70 && (!Api.Inventory.OnCooldown(MP) && !Api.Inventory.OnCooldown(HP)))
+        {
+            foreach (string hpot in HP)
+            {
+                if (HasItem(hpot))
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Using Healing potion");
+                    Console.ResetColor();
+                    if (Api.Inventory.Use(hpot))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        if (me.ManaPercent <= 50 && (!Api.Inventory.OnCooldown(MP) && !Api.Inventory.OnCooldown(HP)))
+        {
+            foreach (string manapot in MP)
+            {
+                if (HasItem(manapot))
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Using mana potion");
+                    Console.ResetColor();
+                    if (Api.Inventory.Use(manapot))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
 
         if (Api.Spellbook.CanCast("Lightning Shield") && !me.HasAura("Lightning Shield") && mana > 30)
         {
@@ -241,13 +277,13 @@ private List<string> npcConditions = new List<string>
 
         return base.CombatPulse();
     }
-private bool IsNPC(WowUnit unit)
-{
-    if (!IsValid(unit))
+    private bool IsNPC(WowUnit unit)
     {
-        // If the unit is not valid, consider it not an NPC
-        return false;
-    }
+        if (!IsValid(unit))
+        {
+            // If the unit is not valid, consider it not an NPC
+            return false;
+        }
 
         foreach (var condition in npcConditions)
         {

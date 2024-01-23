@@ -18,14 +18,14 @@ public class SoDHunter : Rotation
         "VendorReagent", "WildBattlePet", "GarrisonMissionNPC", "GarrisonTalentNPC",
         "QuestGiver"
     };
-		public bool IsValid(WowUnit unit)
-	{
-		if (unit == null || unit.Address == null)
-		{
-			return false;
-		}
-		return true;
-	}
+    public bool IsValid(WowUnit unit)
+    {
+        if (unit == null || unit.Address == null)
+        {
+            return false;
+        }
+        return true;
+    }
     private bool HasItem(object item) => Api.Inventory.HasItem(item);
 
     private int debugInterval = 5; // Set the debug interval in seconds
@@ -98,7 +98,7 @@ public class SoDHunter : Rotation
         // Target distance from the player
         var targetDistance = target.Position.Distance2D(me.Position);
 
-        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsLooting() || me.IsFlying()||me.HasAura("Drink") || me.HasAura("Food")) return false;
+        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsLooting() || me.IsFlying() || me.HasAura("Drink") || me.HasAura("Food")) return false;
 
 
         if (Api.HasMacro("Chest") && !me.HasPermanent("Aspect of the Lion"))
@@ -208,30 +208,30 @@ public class SoDHunter : Rotation
 
                 return true;
         }
-		var reaction = me.GetReaction(target);
+        var reaction = me.GetReaction(target);
 
-		
-        if (!target.IsDead() && 
+
+        if (!target.IsDead() &&
     (reaction != UnitReaction.Friendly &&
      reaction != UnitReaction.Honored &&
      reaction != UnitReaction.Revered &&
      reaction != UnitReaction.Exalted) &&
     mana > 20 && !IsNPC(target) && Api.Spellbook.CanCast("Hunter's Mark") && !target.HasAura("Hunter's Mark") && healthPercentage > 50 && mana > 20 && PetHealth > 50)
         {
-            
 
-           
-            
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Casting Mark");
-                Console.ResetColor();
 
-                if (Api.UseMacro("Mark"))
-                
-                     // Update the lastMarkTime after successful casting
-                    return true;
-                
-            
+
+
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Casting Mark");
+            Console.ResetColor();
+
+            if (Api.UseMacro("Mark"))
+
+                // Update the lastMarkTime after successful casting
+                return true;
+
+
 
         }
         return base.PassivePulse();
@@ -260,7 +260,7 @@ public class SoDHunter : Rotation
         var targethealth = target.HealthPercent;
 
         // Power percentages for different resources
-        var mana = me.Mana;
+        var mana = me.ManaPercent;
 
 
         // Target distance from the player
@@ -269,6 +269,43 @@ public class SoDHunter : Rotation
         if (me.HasAura("Drink") || me.HasAura("Food")) return false;
 
         var meTarget = me.Target;
+
+        string[] HP = { "Major Healing Potion", "Superior Healing Potion", "Greater Healing Potion", "Healing Potion", "Lesser Healing Potion", "Minor Healing Potion" };
+        string[] MP = { "Major Mana Potion", "Superior Mana Potion", "Greater Mana Potion", "Mana Potion", "Lesser Mana Potion", "Minor Mana Potion" };
+
+        if (me.HealthPercent <= 70 && (!Api.Inventory.OnCooldown(MP) && !Api.Inventory.OnCooldown(HP)))
+        {
+            foreach (string hpot in HP)
+            {
+                if (HasItem(hpot))
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Using Healing potion");
+                    Console.ResetColor();
+                    if (Api.Inventory.Use(hpot))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        if (me.ManaPercent <= 50 && (!Api.Inventory.OnCooldown(MP) && !Api.Inventory.OnCooldown(HP)))
+        {
+            foreach (string manapot in MP)
+            {
+                if (HasItem(manapot))
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Using mana potion");
+                    Console.ResetColor();
+                    if (Api.Inventory.Use(manapot))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
 
         if (pet.IsDead() && Api.Spellbook.CanCast("Revive Pet"))
         {
@@ -435,13 +472,13 @@ public class SoDHunter : Rotation
 
         return base.CombatPulse();
     }
-private bool IsNPC(WowUnit unit)
-{
-    if (!IsValid(unit))
+    private bool IsNPC(WowUnit unit)
     {
-        // If the unit is not valid, consider it not an NPC
-        return false;
-    }
+        if (!IsValid(unit))
+        {
+            // If the unit is not valid, consider it not an NPC
+            return false;
+        }
 
         foreach (var condition in npcConditions)
         {

@@ -18,14 +18,14 @@ public class Druid : Rotation
         "VendorReagent", "WildBattlePet", "GarrisonMissionNPC", "GarrisonTalentNPC",
         "QuestGiver"
     };
-		public bool IsValid(WowUnit unit)
-	{
-		if (unit == null || unit.Address == null)
-		{
-			return false;
-		}
-		return true;
-	}
+    public bool IsValid(WowUnit unit)
+    {
+        if (unit == null || unit.Address == null)
+        {
+            return false;
+        }
+        return true;
+    }
     private bool HasItem(object item) => Api.Inventory.HasItem(item);
 
     private int debugInterval = 20; // Set the debug interval in seconds
@@ -69,7 +69,7 @@ public class Druid : Rotation
         var healthPercentage = me.HealthPercent;
         var mana = me.Mana;
 
-        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() ||me.IsChanneling() ||me.IsMounted() ||me.HasAura("Drink") || me.HasAura("Food")) return false;
+        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.HasAura("Drink") || me.HasAura("Food")) return false;
         if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
         {
             LogPlayerStats();
@@ -108,42 +108,42 @@ public class Druid : Rotation
 
         var target = Api.Target;
 
-       var reaction = me.GetReaction(target);
+        var reaction = me.GetReaction(target);
 
-if (!target.IsDead() && 
-    (reaction != UnitReaction.Friendly &&
-     reaction != UnitReaction.Honored &&
-     reaction != UnitReaction.Revered &&
-     reaction != UnitReaction.Exalted) &&
-    mana > 20 && !IsNPC(target))
+        if (!target.IsDead() &&
+            (reaction != UnitReaction.Friendly &&
+             reaction != UnitReaction.Honored &&
+             reaction != UnitReaction.Revered &&
+             reaction != UnitReaction.Exalted) &&
+            mana > 20 && !IsNPC(target))
         {
 
             if (Api.Spellbook.CanCast("Moonfire") && !target.HasAura("Moonfire"))
             {
 
-                
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine("Casting Moonfire");
-                    Console.ResetColor();
 
-                    if (Api.Spellbook.Cast("Moonfire"))
-                                           return true; // Successful cast of Wrath
-                                                    // If unable to cast Moonfire, proceed to the next spell
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Moonfire");
+                Console.ResetColor();
+
+                if (Api.Spellbook.Cast("Moonfire"))
+                    return true; // Successful cast of Wrath
+                                 // If unable to cast Moonfire, proceed to the next spell
             }
             else
             if (Api.Spellbook.CanCast("Wrath"))
             {
 
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine("Casting Wrath");
-                    Console.ResetColor();
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Wrath");
+                Console.ResetColor();
 
-                    if (Api.Spellbook.Cast("Wrath"))
-                    {
-                        return true; // Successful cast of Wrath
-                    }
+                if (Api.Spellbook.Cast("Wrath"))
+                {
+                    return true; // Successful cast of Wrath
                 }
-             
+            }
+
 
         }
 
@@ -161,6 +161,42 @@ if (!target.IsDead() &&
         var targethealth = target.HealthPercent;
         var energy = me.Energy;
         var points = me.ComboPoints;
+        string[] HP = { "Major Healing Potion", "Superior Healing Potion", "Greater Healing Potion", "Healing Potion", "Lesser Healing Potion", "Minor Healing Potion" };
+        string[] MP = { "Major Mana Potion", "Superior Mana Potion", "Greater Mana Potion", "Mana Potion", "Lesser Mana Potion", "Minor Mana Potion" };
+
+        if (me.HealthPercent <= 70 && (!Api.Inventory.OnCooldown(MP) && !Api.Inventory.OnCooldown(HP)))
+        {
+            foreach (string hpot in HP)
+            {
+                if (HasItem(hpot))
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Using Healing potion");
+                    Console.ResetColor();
+                    if (Api.Inventory.Use(hpot))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        if (me.ManaPercent <= 50 && (!Api.Inventory.OnCooldown(MP) && !Api.Inventory.OnCooldown(HP)))
+        {
+            foreach (string manapot in MP)
+            {
+                if (HasItem(manapot))
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Using mana potion");
+                    Console.ResetColor();
+                    if (Api.Inventory.Use(manapot))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
 
         if (Api.Spellbook.CanCast("Rejuvenation") && !me.HasAura("Rejuvenation") && healthPercentage <= 70 && mana >= 15)
         {
@@ -250,13 +286,13 @@ if (!target.IsDead() &&
 
         return base.CombatPulse();
     }
-private bool IsNPC(WowUnit unit)
-{
-    if (!IsValid(unit))
+    private bool IsNPC(WowUnit unit)
     {
-        // If the unit is not valid, consider it not an NPC
-        return false;
-    }
+        if (!IsValid(unit))
+        {
+            // If the unit is not valid, consider it not an NPC
+            return false;
+        }
 
         foreach (var condition in npcConditions)
         {

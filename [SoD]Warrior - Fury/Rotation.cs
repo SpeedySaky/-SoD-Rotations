@@ -1,15 +1,10 @@
 using System;
 using System.Threading;
 using wShadow.Templates;
+using System.Collections.Generic;
 using wShadow.Warcraft.Classes;
 using wShadow.Warcraft.Defines;
 using wShadow.Warcraft.Managers;
-using wShadow.Warcraft.Structures.Wow_Player;
-using wShadow.Warcraft.Defines.Wow_Player;
-using wShadow.Warcraft.Defines.Wow_Spell;
-
-
-
 public class FuryWarriorSoD : Rotation
 {
 
@@ -93,8 +88,28 @@ public class FuryWarriorSoD : Rotation
         var rage = me.Rage;
         var target = Api.Target;
         var targethealth = target.HealthPercent;
+        string[] HP = { "Major Healing Potion", "Superior Healing Potion", "Greater Healing Potion", "Healing Potion", "Lesser Healing Potion", "Minor Healing Potion" };
 
-        if (!me.HasAura("Bloodrage") && Api.Spellbook.CanCast("Bloodrage") && !Api.Spellbook.OnCooldown("Bloodrage") && healthPercentage>=75)
+        if (me.HealthPercent <= 70 && !Api.Inventory.OnCooldown(HP))
+        {
+            foreach (string hpot in HP)
+            {
+                if (HasItem(hpot))
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Using Healing potion");
+                    Console.ResetColor();
+                    if (Api.Inventory.Use(hpot))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+
+
+
+        if (!me.HasAura("Bloodrage") && Api.Spellbook.CanCast("Bloodrage") && !Api.Spellbook.OnCooldown("Bloodrage") && healthPercentage >= 75)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Bloodrage");
@@ -150,10 +165,10 @@ public class FuryWarriorSoD : Rotation
 
                 return true;
         }
-      
-     
 
-        if (Api.Spellbook.CanCast("Overpower")&& rage>=10)
+
+
+        if (Api.Spellbook.CanCast("Overpower") && rage >= 10)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Overpower");
@@ -163,7 +178,7 @@ public class FuryWarriorSoD : Rotation
                 return true;
 
         }
-        if (Api.Spellbook.CanCast("Heroic Strike") && rage>=15)
+        if (Api.Spellbook.CanCast("Heroic Strike") && rage >= 15)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Heroic Strike");

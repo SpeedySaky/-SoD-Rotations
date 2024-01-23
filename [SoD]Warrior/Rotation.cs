@@ -5,9 +5,6 @@ using System.Collections.Generic;
 using wShadow.Warcraft.Classes;
 using wShadow.Warcraft.Defines;
 using wShadow.Warcraft.Managers;
-
-
-
 public class Warrior : Rotation
 {
 
@@ -15,7 +12,7 @@ public class Warrior : Rotation
     private DateTime lastDebugTime = DateTime.MinValue;
 
 
-   private List<string> npcConditions = new List<string>
+    private List<string> npcConditions = new List<string>
     {
         "Innkeeper", "Auctioneer", "Banker", "FlightMaster", "GuildBanker",
         "PlayerVehicle", "StableMaster", "Repair", "Trainer", "TrainerClass",
@@ -23,14 +20,14 @@ public class Warrior : Rotation
         "VendorReagent", "WildBattlePet", "GarrisonMissionNPC", "GarrisonTalentNPC",
         "QuestGiver"
     };
-		public bool IsValid(WowUnit unit)
-	{
-		if (unit == null || unit.Address == null)
-		{
-			return false;
-		}
-		return true;
-	}
+    public bool IsValid(WowUnit unit)
+    {
+        if (unit == null || unit.Address == null)
+        {
+            return false;
+        }
+        return true;
+    }
     private bool HasItem(object item) => Api.Inventory.HasItem(item);
 
 
@@ -72,16 +69,16 @@ public class Warrior : Rotation
         if (!IsValid(target))
             return true;
 
-        if (me.IsDead() || me.IsGhost() || me.IsCasting() ||me.IsMounted() || me.HasAura("Drink") || me.HasAura("Food")) return false;
+        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMounted() || me.HasAura("Drink") || me.HasAura("Food")) return false;
         var targetDistance = target.Position.Distance2D(me.Position);
- if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
+        if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
         {
             LogPlayerStats();
             lastDebugTime = DateTime.Now;
         }
-var reaction = me.GetReaction(target);
+        var reaction = me.GetReaction(target);
 
-        if (!target.IsDead() && 
+        if (!target.IsDead() &&
     (reaction != UnitReaction.Friendly &&
      reaction != UnitReaction.Honored &&
      reaction != UnitReaction.Revered &&
@@ -109,11 +106,31 @@ var reaction = me.GetReaction(target);
         var rage = me.Rage;
         var target = Api.Target;
         var targethealth = target.HealthPercent;
- if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
+        if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
         {
             LogPlayerStats();
             lastDebugTime = DateTime.Now;
         }
+        string[] HP = { "Major Healing Potion", "Superior Healing Potion", "Greater Healing Potion", "Healing Potion", "Lesser Healing Potion", "Minor Healing Potion" };
+
+        if (me.HealthPercent <= 70 && !Api.Inventory.OnCooldown(HP))
+        {
+            foreach (string hpot in HP)
+            {
+                if (HasItem(hpot))
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Using Healing potion");
+                    Console.ResetColor();
+                    if (Api.Inventory.Use(hpot))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+
+
 
         if (Api.Spellbook.CanCast("Hamstring") && targethealth <= 30 && !target.HasAura("Hamstring"))
         {
@@ -186,13 +203,13 @@ var reaction = me.GetReaction(target);
     }
 
 
- private bool IsNPC(WowUnit unit)
-{
-    if (!IsValid(unit))
+    private bool IsNPC(WowUnit unit)
     {
-        // If the unit is not valid, consider it not an NPC
-        return false;
-    }
+        if (!IsValid(unit))
+        {
+            // If the unit is not valid, consider it not an NPC
+            return false;
+        }
 
         foreach (var condition in npcConditions)
         {
@@ -219,7 +236,7 @@ var reaction = me.GetReaction(target);
 
         var rage = me.Rage;
         var healthPercentage = me.HealthPercent;
- if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
+        if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
         {
             LogPlayerStats();
             lastDebugTime = DateTime.Now;

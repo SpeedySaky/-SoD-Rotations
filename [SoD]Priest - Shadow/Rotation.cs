@@ -19,7 +19,7 @@ public class PriestShadow : Rotation
 
 
 
-   private List<string> npcConditions = new List<string>
+    private List<string> npcConditions = new List<string>
     {
         "Innkeeper", "Auctioneer", "Banker", "FlightMaster", "GuildBanker",
         "PlayerVehicle", "StableMaster", "Repair", "Trainer", "TrainerClass",
@@ -27,14 +27,14 @@ public class PriestShadow : Rotation
         "VendorReagent", "WildBattlePet", "GarrisonMissionNPC", "GarrisonTalentNPC",
         "QuestGiver"
     };
-		public bool IsValid(WowUnit unit)
-	{
-		if (unit == null || unit.Address == null)
-		{
-			return false;
-		}
-		return true;
-	}
+    public bool IsValid(WowUnit unit)
+    {
+        if (unit == null || unit.Address == null)
+        {
+            return false;
+        }
+        return true;
+    }
     private bool HasItem(object item) => Api.Inventory.HasItem(item);
 
 
@@ -84,7 +84,7 @@ public class PriestShadow : Rotation
 
         // Target distance from the player
 
-        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsLooting() ||me.IsMounted() ||me.HasAura("Drink") || me.HasAura("Food") ) return false;
+        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsLooting() || me.IsMounted() || me.HasAura("Drink") || me.HasAura("Food")) return false;
 
         if (Api.Spellbook.CanCast("Renew") && !me.HasAura("Renew") && healthPercentage < 80)
         {
@@ -117,25 +117,25 @@ public class PriestShadow : Rotation
             }
         }
 
-var reaction = me.GetReaction(target);
+        var reaction = me.GetReaction(target);
 
-if (!target.IsDead() && 
-    (reaction != UnitReaction.Friendly &&
-     reaction != UnitReaction.Honored &&
-     reaction != UnitReaction.Revered &&
-     reaction != UnitReaction.Exalted) &&
-    mana > 20 && !IsNPC(target))
-                if (reaction != UnitReaction.Friendly)
-                {
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine("Casting Mind Blast");
-                    Console.ResetColor();
-                    if (Api.Spellbook.Cast("Mind Blast"))
+        if (!target.IsDead() &&
+            (reaction != UnitReaction.Friendly &&
+             reaction != UnitReaction.Honored &&
+             reaction != UnitReaction.Revered &&
+             reaction != UnitReaction.Exalted) &&
+            mana > 20 && !IsNPC(target))
+            if (reaction != UnitReaction.Friendly)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Mind Blast");
+                Console.ResetColor();
+                if (Api.Spellbook.Cast("Mind Blast"))
 
-                        return true;
-                }
-            
-        
+                    return true;
+            }
+
+
         return base.PassivePulse();
     }
 
@@ -157,6 +157,42 @@ if (!target.IsDead() &&
         var healthPercentage = me.HealthPercent;
         var targethealth = target.HealthPercent;
 
+        string[] HP = { "Major Healing Potion", "Superior Healing Potion", "Greater Healing Potion", "Healing Potion", "Lesser Healing Potion", "Minor Healing Potion" };
+        string[] MP = { "Major Mana Potion", "Superior Mana Potion", "Greater Mana Potion", "Mana Potion", "Lesser Mana Potion", "Minor Mana Potion" };
+
+        if (me.HealthPercent <= 70 && (!Api.Inventory.OnCooldown(MP) && !Api.Inventory.OnCooldown(HP)))
+        {
+            foreach (string hpot in HP)
+            {
+                if (HasItem(hpot))
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Using Healing potion");
+                    Console.ResetColor();
+                    if (Api.Inventory.Use(hpot))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        if (me.ManaPercent <= 50 && (!Api.Inventory.OnCooldown(MP) && !Api.Inventory.OnCooldown(HP)))
+        {
+            foreach (string manapot in MP)
+            {
+                if (HasItem(manapot))
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Using mana potion");
+                    Console.ResetColor();
+                    if (Api.Inventory.Use(manapot))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
 
         // Target distance from the player
         var targetDistance = target.Position.Distance2D(me.Position);
@@ -251,13 +287,13 @@ if (!target.IsDead() &&
 
         return base.CombatPulse();
     }
- private bool IsNPC(WowUnit unit)
-{
-    if (!IsValid(unit))
+    private bool IsNPC(WowUnit unit)
     {
-        // If the unit is not valid, consider it not an NPC
-        return false;
-    }
+        if (!IsValid(unit))
+        {
+            // If the unit is not valid, consider it not an NPC
+            return false;
+        }
 
         foreach (var condition in npcConditions)
         {
