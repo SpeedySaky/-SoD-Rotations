@@ -10,7 +10,7 @@ using wShadow.Warcraft.Managers;
 
 public class RetPala : Rotation
 {
-    private List<string> npcConditions = new List<string>
+private List<string> npcConditions = new List<string>
     {
         "Innkeeper", "Auctioneer", "Banker", "FlightMaster", "GuildBanker",
         "PlayerVehicle", "StableMaster", "Repair", "Trainer", "TrainerClass",
@@ -18,14 +18,14 @@ public class RetPala : Rotation
         "VendorReagent", "WildBattlePet", "GarrisonMissionNPC", "GarrisonTalentNPC",
         "QuestGiver"
     };
-    public bool IsValid(WowUnit unit)
-    {
-        if (unit == null || unit.Address == null)
-        {
-            return false;
-        }
-        return true;
-    }
+		public bool IsValid(WowUnit unit)
+	{
+		if (unit == null || unit.Address == null)
+		{
+			return false;
+		}
+		return true;
+	}
     private bool HasItem(object item) => Api.Inventory.HasItem(item);
     private int debugInterval = 5; // Set the debug interval in seconds
     private DateTime lastDebugTime = DateTime.MinValue;
@@ -70,7 +70,7 @@ public class RetPala : Rotation
         var healthPercentage = me.HealthPercent;
         var mana = me.ManaPercent;
 
-        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMounted() || me.HasAura("Drink") || me.HasAura("Food")) return false;
+        if (me.IsDead() || me.IsGhost() || me.IsCasting()||me.IsMounted() || me.HasAura("Drink") || me.HasAura("Food")) return false;
 
         if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
         {
@@ -91,7 +91,7 @@ public class RetPala : Rotation
 
 
 
-        if (Api.Spellbook.CanCast("Blessing of Wisdom") && !me.HasAura("Blessing of Might") && mana < 30)
+        if (Api.Spellbook.CanCast("Blessing of Wisdom") && !me.HasAura("Blessing of Might") && !me.HasAura("Blessing of Wisdom") && mana < 30)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Blessing of Wisdom");
@@ -140,18 +140,18 @@ public class RetPala : Rotation
         if (me.IsDead() || me.IsGhost() || me.IsCasting()) return false;
         if (me.HasAura("Drink") || me.HasAura("Food")) return false;
 
-        string[] HP = { "Major Healing Potion", "Superior Healing Potion", "Greater Healing Potion", "Healing Potion", "Lesser Healing Potion", "Minor Healing Potion" };
-        string[] MP = { "Major Mana Potion", "Superior Mana Potion", "Greater Mana Potion", "Mana Potion", "Lesser Mana Potion", "Minor Mana Potion" };
+string[] HP = { "Major Healing Potion", "Superior Healing Potion", "Greater Healing Potion", "Healing Potion", "Lesser Healing Potion", "Minor Healing Potion" };
+	string[] MP= { "Major Mana Potion", "Superior Mana Potion", "Greater Mana Potion", "Mana Potion", "Lesser Mana Potion", "Minor Mana Potion" };
 
-        if (me.HealthPercent <= 70 && (!Api.Inventory.OnCooldown(MP) && !Api.Inventory.OnCooldown(HP)))
+        if (me.HealthPercent <= 70 && (Api.Inventory.OnCooldown(MP)||!Api.Inventory.OnCooldown(HP)))
         {
             foreach (string hpot in HP)
             {
                 if (HasItem(hpot))
                 {
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine("Using Healing potion");
-                    Console.ResetColor();
+                   Console.ForegroundColor = ConsoleColor.Green;
+					Console.WriteLine("Using Healing potion");
+					Console.ResetColor();
                     if (Api.Inventory.Use(hpot))
                     {
                         return true;
@@ -159,25 +159,25 @@ public class RetPala : Rotation
                 }
             }
         }
-
-        if (me.ManaPercent <= 50 && (!Api.Inventory.OnCooldown(MP) && !Api.Inventory.OnCooldown(HP)))
+		
+        if (me.ManaPercent <= 50 && (!Api.Inventory.OnCooldown(MP)||!Api.Inventory.OnCooldown(HP) ))
         {
             foreach (string manapot in MP)
             {
                 if (HasItem(manapot))
                 {
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine("Using mana potion");
-                    Console.ResetColor();
+                   Console.ForegroundColor = ConsoleColor.Green;
+					Console.WriteLine("Using mana potion");
+					Console.ResetColor();
                     if (Api.Inventory.Use(manapot))
                     {
                         return true;
                     }
                 }
             }
-        }
-
-
+        }	
+		
+		
         if (Api.Spellbook.CanCast("Devotion Aura") && !me.HasPermanent("Devotion Aura"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
@@ -211,7 +211,7 @@ public class RetPala : Rotation
                 return true;
 
         }
-
+        
         if (Api.Spellbook.CanCast("Consecration") && !Api.Spellbook.OnCooldown("Consecration") && targethp >= 30)
         {
             Console.ForegroundColor = ConsoleColor.Green;
@@ -265,7 +265,7 @@ public class RetPala : Rotation
                 return true;
             }
         }
-        if (Api.HasMacro("Chest"))
+if (Api.HasMacro("Chest"))
         {
             if ((DateTime.Now - lastChest) >= ChestCd)
             {
@@ -311,13 +311,13 @@ public class RetPala : Rotation
 
         return base.CombatPulse();
     }
-    private bool IsNPC(WowUnit unit)
+ private bool IsNPC(WowUnit unit)
+{
+    if (!IsValid(unit))
     {
-        if (!IsValid(unit))
-        {
-            // If the unit is not valid, consider it not an NPC
-            return false;
-        }
+        // If the unit is not valid, consider it not an NPC
+        return false;
+    }
 
         foreach (var condition in npcConditions)
         {
