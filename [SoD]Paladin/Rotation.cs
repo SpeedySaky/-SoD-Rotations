@@ -190,6 +190,60 @@ public class RetPala : Rotation
             }
         }
         var hasPoisonDebuff = me.HasDebuff("Poison") || me.HasDebuff("Rabies") || me.HasDebuff("Tetanus");
+        if (Api.Spellbook.CanCast("Divine Protection") && Api.Player.HealthPercent < 45 && !me.IsCasting() && !Api.Player.HasAura("Forbearance") && !Api.Spellbook.OnCooldown("Divine Protection"))
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Casting Divine Protection");
+            Console.ResetColor();
+            if (Api.Spellbook.Cast("Divine Protection"))
+            {
+                return true;
+            }
+        }
+
+        if (Api.Player.HasAura("Divine Protection") && healthPercentage <= 50 && Api.Spellbook.CanCast("Holy Light") )
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Casting Holy Light");
+            Console.ResetColor();
+            if (Api.Spellbook.Cast("Holy Light"))
+            {
+                return true;
+            }
+        }
+
+        if (Api.Spellbook.CanCast("Blessing of Protection") && Api.Player.HealthPercent < 30 && !me.IsCasting() && !Api.Player.HasAura("Forbearance") && !Api.Spellbook.OnCooldown("Blessing of Protection"))
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Casting Blessing of Protection");
+            Console.ResetColor();
+            if (Api.Spellbook.Cast("Blessing of Protection"))
+            {
+                return true;
+            }
+        }
+
+        if (Api.Player.HasAura("Blessing of Protection") && healthPercentage <= 35 && Api.Spellbook.CanCast("Holy Light"))
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Casting Holy Light");
+            Console.ResetColor();
+            if (Api.Spellbook.Cast("Holy Light"))
+            {
+                return true;
+            }
+        }
+        if (Api.Player.HasAura("Lay on Hands") && healthPercentage <= 10 && Api.Spellbook.CanCast("Lay on Hands") && !Api.Spellbook.OnCooldown("Lay on Hands"))
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Casting Lay on Hands");
+            Console.ResetColor();
+            if (Api.Spellbook.Cast("Lay on Hands"))
+            {
+                return true;
+            }
+        }
+
 
         if (hasPoisonDebuff && Api.Spellbook.CanCast("Purify") && mana > 32)
         {
