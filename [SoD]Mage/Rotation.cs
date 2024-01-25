@@ -275,7 +275,7 @@ public class MageSoD : Rotation
                     if (Api.Spellbook.Cast("Frost Nova"))
                         return true;
                 }
-                if (Api.Spellbook.CanCast("Pyroblast") && !Api.Spellbook.OnCooldown("Pyroblast") && !target.HasAura("Pyroblast") && targethealth > 20)
+                if (Api.Spellbook.CanCast("Pyroblast") && !Api.Spellbook.OnCooldown("Pyroblast") && !target.HasAura("Pyroblast") && targethealth < 80)
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine("Casting Pyroblast");
