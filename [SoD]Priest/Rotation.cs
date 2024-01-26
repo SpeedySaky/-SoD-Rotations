@@ -31,6 +31,8 @@ public class Priest : Rotation
     private TimeSpan Hands = TimeSpan.FromSeconds(14);
     private DateTime lastPants = DateTime.MinValue;
     private TimeSpan Pants = TimeSpan.FromSeconds(60);
+    private DateTime lastChest = DateTime.MinValue;
+    private TimeSpan Chest = TimeSpan.FromSeconds(8);
 
 
 
@@ -228,11 +230,28 @@ public class Priest : Rotation
             }
             else
             {
-                // If the cooldown period for Chimera Shot hasn't elapsed yet
                 Console.WriteLine("Hands rune is on cooldown. Skipping cast.");
             }
         }
+        if (Api.HasMacro("Chest") && !target.HasAura("Void Plague"))
+        {
+            if ((DateTime.Now - lastChest) >= Chest)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Chest rune");
+                Console.ResetColor();
 
+                if (Api.UseMacro("Chest"))
+                {
+                    lastChest = DateTime.Now;
+                    return true;
+                }
+            }
+            else
+            {
+                Console.WriteLine("Chest rune is on cooldown. Skipping cast.");
+            }
+        }
         if (Api.HasMacro("Legs"))
         {
             if ((DateTime.Now - lastPants) >= Pants)
@@ -249,7 +268,6 @@ public class Priest : Rotation
             }
             else
             {
-                // If the cooldown period for Chimera Shot hasn't elapsed yet
                 Console.WriteLine("Legs rune is on cooldown. Skipping cast.");
             }
         }
