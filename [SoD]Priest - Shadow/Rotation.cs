@@ -16,7 +16,8 @@ public class PriestShadow : Rotation
     private TimeSpan Hands = TimeSpan.FromSeconds(14);
     private DateTime lastPants = DateTime.MinValue;
     private TimeSpan Pants = TimeSpan.FromSeconds(65);
-
+    private DateTime lastChest = DateTime.MinValue;
+    private TimeSpan Chest = TimeSpan.FromSeconds(8);
 
 
     private List<string> npcConditions = new List<string>
@@ -226,7 +227,25 @@ public class PriestShadow : Rotation
                 Console.WriteLine("Hands rune is on cooldown. Skipping cast.");
             }
         }
+        if (Api.HasMacro("Chest") && !target.HasAura("Void Plague"))
+        {
+            if ((DateTime.Now - lastChest) >= Chest)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Chest rune");
+                Console.ResetColor();
 
+                if (Api.UseMacro("Chest"))
+                {
+                    lastChest = DateTime.Now;
+                    return true;
+                }
+            }
+            else
+            {
+                Console.WriteLine("Chest rune is on cooldown. Skipping cast.");
+            }
+        }
         if (Api.HasMacro("Legs") && targethealth >= 30)
         {
             if ((DateTime.Now - lastPants) >= Pants)
