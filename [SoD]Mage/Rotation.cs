@@ -29,6 +29,8 @@ public class MageSoD : Rotation
     private bool HasItem(object item) => Api.Inventory.HasItem(item);
     private int debugInterval = 5; // Set the debug interval in seconds
     private DateTime lastDebugTime = DateTime.MinValue;
+    private TimeSpan PyroCD = TimeSpan.FromSeconds(10);
+    private DateTime lastPyro = DateTime.MinValue;
 
     public override void Initialize()
     {
@@ -40,8 +42,8 @@ public class MageSoD : Rotation
         // The simplest calculation for optimal ticks (to avoid key spam and false attempts)
 
         // Assuming wShadow is an instance of some class containing UnitRatings property
-        SlowTick = 800;
-        FastTick = 400;
+        SlowTick = 600;
+        FastTick = 200;
 
         // You can also use this method to add to various action lists.
 
@@ -167,8 +169,9 @@ public class MageSoD : Rotation
             Console.WriteLine("Trying to cast Pyroblast");
 
             // Try casting Pyroblast
-            if (Api.Spellbook.CanCast("Pyroblast") && Api.Spellbook.Cast("Pyroblast"))
+            if (Api.Spellbook.CanCast("Pyroblast") && Api.Spellbook.Cast("Pyroblast") && ((DateTime.Now - lastPyro) >= PyroCD))
             {
+				 lastPyro = DateTime.Now;
                 Console.WriteLine("Casting Pyroblast");
                 return true;
             }
@@ -249,8 +252,28 @@ public class MageSoD : Rotation
 
         if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsChanneling()) return false;
         if (me.HasAura("Drink") || me.HasAura("Food")) return false;
+var hasDebuff = me.HasDebuff("Curse of Stalvan");
 
-
+        if (hasDebuff && Api.Spellbook.CanCast("Remove Lesser Curse"))
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Decursing");
+            Console.ResetColor();
+			if (Api.Spellbook.Cast("Remove Lesser Curse"))
+            {
+                return true;
+            }
+        }
+ if (Api.Spellbook.CanCast("Counterspell") && !Api.Spellbook.OnCooldown("Counterspell") && (target.IsCasting() || target.IsChanneling()))
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Casting Counterspell");
+            Console.ResetColor();
+            if (Api.Spellbook.Cast("Counterspell"))
+            {
+                return true;
+            }
+        }
         if (Api.Spellbook.CanCast("Evocation") && !Api.Spellbook.OnCooldown("Evocation") && mana <= 10)
         {
             Console.ForegroundColor = ConsoleColor.Green;
@@ -275,8 +298,10 @@ public class MageSoD : Rotation
                     if (Api.Spellbook.Cast("Frost Nova"))
                         return true;
                 }
-                if (Api.Spellbook.CanCast("Pyroblast") && !Api.Spellbook.OnCooldown("Pyroblast") && !target.HasAura("Pyroblast") && targethealth > 20)
+				
+                if (Api.Spellbook.CanCast("Pyroblast") && ((DateTime.Now - lastPyro) >= PyroCD) && !Api.Spellbook.OnCooldown("Pyroblast") && !target.HasAura("Pyroblast") && targethealth > 20)
                 {
+					 lastPyro = DateTime.Now;
                     Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine("Casting Pyroblast");
                     Console.ResetColor();
@@ -284,6 +309,7 @@ public class MageSoD : Rotation
                     if (Api.Spellbook.Cast("Pyroblast"))
                         return true;
                 }
+				
                 if (Api.Spellbook.CanCast("Fire Blast") && mana > 30 && !target.IsDead() && !Api.Spellbook.OnCooldown("Fire Blast") && targetDistance <= 25)
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
@@ -444,7 +470,14 @@ public class MageSoD : Rotation
         Console.WriteLine("Current Food Count: " + foodCount);
         Console.WriteLine("Current Water Count: " + waterCount);
         Console.ResetColor();
+var hasDebuff = me.HasDebuff("Curse of Stalvan");
 
+        if (hasDebuff)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Have curse debuff");
+            Console.ResetColor();
+        }
 
 
         Console.ResetColor();
