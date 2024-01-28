@@ -79,6 +79,18 @@ public class MageSoD : Rotation
         ShadowApi shadowApi = new ShadowApi();
 
         if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.HasAura("Drink") || me.HasAura("Food")) return false;
+var hasDebuff = me.HasDebuff("Curse of Stalvan")|| me.HasDebuff("Curse of Blood");
+
+        if (hasDebuff && Api.Spellbook.CanCast("Remove Lesser Curse"))
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Decursing");
+            Console.ResetColor();
+			if (Api.Spellbook.Cast("Remove Lesser Curse"))
+            {
+                return true;
+            }
+        }
 
         if (Api.Spellbook.CanCast("Frost Armor") && !me.HasAura("Frost Armor"))
         {
@@ -252,7 +264,7 @@ public class MageSoD : Rotation
 
         if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsChanneling()) return false;
         if (me.HasAura("Drink") || me.HasAura("Food")) return false;
-var hasDebuff = me.HasDebuff("Curse of Stalvan");
+var hasDebuff = me.HasDebuff("Curse of Stalvan")|| me.HasDebuff("Curse of Blood");
 
         if (hasDebuff && Api.Spellbook.CanCast("Remove Lesser Curse"))
         {
