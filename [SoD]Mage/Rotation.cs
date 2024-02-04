@@ -91,7 +91,25 @@ var hasDebuff = me.HasDebuff("Curse of Stalvan")|| me.HasDebuff("Curse of Blood"
                 return true;
             }
         }
+        string[] GemTypes = { "Mana Agate", "Mana Sapphire", "Mana Emerald", "Mana Ruby", "Mana Citrine", "Mana Jade" };
+        bool needsgem = true;
 
+        foreach (string gemType in GemTypes)
+        {
+            if (shadowApi.Inventory.HasItem(gemType))
+            {
+                needsgem = false;
+                break;
+            }
+        }
+        if (Api.Spellbook.CanCast("Conjure Mana Agate") && needsgem)
+        {
+            if (Api.Spellbook.Cast("Conjure Mana Agate"))
+            {
+                Console.WriteLine("Conjure Mana Gem.");
+                // Add further actions if needed after conjuring water
+            }
+        }
         if (Api.Spellbook.CanCast("Frost Armor") && !me.HasAura("Frost Armor"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
@@ -113,12 +131,12 @@ var hasDebuff = me.HasDebuff("Curse of Stalvan")|| me.HasDebuff("Curse of Blood"
         }
 
 
-        string[] waterTypes = { "Conjured Fresh Water", "Conjured Water", "Conjured Purified Water" };
-        bool needsWater = true;
+        string[] waterTypes = { "Conjured Mana Strudel", "Conjured Mountain Spring Water", "Conjured Crystal Water", "Conjured Sparkling Water", "Conjured Mineral Water", "Conjured Spring Water", "Conjured Purified Water", "Conjured Fresh Water", "Conjured Water" };
+        string[] foodTypes = { "Conjured Mana Strudel", "Conjured Cinnamon Roll", "Conjured Sweet Roll", "Conjured Sourdough", "Conjured Pumpernickel", "Conjured Rye", "Conjured Bread", "Conjured Muffin" }; bool needsWater = true;
 
         foreach (string waterType in waterTypes)
         {
-            if (shadowApi.Inventory.HasItem(waterType))
+            if (HasItem(waterType))
             {
                 needsWater = false;
                 break;
@@ -140,7 +158,6 @@ var hasDebuff = me.HasDebuff("Curse of Stalvan")|| me.HasDebuff("Curse of Blood"
                 }
             }
         }
-        string[] foodTypes = { "Conjured Muffin", "Conjured Bread", "Conjured Rye" };
         bool needsFood = true;
 
         foreach (string foodType in foodTypes)
@@ -258,7 +275,25 @@ var hasDebuff = me.HasDebuff("Curse of Stalvan")|| me.HasDebuff("Curse of Blood"
                 }
             }
         }
+        string[] GemTypes = { "Mana Jade", "Mana Citrine", "Mana Ruby", "Mana Emerald", "Mana Sapphire", "Mana Agate" };
 
+        if (me.Mana <= 30 && !Api.Inventory.OnCooldown(GemTypes))
+        {
+            foreach (string gem in GemTypes)
+            {
+                if (HasItem(gem))
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Using Minor Healthstone");
+                    Console.ResetColor();
+
+                    if (Api.Inventory.Use("Minor Healthstone"))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
         // Target distance from the player
         var targetDistance = target.Position.Distance2D(me.Position);
 
