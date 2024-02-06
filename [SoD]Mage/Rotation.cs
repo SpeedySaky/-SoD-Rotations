@@ -110,7 +110,16 @@ var hasDebuff = me.HasDebuff("Curse of Stalvan")|| me.HasDebuff("Curse of Blood"
                 // Add further actions if needed after conjuring water
             }
         }
-        if (Api.Spellbook.CanCast("Frost Armor") && !me.HasAura("Frost Armor"))
+        if (Api.Spellbook.CanCast("Ice Armor") && !me.HasAura("Ice Armor"))
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Casting Ice Armor");
+            Console.ResetColor();
+
+            if (Api.Spellbook.Cast("Ice Armor"))
+                return true;
+        }
+		else if (Api.Spellbook.CanCast("Frost Armor") && !me.HasAura("Frost Armor") && !me.HasAura("Ice Armor"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Frost Armor");
@@ -132,7 +141,8 @@ var hasDebuff = me.HasDebuff("Curse of Stalvan")|| me.HasDebuff("Curse of Blood"
 
 
         string[] waterTypes = { "Conjured Mana Strudel", "Conjured Mountain Spring Water", "Conjured Crystal Water", "Conjured Sparkling Water", "Conjured Mineral Water", "Conjured Spring Water", "Conjured Purified Water", "Conjured Fresh Water", "Conjured Water" };
-        string[] foodTypes = { "Conjured Mana Strudel", "Conjured Cinnamon Roll", "Conjured Sweet Roll", "Conjured Sourdough", "Conjured Pumpernickel", "Conjured Rye", "Conjured Bread", "Conjured Muffin" }; bool needsWater = true;
+        string[] foodTypes = { "Conjured Mana Strudel", "Conjured Cinnamon Roll", "Conjured Sweet Roll", "Conjured Sourdough", "Conjured Pumpernickel", "Conjured Rye", "Conjured Bread", "Conjured Muffin" }; 
+		bool needsWater = true;
 
         foreach (string waterType in waterTypes)
         {
@@ -493,9 +503,8 @@ var hasDebuff = me.HasDebuff("Curse of Stalvan")|| me.HasDebuff("Curse of Blood"
 
 
         // Define food and water types
-        string[] foodTypes = { "Conjured Muffin", "Conjured Bread", "Conjured Rye" };
-        string[] waterTypes = { "Conjured Fresh Water", "Conjured Water", "Conjured Purified Water" };
-
+string[] waterTypes = { "Conjured Mana Strudel", "Conjured Mountain Spring Water", "Conjured Crystal Water", "Conjured Sparkling Water", "Conjured Mineral Water", "Conjured Spring Water", "Conjured Purified Water", "Conjured Fresh Water", "Conjured Water" };
+        string[] foodTypes = { "Conjured Mana Strudel", "Conjured Cinnamon Roll", "Conjured Sweet Roll", "Conjured Sourdough", "Conjured Pumpernickel", "Conjured Rye", "Conjured Bread", "Conjured Muffin" }; 
         // Count food items in the inventory
         int foodCount = 0;
         foreach (string foodType in foodTypes)
