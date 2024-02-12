@@ -66,7 +66,10 @@ public class FeralDruidSoD : Rotation
         var me = Api.Player;
         var healthPercentage = me.HealthPercent;
         var mana = me.ManaPercent;
+        var target = Api.Target;
 
+        var reaction = me.GetReaction(target);
+        var meTarget = me.Target;
         if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.Auras.Contains("Drink") || me.Auras.Contains("Food") || me.IsMounted()) return false;
         if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
         {
@@ -74,8 +77,8 @@ public class FeralDruidSoD : Rotation
             lastDebugTime = DateTime.Now; // Update lastDebugTime
         }
 
-
-        if (Api.Spellbook.CanCast("Mark of the Wild") && !me.Auras.Contains("Mark of the Wild") && (!me.Auras.Contains(768, false) || me.Auras.Contains(768, false)))
+       
+        if (Api.Spellbook.CanCast("Mark of the Wild") && !me.Auras.Contains("Mark of the Wild") )
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Mark of the Wild");
@@ -85,7 +88,7 @@ public class FeralDruidSoD : Rotation
                 return true;
         }
 
-        if (Api.Spellbook.CanCast("Thorns") && !me.Auras.Contains("Thorns") && (!me.Auras.Contains(768, false) || me.Auras.Contains(768, false)))
+        if (Api.Spellbook.CanCast("Thorns") && !me.Auras.Contains("Thorns"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Thorns");
@@ -95,7 +98,7 @@ public class FeralDruidSoD : Rotation
                 return true;
         }
 
-        if (Api.Spellbook.CanCast("Omen of Clarity") && !me.Auras.Contains("Omen of Clarity") && (!me.Auras.Contains(768, false) || me.Auras.Contains(768, false)))
+        if (Api.Spellbook.CanCast("Omen of Clarity") && !me.Auras.Contains("Omen of Clarity") )
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Omen of Clarity");
@@ -104,21 +107,35 @@ public class FeralDruidSoD : Rotation
 
                 return true;
         }
-        if (!me.Auras.Contains(768, false) && Api.Spellbook.CanCast(768))
+
+        if (target == null && !me.Auras.Contains("Cat Form", false))
         {
-            if (Api.Spellbook.CanCast(768) && !me.Auras.Contains(768, false))
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Casting Cat Form");
+            Console.ResetColor();
+
+            if (Api.Spellbook.Cast("Cat Form"))
+            {
+                return true;
+            }
+        }
+        else
+        {
+            if (reaction != UnitReaction.Friendly && reaction != UnitReaction.Honored && reaction != UnitReaction.Revered && reaction != UnitReaction.Exalted && mana > 20 && !IsNPC(target) && !me.Auras.Contains("Cat Form", false))
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Casting Cat Form");
                 Console.ResetColor();
-                if (Api.Spellbook.Cast(768))
+
+                if (Api.Spellbook.Cast("Cat Form"))
                 {
                     return true;
                 }
             }
-
         }
-        var target = Api.Target;
+
+
+
 
 
         return base.PassivePulse();
@@ -138,7 +155,7 @@ public class FeralDruidSoD : Rotation
         string[] HP = { "Major Healing Potion", "Superior Healing Potion", "Greater Healing Potion", "Healing Potion", "Lesser Healing Potion", "Minor Healing Potion" };
         string[] MP = { "Major Mana Potion", "Superior Mana Potion", "Greater Mana Potion", "Mana Potion", "Lesser Mana Potion", "Minor Mana Potion" };
 
-        if (me.HealthPercent <= 70 && (!Api.Inventory.OnCooldown(MP) && !Api.Inventory.OnCooldown(HP)))
+        if (me.HealthPercent <= 70 && (!Api.Inventory.OnCooldown(MP) || !Api.Inventory.OnCooldown(HP)))
         {
             foreach (string hpot in HP)
             {
@@ -155,7 +172,7 @@ public class FeralDruidSoD : Rotation
             }
         }
 
-        if (me.ManaPercent <= 50 && (!Api.Inventory.OnCooldown(MP) && !Api.Inventory.OnCooldown(HP)))
+        if (me.ManaPercent <= 50 && (!Api.Inventory.OnCooldown(MP) || !Api.Inventory.OnCooldown(HP)))
         {
             foreach (string manapot in MP)
             {
@@ -213,19 +230,7 @@ public class FeralDruidSoD : Rotation
                 return true;
             }
         }
-        if (Api.Spellbook.CanCast("War Stomp") && !Api.Spellbook.OnCooldown("War Stomp"))
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting War Stomp");
-            Console.ResetColor();
-            if (Api.Spellbook.Cast("War Stomp"))
-            {
-                return true;
-            }
-        }
-
-
-
+      
         if (!me.Auras.Contains(768, false) && Api.Spellbook.CanCast(768))
         {
             if (Api.Spellbook.CanCast(768) && !me.Auras.Contains(768, false))
@@ -251,7 +256,7 @@ public class FeralDruidSoD : Rotation
                 return true;
             }
         }
-        if (Api.HasMacro("Roar") && points >= 1 && energy >= 25 && !me.Auras.Contains("Savage Roar") && me.Auras.Contains(768, false))
+        if (Api.HasMacro("Roar") && points >= 1 && energy >= 25 && !me.Auras.Contains("Savage Roar") && me.Auras.Contains("Cat Form", false))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine($"Casting Savage Roar");
@@ -260,7 +265,7 @@ public class FeralDruidSoD : Rotation
             if (Api.UseMacro("Roar"))
                 return true;
         }
-        if (Api.HasMacro("Mangle") && points < 3 && energy >= 45 && me.Auras.Contains(768, false))
+        if (Api.HasMacro("Mangle") && points < 3 && energy >= 45 && me.Auras.Contains("Cat Form", false))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine($"Casting Mangle (Cat) with {energy} Energy");
@@ -270,7 +275,7 @@ public class FeralDruidSoD : Rotation
                 return true;
         }
 
-        if (Api.Spellbook.CanCast("Claw") && points < 3 && energy >= 45 && me.Auras.Contains(768, false))
+        if (Api.Spellbook.CanCast("Claw") && points < 3 && energy >= 45 && me.Auras.Contains("Cat Form", false))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine($"Casting Claw (Cat) with {energy} Energy");
@@ -280,7 +285,7 @@ public class FeralDruidSoD : Rotation
                 return true;
         }
 
-        if (Api.Spellbook.CanCast("Rip") && !target.Auras.Contains("Rip") && target.HealthPercent >= 20 && energy > 30 && points >= 3 && me.Auras.Contains(768, false))
+        if (Api.Spellbook.CanCast("Rip") && !target.Auras.Contains("Rip") && target.HealthPercent >= 20 && energy > 30 && points >= 3 && me.Auras.Contains("Cat Form", false))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine($"Casting Rip with {points} Points and {energy} Energy");
@@ -335,12 +340,7 @@ public class FeralDruidSoD : Rotation
         Console.ResetColor();
         Console.ResetColor();
 
-        if (me.Auras.Contains("Fury of Stormrage"))
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Fury of Stormrage");
-            Console.ResetColor();
-        }
+   
 
     }
 }
