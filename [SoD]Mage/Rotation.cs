@@ -78,15 +78,15 @@ public class MageSoD : Rotation
         var targetDistance = target.Position.Distance2D(me.Position);
         ShadowApi shadowApi = new ShadowApi();
 
-        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.HasAura("Drink") || me.HasAura("Food")) return false;
-var hasDebuff = me.HasDebuff("Curse of Stalvan")|| me.HasDebuff("Curse of Blood");
+        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
+        var hasaura = me.Auras.Contains("Curse of Stalvan") || me.Auras.Contains("Curse of Blood");
 
-        if (hasDebuff && Api.Spellbook.CanCast("Remove Lesser Curse"))
+        if (hasaura && Api.Spellbook.CanCast("Remove Lesser Curse"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Decursing");
             Console.ResetColor();
-			if (Api.Spellbook.Cast("Remove Lesser Curse"))
+            if (Api.Spellbook.Cast("Remove Lesser Curse"))
             {
                 return true;
             }
@@ -110,7 +110,7 @@ var hasDebuff = me.HasDebuff("Curse of Stalvan")|| me.HasDebuff("Curse of Blood"
                 // Add further actions if needed after conjuring water
             }
         }
-        if (Api.Spellbook.CanCast("Ice Armor") && !me.HasAura("Ice Armor"))
+        if (Api.Spellbook.CanCast("Ice Armor") && !me.Auras.Contains("Ice Armor"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Ice Armor");
@@ -119,7 +119,7 @@ var hasDebuff = me.HasDebuff("Curse of Stalvan")|| me.HasDebuff("Curse of Blood"
             if (Api.Spellbook.Cast("Ice Armor"))
                 return true;
         }
-		else if (Api.Spellbook.CanCast("Frost Armor") && !me.HasAura("Frost Armor") && !me.HasAura("Ice Armor"))
+        else if (Api.Spellbook.CanCast("Frost Armor") && !me.Auras.Contains("Frost Armor") && !me.Auras.Contains("Ice Armor"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Frost Armor");
@@ -129,7 +129,7 @@ var hasDebuff = me.HasDebuff("Curse of Stalvan")|| me.HasDebuff("Curse of Blood"
                 return true;
         }
 
-        if (Api.Spellbook.CanCast("Arcane Intellect") && !me.HasPermanent("Arcane Intellect"))
+        if (Api.Spellbook.CanCast("Arcane Intellect") && !me.Auras.Contains("Arcane Intellect", false))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Arcane Intellect");
@@ -141,8 +141,8 @@ var hasDebuff = me.HasDebuff("Curse of Stalvan")|| me.HasDebuff("Curse of Blood"
 
 
         string[] waterTypes = { "Conjured Mana Strudel", "Conjured Mountain Spring Water", "Conjured Crystal Water", "Conjured Sparkling Water", "Conjured Mineral Water", "Conjured Spring Water", "Conjured Purified Water", "Conjured Fresh Water", "Conjured Water" };
-        string[] foodTypes = { "Conjured Mana Strudel", "Conjured Cinnamon Roll", "Conjured Sweet Roll", "Conjured Sourdough", "Conjured Pumpernickel", "Conjured Rye", "Conjured Bread", "Conjured Muffin" }; 
-		bool needsWater = true;
+        string[] foodTypes = { "Conjured Mana Strudel", "Conjured Cinnamon Roll", "Conjured Sweet Roll", "Conjured Sourdough", "Conjured Pumpernickel", "Conjured Rye", "Conjured Bread", "Conjured Muffin" };
+        bool needsWater = true;
 
         foreach (string waterType in waterTypes)
         {
@@ -210,7 +210,7 @@ var hasDebuff = me.HasDebuff("Curse of Stalvan")|| me.HasDebuff("Curse of Blood"
             // Try casting Pyroblast
             if (Api.Spellbook.CanCast("Pyroblast") && Api.Spellbook.Cast("Pyroblast") && ((DateTime.Now - lastPyro) >= PyroCD))
             {
-				 lastPyro = DateTime.Now;
+                lastPyro = DateTime.Now;
                 Console.WriteLine("Casting Pyroblast");
                 return true;
             }
@@ -252,7 +252,7 @@ var hasDebuff = me.HasDebuff("Curse of Stalvan")|| me.HasDebuff("Curse of Blood"
         string[] HP = { "Major Healing Potion", "Superior Healing Potion", "Greater Healing Potion", "Healing Potion", "Lesser Healing Potion", "Minor Healing Potion" };
         string[] MP = { "Major Mana Potion", "Superior Mana Potion", "Greater Mana Potion", "Mana Potion", "Lesser Mana Potion", "Minor Mana Potion" };
 
-        if (me.HealthPercent <= 70 && (!Api.Inventory.OnCooldown(MP) && !Api.Inventory.OnCooldown(HP)))
+        if (me.HealthPercent <= 70 && (!Api.Inventory.OnCooldown(MP) || !Api.Inventory.OnCooldown(HP)))
         {
             foreach (string hpot in HP)
             {
@@ -269,7 +269,7 @@ var hasDebuff = me.HasDebuff("Curse of Stalvan")|| me.HasDebuff("Curse of Blood"
             }
         }
 
-        if (me.ManaPercent <= 50 && (!Api.Inventory.OnCooldown(MP) && !Api.Inventory.OnCooldown(HP)))
+        if (me.ManaPercent <= 50 && (!Api.Inventory.OnCooldown(MP) || !Api.Inventory.OnCooldown(HP)))
         {
             foreach (string manapot in MP)
             {
@@ -294,34 +294,35 @@ var hasDebuff = me.HasDebuff("Curse of Stalvan")|| me.HasDebuff("Curse of Blood"
                 if (HasItem(gem))
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine("Using Minor Healthstone");
+                    Console.WriteLine($"Using {gem}");
                     Console.ResetColor();
 
-                    if (Api.Inventory.Use("Minor Healthstone"))
+                    if (Api.Inventory.Use(gem))
                     {
                         return true;
                     }
                 }
             }
         }
+
         // Target distance from the player
         var targetDistance = target.Position.Distance2D(me.Position);
 
         if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsChanneling()) return false;
-        if (me.HasAura("Drink") || me.HasAura("Food")) return false;
-var hasDebuff = me.HasDebuff("Curse of Stalvan")|| me.HasDebuff("Curse of Blood");
+        if (me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
+        var hasaura = me.Auras.Contains("Curse of Stalvan") || me.Auras.Contains("Curse of Blood");
 
-        if (hasDebuff && Api.Spellbook.CanCast("Remove Lesser Curse"))
+        if (hasaura && Api.Spellbook.CanCast("Remove Lesser Curse"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Decursing");
             Console.ResetColor();
-			if (Api.Spellbook.Cast("Remove Lesser Curse"))
+            if (Api.Spellbook.Cast("Remove Lesser Curse"))
             {
                 return true;
             }
         }
- if (Api.Spellbook.CanCast("Counterspell") && !Api.Spellbook.OnCooldown("Counterspell") && (target.IsCasting() || target.IsChanneling()))
+        if (Api.Spellbook.CanCast("Counterspell") && !Api.Spellbook.OnCooldown("Counterspell") && (target.IsCasting() || target.IsChanneling()))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Counterspell");
@@ -355,10 +356,10 @@ var hasDebuff = me.HasDebuff("Curse of Stalvan")|| me.HasDebuff("Curse of Blood"
                     if (Api.Spellbook.Cast("Frost Nova"))
                         return true;
                 }
-				
-                if (Api.Spellbook.CanCast("Pyroblast") && ((DateTime.Now - lastPyro) >= PyroCD) && !Api.Spellbook.OnCooldown("Pyroblast") && !target.HasAura("Pyroblast") && targethealth > 20)
+
+                if (Api.Spellbook.CanCast("Pyroblast") && ((DateTime.Now - lastPyro) >= PyroCD) && !Api.Spellbook.OnCooldown("Pyroblast") && !target.Auras.Contains("Pyroblast") && targethealth > 20)
                 {
-					 lastPyro = DateTime.Now;
+                    lastPyro = DateTime.Now;
                     Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine("Casting Pyroblast");
                     Console.ResetColor();
@@ -366,7 +367,7 @@ var hasDebuff = me.HasDebuff("Curse of Stalvan")|| me.HasDebuff("Curse of Blood"
                     if (Api.Spellbook.Cast("Pyroblast"))
                         return true;
                 }
-				
+
                 if (Api.Spellbook.CanCast("Fire Blast") && mana > 30 && !target.IsDead() && !Api.Spellbook.OnCooldown("Fire Blast") && targetDistance <= 25)
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
@@ -488,11 +489,11 @@ var hasDebuff = me.HasDebuff("Curse of Stalvan")|| me.HasDebuff("Curse of Blood"
         Console.ResetColor();
 
 
-        if (me.HasAura("Frost Armor")) // Replace "Thorns" with the actual aura name
+        if (me.Auras.Contains("Frost Armor")) // Replace "Thorns" with the actual aura name
         {
             Console.ForegroundColor = ConsoleColor.Blue;
             Console.ResetColor();
-            var remainingTimeSeconds = me.AuraRemains("Frost Armor");
+            var remainingTimeSeconds = me.Auras.TimeRemaining("Frost Armor");
             var remainingTimeMinutes = remainingTimeSeconds / 60; // Convert seconds to minutes
             var roundedMinutes = Math.Round(remainingTimeMinutes / 1000, 1); // Round to one decimal place
 
@@ -503,8 +504,8 @@ var hasDebuff = me.HasDebuff("Curse of Stalvan")|| me.HasDebuff("Curse of Blood"
 
 
         // Define food and water types
-string[] waterTypes = { "Conjured Mana Strudel", "Conjured Mountain Spring Water", "Conjured Crystal Water", "Conjured Sparkling Water", "Conjured Mineral Water", "Conjured Spring Water", "Conjured Purified Water", "Conjured Fresh Water", "Conjured Water" };
-        string[] foodTypes = { "Conjured Mana Strudel", "Conjured Cinnamon Roll", "Conjured Sweet Roll", "Conjured Sourdough", "Conjured Pumpernickel", "Conjured Rye", "Conjured Bread", "Conjured Muffin" }; 
+        string[] waterTypes = { "Conjured Mana Strudel", "Conjured Mountain Spring Water", "Conjured Crystal Water", "Conjured Sparkling Water", "Conjured Mineral Water", "Conjured Spring Water", "Conjured Purified Water", "Conjured Fresh Water", "Conjured Water" };
+        string[] foodTypes = { "Conjured Mana Strudel", "Conjured Cinnamon Roll", "Conjured Sweet Roll", "Conjured Sourdough", "Conjured Pumpernickel", "Conjured Rye", "Conjured Bread", "Conjured Muffin" };
         // Count food items in the inventory
         int foodCount = 0;
         foreach (string foodType in foodTypes)
@@ -526,9 +527,9 @@ string[] waterTypes = { "Conjured Mana Strudel", "Conjured Mountain Spring Water
         Console.WriteLine("Current Food Count: " + foodCount);
         Console.WriteLine("Current Water Count: " + waterCount);
         Console.ResetColor();
-var hasDebuff = me.HasDebuff("Curse of Stalvan");
+        var hasaura = me.Auras.Contains("Curse of Stalvan");
 
-        if (hasDebuff)
+        if (hasaura)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Have curse debuff");
