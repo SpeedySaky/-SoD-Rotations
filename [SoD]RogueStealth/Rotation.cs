@@ -83,7 +83,7 @@ public class RogueStealth : Rotation
         // Target distance from the player
         var targetDistance = target.Position.Distance2D(me.Position);
 
-        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsLooting() || me.IsMounted() || me.HasAura("Drink") || me.HasAura("Food")) return false;
+        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsLooting() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
 
 
         if (Api.Spellbook.CanCast("Sprint") && !Api.Spellbook.OnCooldown("Sprint"))
@@ -96,7 +96,7 @@ public class RogueStealth : Rotation
                 return true;
             }
         }
-        if (!me.HasPermanent("Stealth") && Api.Spellbook.CanCast("Stealth") && !Api.Spellbook.OnCooldown("Stealth") && Api.HasTarget() && targetDistance <= 30 && !target.IsDead())
+        if (!me.Auras.Contains("Stealth", false) && Api.Spellbook.CanCast("Stealth") && !Api.Spellbook.OnCooldown("Stealth") && Api.HasTarget() && targetDistance <= 30 && !target.IsDead())
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Stealth");
@@ -176,7 +176,7 @@ public class RogueStealth : Rotation
         var targetDistance = target.Position.Distance2D(me.Position);
 
         if (me.IsDead() || me.IsGhost() || me.IsCasting()) return false;
-        if (me.HasAura("Drink") || me.HasAura("Food")) return false;
+        if (me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
         if (Api.Spellbook.CanCast("Kick") && !Api.Spellbook.OnCooldown("Kick") && (target.IsCasting() || target.IsChanneling()))
         {
             Console.ForegroundColor = ConsoleColor.Green;
@@ -228,7 +228,7 @@ public class RogueStealth : Rotation
                 Console.WriteLine("Legs rune is on cooldown. Skipping cast.");
             }
         }
-        if (Api.Spellbook.CanCast("Evasion") && !me.HasPermanent("Evasion") && Api.UnfriendlyUnitsNearby(10, true) >= 2 && !Api.Spellbook.OnCooldown("Evasion"))
+        if (Api.Spellbook.CanCast("Evasion") && !me.Auras.Contains("Evasion", false) && Api.UnfriendlyUnitsNearby(10, true) >= 2 && !Api.Spellbook.OnCooldown("Evasion"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine($"Casting Evasion");
@@ -239,7 +239,7 @@ public class RogueStealth : Rotation
         }
 
 
-        if (Api.Spellbook.HasSpell("Slice and Dice") && points >= 2 && !me.HasPermanent("Slice and Dice") && energy >= 25)
+        if (Api.Spellbook.HasSpell("Slice and Dice") && points >= 2 && !me.Auras.Contains("Slice and Dice", false) && energy >= 25)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine($"Casting Slice and Dice ");

@@ -79,7 +79,7 @@ public class EnhaShaman : Rotation
             lastDebugTime = DateTime.Now; // Update lastDebugTime
         }
         if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsChanneling()) return false;
-        if (me.HasAura("Drink") || me.HasAura("Food") || me.IsMounted()) return false;
+        if (me.Auras.Contains("Drink") || me.Auras.Contains("Food") || me.IsMounted()) return false;
 
         bool hasFlametongueEnchantment = HasEnchantment(EquipmentSlot.MainHand, "Flametongue 1");
         bool hasFlametongueEnchantment2 = HasEnchantment(EquipmentSlot.MainHand, "Flametongue 2");
@@ -125,7 +125,7 @@ public class EnhaShaman : Rotation
                 return true;
             }
         }
-        if (Api.Spellbook.CanCast("Ghost Wolf") && !me.HasPermanent("Ghost Wolf"))
+        if (Api.Spellbook.CanCast("Ghost Wolf") && !me.Auras.Contains("Ghost Wolf", false))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Ghost Wolf");
@@ -136,7 +136,7 @@ public class EnhaShaman : Rotation
             }
         }
 
-        if (Api.Spellbook.CanCast("Lightning Shield") && !me.HasAura("Lightning Shield") && mana > 30)
+        if (Api.Spellbook.CanCast("Lightning Shield") && !me.Auras.Contains("Lightning Shield") && mana > 30)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Lighting Shield");
@@ -195,7 +195,7 @@ public class EnhaShaman : Rotation
             }
         }
 
-        if (Api.Spellbook.CanCast("Lightning Shield") && !me.HasAura("Lightning Shield") && mana > 30)
+        if (Api.Spellbook.CanCast("Lightning Shield") && !me.Auras.Contains("Lightning Shield") && mana > 30)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Lighting Shield");
@@ -239,7 +239,7 @@ public class EnhaShaman : Rotation
             }
         }
 
-        if (Api.Spellbook.CanCast("Flame Shock") && !Api.Spellbook.OnCooldown("Flame Shock") && !target.HasAura("Flame Shock"))
+        if (Api.Spellbook.CanCast("Flame Shock") && !Api.Spellbook.OnCooldown("Flame Shock") && !target.Auras.Contains("Flame Shock"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Flame Shock");

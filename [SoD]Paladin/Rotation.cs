@@ -30,7 +30,7 @@ public class RetPala : Rotation
     private int debugInterval = 5; // Set the debug interval in seconds
     private DateTime lastDebugTime = DateTime.MinValue;
     private DateTime lastcrusaderShotTime = DateTime.MinValue;
-    private TimeSpan crusader = TimeSpan.FromSeconds(6.5);
+    private TimeSpan crusader = TimeSpan.FromSeconds(7);
     private DateTime lastChest = DateTime.MinValue;
     private TimeSpan ChestCd = TimeSpan.FromSeconds(12);
 
@@ -70,7 +70,7 @@ public class RetPala : Rotation
         var healthPercentage = me.HealthPercent;
         var mana = me.ManaPercent;
 
-        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMounted() || me.HasAura("Drink") || me.HasAura("Food")) return false;
+        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
 
         if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
         {
@@ -91,7 +91,7 @@ public class RetPala : Rotation
 
 
 
-        if (Api.Spellbook.CanCast("Blessing of Wisdom") && !me.HasAura("Blessing of Might") && !me.HasAura("Blessing of Wisdom") && mana < 30)
+        if (Api.Spellbook.CanCast("Blessing of Wisdom") && !me.Auras.Contains("Blessing of Might") && !me.Auras.Contains("Blessing of Wisdom") && mana < 30)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Blessing of Wisdom");
@@ -101,7 +101,7 @@ public class RetPala : Rotation
                 return true;
             }
         }
-        else if (!me.HasAura("Blessing of Might") && mana > 30)
+        else if (!me.Auras.Contains("Blessing of Might") && mana > 30)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Blessing of Might");
@@ -111,7 +111,7 @@ public class RetPala : Rotation
                 return true;
             }
         }
-        if (Api.Spellbook.CanCast("Devotion Aura") && !me.HasPermanent("Devotion Aura"))
+        if (Api.Spellbook.CanCast("Devotion Aura") && !me.Auras.Contains("Devotion Aura", false))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Devotion Aura");
@@ -138,12 +138,12 @@ public class RetPala : Rotation
         var target = Api.Target;
         var targethp = target.HealthPercent;
         if (me.IsDead() || me.IsGhost() || me.IsCasting()) return false;
-        if (me.HasAura("Drink") || me.HasAura("Food")) return false;
+        if (me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
 
         string[] HP = { "Major Healing Potion", "Superior Healing Potion", "Greater Healing Potion", "Healing Potion", "Lesser Healing Potion", "Minor Healing Potion" };
         string[] MP = { "Major Mana Potion", "Superior Mana Potion", "Greater Mana Potion", "Mana Potion", "Lesser Mana Potion", "Minor Mana Potion" };
 
-        if (me.HealthPercent <= 70 && (!Api.Inventory.OnCooldown(MP) && !Api.Inventory.OnCooldown(HP)))
+        if (me.HealthPercent <= 70 && (!Api.Inventory.OnCooldown(MP) || !Api.Inventory.OnCooldown(HP)))
         {
             foreach (string hpot in HP)
             {
@@ -160,7 +160,7 @@ public class RetPala : Rotation
             }
         }
 
-        if (me.ManaPercent <= 50 && (!Api.Inventory.OnCooldown(MP) && !Api.Inventory.OnCooldown(HP)))
+        if (me.ManaPercent <= 50 && (!Api.Inventory.OnCooldown(MP) || !Api.Inventory.OnCooldown(HP)))
         {
             foreach (string manapot in MP)
             {
@@ -178,7 +178,7 @@ public class RetPala : Rotation
         }
 
 
-        if (Api.Spellbook.CanCast("Devotion Aura") && !me.HasPermanent("Devotion Aura"))
+        if (Api.Spellbook.CanCast("Devotion Aura") && !me.Auras.Contains("Devotion Aura", false))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Devotion Aura");
@@ -189,8 +189,8 @@ public class RetPala : Rotation
                 return true;
             }
         }
-        var hasPoisonDebuff = me.HasDebuff("Poison") || me.HasDebuff("Rabies") || me.HasDebuff("Tetanus");
-        if (Api.Spellbook.CanCast("Divine Protection") && Api.Player.HealthPercent < 45 && !me.IsCasting() && !Api.Player.HasAura("Forbearance") && !Api.Spellbook.OnCooldown("Divine Protection"))
+        var hasPoisonDebuff = me.Auras.Contains("Poison") || me.Auras.Contains("Rabies") || me.Auras.Contains("Tetanus") || me.Auras.Contains("Infected Bite");
+        if (Api.Spellbook.CanCast("Divine Protection") && Api.Player.HealthPercent < 45 && !me.IsCasting() && !Api.Player.Auras.Contains("Forbearance") && !Api.Spellbook.OnCooldown("Divine Protection"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Divine Protection");
@@ -201,7 +201,7 @@ public class RetPala : Rotation
             }
         }
 
-        if (Api.Player.HasAura("Divine Protection") && healthPercentage <= 50 && Api.Spellbook.CanCast("Holy Light") )
+        if (Api.Player.Auras.Contains("Divine Protection") && healthPercentage <= 50 && Api.Spellbook.CanCast("Holy Light") )
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Holy Light");
@@ -212,7 +212,7 @@ public class RetPala : Rotation
             }
         }
 
-        if (Api.Spellbook.CanCast("Blessing of Protection") && Api.Player.HealthPercent < 30 && !me.IsCasting() && !Api.Player.HasAura("Forbearance") && !Api.Spellbook.OnCooldown("Blessing of Protection"))
+        if (Api.Spellbook.CanCast("Blessing of Protection") && Api.Player.HealthPercent < 30 && !me.IsCasting() && !Api.Player.Auras.Contains("Forbearance") && !Api.Spellbook.OnCooldown("Blessing of Protection"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Blessing of Protection");
@@ -223,7 +223,7 @@ public class RetPala : Rotation
             }
         }
 
-        if (Api.Player.HasAura("Blessing of Protection") && healthPercentage <= 35 && Api.Spellbook.CanCast("Holy Light"))
+        if (Api.Player.Auras.Contains("Blessing of Protection") && healthPercentage <= 35 && Api.Spellbook.CanCast("Holy Light"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Holy Light");
@@ -233,7 +233,7 @@ public class RetPala : Rotation
                 return true;
             }
         }
-        if (Api.Player.HasAura("Lay on Hands") && healthPercentage <= 10 && Api.Spellbook.CanCast("Lay on Hands") && !Api.Spellbook.OnCooldown("Lay on Hands"))
+        if (Api.Player.Auras.Contains("Lay on Hands") && healthPercentage <= 10 && Api.Spellbook.CanCast("Lay on Hands") && !Api.Spellbook.OnCooldown("Lay on Hands"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Lay on Hands");
@@ -277,7 +277,7 @@ public class RetPala : Rotation
 
         }
 
-        if (!me.HasAura("Seal of Command") && Api.Spellbook.CanCast("Seal of Command") && !Api.Spellbook.OnCooldown("Seal of Command"))
+        if (!me.Auras.Contains("Seal of Command") && Api.Spellbook.CanCast("Seal of Command") && !Api.Spellbook.OnCooldown("Seal of Command"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Seal of Command");
@@ -287,7 +287,7 @@ public class RetPala : Rotation
                 return true;
 
         }
-        else if (!me.HasAura("Seal of Righteousness") && Api.Spellbook.CanCast("Seal of Righteousness") && !Api.Spellbook.OnCooldown("Seal of Righteousness") && !me.HasAura("Seal of Command"))
+        else if (!me.Auras.Contains("Seal of Righteousness") && Api.Spellbook.CanCast("Seal of Righteousness") && !Api.Spellbook.OnCooldown("Seal of Righteousness") && !me.Auras.Contains("Seal of Command"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Seal of Righteousness");
@@ -309,7 +309,7 @@ public class RetPala : Rotation
             }
         }
 
-        if (Api.Spellbook.CanCast("Judgement") && !Api.Spellbook.OnCooldown("Judgement") && !Api.Spellbook.OnCooldown("Judgement") && (me.HasAura("Seal of Righteousness") || me.HasAura("Seal of Command")))
+        if (Api.Spellbook.CanCast("Judgement") && !Api.Spellbook.OnCooldown("Judgement") && !Api.Spellbook.OnCooldown("Judgement") && (me.Auras.Contains("Seal of Righteousness") || me.Auras.Contains("Seal of Command")))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Judgement");
@@ -405,7 +405,7 @@ public class RetPala : Rotation
         Console.WriteLine($"{healthPercentage}% Health available");
 
         // Assuming me is an instance of a player character
-        var hasPoisonDebuff = me.HasDebuff("Poison");
+        var hasPoisonDebuff = me.Auras.Contains("Poison");
 
         if (hasPoisonDebuff)
         {
@@ -413,7 +413,14 @@ public class RetPala : Rotation
             Console.WriteLine("Have poison debuff");
             Console.ResetColor();
         }
+        if (Api.Spellbook.CanCast("Crusader Strike")|| Api.Spellbook.CanCast(407676))
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Can Cast Crusader Strike");
+            Console.ResetColor();
+            
 
+        }
         Console.ResetColor();
     }
 }

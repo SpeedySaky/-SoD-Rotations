@@ -8,7 +8,7 @@ using wShadow.Warcraft.Managers;
 
 
 
-public class MageSoD : Rotation
+public class DruidSoD : Rotation
 {
     private List<string> npcConditions = new List<string>
     {
@@ -58,16 +58,16 @@ public class MageSoD : Rotation
         var targetDistance = target.Position.Distance2D(me.Position);
 
         if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling()) return false;
-        if (me.HasAura("Drink") || me.HasAura("Food")) return false;
+        if (me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
 
-        if (Api.Spellbook.CanCast("Frost Armor") && !me.HasAura("Frost Armor"))
+        if (Api.Spellbook.CanCast("Frost Armor") && !me.Auras.Contains("Frost Armor"))
         {
             Console.WriteLine("Casting Frost Armor");
             Api.Spellbook.Cast("Frost Armor");
             return true;
         }
 
-        if (Api.Spellbook.CanCast("Arcane Intellect") && !me.HasPermanent("Arcane Intellect"))
+        if (Api.Spellbook.CanCast("Arcane Intellect") && !me.Auras.Contains("Arcane Intellect", false))
         {
             Console.WriteLine("Casting Arcane Intellect");
             Api.Spellbook.Cast("Arcane Intellect");
@@ -195,11 +195,11 @@ if (!target.IsDead() &&
         Console.WriteLine($"Health: {healthPercentage}%, Mana: {mana}");
     }
 
-    if (me.HasAura("Frost Armor"))
+    if (me.Auras.Contains("Frost Armor"))
     {
         Console.ForegroundColor = ConsoleColor.Blue;
         Console.ResetColor();
-        var remainingTimeSeconds = me.AuraRemains("Frost Armor");
+        var remainingTimeSeconds = me.Auras.TimeRemaining("Frost Armor");
         var remainingTimeMinutes = remainingTimeSeconds / 60; // Convert seconds to minutes
         var roundedMinutes = Math.Round(remainingTimeMinutes / 1000, 1); // Round to one decimal place
 

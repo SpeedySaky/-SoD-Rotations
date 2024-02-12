@@ -69,7 +69,7 @@ public class Druid : Rotation
         var healthPercentage = me.HealthPercent;
         var mana = me.Mana;
 
-        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.HasAura("Drink") || me.HasAura("Food")) return false;
+        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
         if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
         {
             LogPlayerStats();
@@ -77,7 +77,7 @@ public class Druid : Rotation
         }
 
 
-        if (Api.Spellbook.CanCast("Mark of the Wild") && !me.HasAura("Mark of the Wild"))
+        if (Api.Spellbook.CanCast("Mark of the Wild") && !me.Auras.Contains("Mark of the Wild"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Mark of the Wild");
@@ -86,7 +86,7 @@ public class Druid : Rotation
 
                 return true;
         }
-        if (Api.Spellbook.CanCast("Thorns") && !me.HasAura("Thorns"))
+        if (Api.Spellbook.CanCast("Thorns") && !me.Auras.Contains("Thorns"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Thorns");
@@ -96,7 +96,7 @@ public class Druid : Rotation
                 return true;
         }
 
-        if (Api.Spellbook.CanCast("Omen of Clarity") && !me.HasAura("Omen of Clarity"))
+        if (Api.Spellbook.CanCast("Omen of Clarity") && !me.Auras.Contains("Omen of Clarity"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Omen of Clarity");
@@ -118,7 +118,7 @@ public class Druid : Rotation
             mana > 20 && !IsNPC(target))
         {
 
-            if (Api.Spellbook.CanCast("Moonfire") && !target.HasAura("Moonfire"))
+            if (Api.Spellbook.CanCast("Moonfire") && !target.Auras.Contains("Moonfire"))
             {
 
 
@@ -164,7 +164,7 @@ public class Druid : Rotation
         string[] HP = { "Major Healing Potion", "Superior Healing Potion", "Greater Healing Potion", "Healing Potion", "Lesser Healing Potion", "Minor Healing Potion" };
         string[] MP = { "Major Mana Potion", "Superior Mana Potion", "Greater Mana Potion", "Mana Potion", "Lesser Mana Potion", "Minor Mana Potion" };
 
-        if (me.HealthPercent <= 70 && (!Api.Inventory.OnCooldown(MP) && !Api.Inventory.OnCooldown(HP)))
+        if (me.HealthPercent <= 70 && (!Api.Inventory.OnCooldown(MP) || !Api.Inventory.OnCooldown(HP)))
         {
             foreach (string hpot in HP)
             {
@@ -181,7 +181,7 @@ public class Druid : Rotation
             }
         }
 
-        if (me.ManaPercent <= 50 && (!Api.Inventory.OnCooldown(MP) && !Api.Inventory.OnCooldown(HP)))
+        if (me.ManaPercent <= 50 && (!Api.Inventory.OnCooldown(MP) || !Api.Inventory.OnCooldown(HP)))
         {
             foreach (string manapot in MP)
             {
@@ -198,7 +198,7 @@ public class Druid : Rotation
             }
         }
 
-        if (Api.Spellbook.CanCast("Rejuvenation") && !me.HasAura("Rejuvenation") && healthPercentage <= 70 && mana >= 15)
+        if (Api.Spellbook.CanCast("Rejuvenation") && !me.Auras.Contains("Rejuvenation") && healthPercentage <= 70 && mana >= 15)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Rejuvenation");
@@ -209,7 +209,7 @@ public class Druid : Rotation
             }
         }
 
-        if (Api.Spellbook.CanCast("Healing Touch") && healthPercentage <= 45 && mana >= 20 && me.HasAura("Fury of Stormrage"))
+        if (Api.Spellbook.CanCast("Healing Touch") && healthPercentage <= 45 && mana >= 20 && me.Auras.Contains("Fury of Stormrage"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Healing Touch");
@@ -229,7 +229,7 @@ public class Druid : Rotation
                 return true;
             }
         }
-        if (!target.HasAura("Sunfire") && targethealth > 30 && Api.HasMacro("Sunfire"))
+        if (!target.Auras.Contains("Sunfire") && targethealth > 30 && Api.HasMacro("Sunfire"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Sunfire");
@@ -260,7 +260,7 @@ public class Druid : Rotation
                 Console.WriteLine("Starsurge is on cooldown. Skipping cast.");
             }
         }
-        if (Api.Spellbook.CanCast("Moonfire") && !target.HasAura("Moonfire") && targethealth > 30)
+        if (Api.Spellbook.CanCast("Moonfire") && !target.Auras.Contains("Moonfire") && targethealth > 30)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Moonfire");
@@ -327,7 +327,7 @@ public class Druid : Rotation
         Console.ResetColor();
         Console.ResetColor();
 
-        if (me.HasAura("Fury of Stormrage"))
+        if (me.Auras.Contains("Fury of Stormrage"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Fury of Stormrage");

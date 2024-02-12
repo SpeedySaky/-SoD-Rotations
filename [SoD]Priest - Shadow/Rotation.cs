@@ -85,9 +85,9 @@ public class PriestShadow : Rotation
 
         // Target distance from the player
 
-        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsLooting() || me.IsMounted() || me.HasAura("Drink") || me.HasAura("Food")) return false;
+        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsLooting() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
 
-        if (Api.Spellbook.CanCast("Renew") && !me.HasAura("Renew") && healthPercentage < 80)
+        if (Api.Spellbook.CanCast("Renew") && !me.Auras.Contains("Renew") && healthPercentage < 80)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Renew");
@@ -97,7 +97,7 @@ public class PriestShadow : Rotation
                 return true;
             }
         }
-        if (Api.Spellbook.CanCast("Power Word: Fortitude") && !me.HasAura("Power Word: Fortitude"))
+        if (Api.Spellbook.CanCast("Power Word: Fortitude") && !me.Auras.Contains("Power Word: Fortitude"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Power Word: Fortitude");
@@ -107,7 +107,7 @@ public class PriestShadow : Rotation
                 return true;
             }
         }
-        if (Api.Spellbook.CanCast("Inner Fire") && !me.HasAura("Inner Fire"))
+        if (Api.Spellbook.CanCast("Inner Fire") && !me.Auras.Contains("Inner Fire"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Inner Fire");
@@ -197,7 +197,7 @@ public class PriestShadow : Rotation
 
         // Target distance from the player
         var targetDistance = target.Position.Distance2D(me.Position);
-        if (Api.Spellbook.CanCast("Power Word: Shield") && !me.HasAura("Power Word: Shield") && mana > 15 && !me.HasAura("Weakened Soul"))
+        if (Api.Spellbook.CanCast("Power Word: Shield") && !me.Auras.Contains("Power Word: Shield") && mana > 15 && !me.Auras.Contains("Weakened Soul"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Power Word: Shield");
@@ -227,7 +227,7 @@ public class PriestShadow : Rotation
                 Console.WriteLine("Hands rune is on cooldown. Skipping cast.");
             }
         }
-        if (Api.HasMacro("Chest") && !target.HasAura("Void Plague"))
+        if (Api.HasMacro("Chest") && !target.Auras.Contains("Void Plague"))
         {
             if ((DateTime.Now - lastChest) >= Chest)
             {
@@ -266,7 +266,7 @@ public class PriestShadow : Rotation
                 Console.WriteLine("Legs rune is on cooldown. Skipping cast.");
             }
         }
-        if (Api.Spellbook.CanCast("Shadow Word: Pain") && !target.HasAura("Shadow Word: Pain") && targethealth >= 30 && mana > 10)
+        if (Api.Spellbook.CanCast("Shadow Word: Pain") && !target.Auras.Contains("Shadow Word: Pain") && targethealth >= 30 && mana > 10)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Shadow Word: Pain");

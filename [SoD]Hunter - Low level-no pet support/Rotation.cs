@@ -94,7 +94,7 @@ public class Hunter : Rotation
         var targetDistance = target.Position.Distance2D(me.Position);
 
         if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsChanneling()) return false;
-        if (me.HasAura("Drink") || me.HasAura("Food")) return false;
+        if (me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
 
 
 
@@ -111,7 +111,7 @@ public class Hunter : Rotation
      reaction != UnitReaction.Honored &&
      reaction != UnitReaction.Revered &&
      reaction != UnitReaction.Exalted) &&
-    mana > 20 && !IsNPC(target) && Api.Spellbook.CanCast("Hunter's Mark") && !target.HasAura("Hunter's Mark") && healthPercentage > 50 && mana > 20)
+    mana > 20 && !IsNPC(target) && Api.Spellbook.CanCast("Hunter's Mark") && !target.Auras.Contains("Hunter's Mark") && healthPercentage > 50 && mana > 20)
 
         {
             Console.ForegroundColor = ConsoleColor.Green;
@@ -127,7 +127,7 @@ public class Hunter : Rotation
 
 
 
-        if (Api.Spellbook.CanCast("Serpent Sting") && target.HasAura("Hunter's Mark") && healthPercentage > 50 && mana > 20)
+        if (Api.Spellbook.CanCast("Serpent Sting") && target.Auras.Contains("Hunter's Mark") && healthPercentage > 50 && mana > 20)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Serpent Sting");
@@ -169,7 +169,7 @@ public class Hunter : Rotation
         // Target distance from the player
 
         if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsChanneling()) return false;
-        if (me.HasAura("Drink") || me.HasAura("Food")) return false;
+        if (me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
 
         var meTarget = me.Target;
         string[] HP = { "Major Healing Potion", "Superior Healing Potion", "Greater Healing Potion", "Healing Potion", "Lesser Healing Potion", "Minor Healing Potion" };
@@ -210,7 +210,7 @@ public class Hunter : Rotation
         }
 
 
-        if (Api.Spellbook.CanCast("Aspect of the Hawk") && !me.HasPermanent("Aspect of the Hawk"))
+        if (Api.Spellbook.CanCast("Aspect of the Hawk") && !me.Auras.Contains("Aspect of the Hawk", false))
 
         {
             Console.ForegroundColor = ConsoleColor.Green;
@@ -221,7 +221,7 @@ public class Hunter : Rotation
 
                 return true;
         }
-        else if (Api.Spellbook.CanCast("Aspect of the Monkey") && !me.HasPermanent("Aspect of the Monkey") && !me.HasPermanent("Aspect of the Hawk"))
+        else if (Api.Spellbook.CanCast("Aspect of the Monkey") && !me.Auras.Contains("Aspect of the Monkey", false) && !me.Auras.Contains("Aspect of the Hawk", false))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Aspect of the Monkey");
@@ -232,7 +232,7 @@ public class Hunter : Rotation
                 return true;
 
         }
-        if (Api.Spellbook.CanCast("Hunter's Mark") && !target.HasAura("Hunter's Mark") && Api.HasMacro("Mark"))
+        if (Api.Spellbook.CanCast("Hunter's Mark") && !target.Auras.Contains("Hunter's Mark") && Api.HasMacro("Mark"))
 
         {
             var reaction = me.GetReaction(target);
@@ -255,7 +255,7 @@ public class Hunter : Rotation
         if (!target.IsDead() && targetDistance >= 8)
         {
 
-            if (Api.Spellbook.CanCast("Serpent Sting") && mana > 15 && !target.HasAura("Serpent Sting") && healthPercentage > 35)
+            if (Api.Spellbook.CanCast("Serpent Sting") && mana > 15 && !target.Auras.Contains("Serpent Sting") && healthPercentage > 35)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Casting Serpent Sting");
@@ -265,7 +265,7 @@ public class Hunter : Rotation
                     return true;
             }
 
-            if (target.HasAura("Serpent Sting") && Api.HasMacro("Hands"))
+            if (target.Auras.Contains("Serpent Sting") && Api.HasMacro("Hands"))
             {
                 if ((DateTime.Now - lastChimeraShotTime) >= chimeraShotCooldown)
                 {
@@ -313,7 +313,7 @@ public class Hunter : Rotation
                     return true;
                 }
             }
-            if (Api.Spellbook.CanCast("Wing Clip") && mana > 40 && !target.HasAura("Wing Clip"))
+            if (Api.Spellbook.CanCast("Wing Clip") && mana > 40 && !target.Auras.Contains("Wing Clip"))
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Casting Wing Clip");

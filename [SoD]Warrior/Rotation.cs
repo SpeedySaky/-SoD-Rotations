@@ -69,7 +69,7 @@ public class Warrior : Rotation
         if (!IsValid(target))
             return true;
 
-        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMounted() || me.HasAura("Drink") || me.HasAura("Food")) return false;
+        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
         var targetDistance = target.Position.Distance2D(me.Position);
         if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
         {
@@ -132,7 +132,7 @@ public class Warrior : Rotation
 
 
 
-        if (Api.Spellbook.CanCast("Hamstring") && targethealth <= 30 && !target.HasAura("Hamstring"))
+        if (Api.Spellbook.CanCast("Hamstring") && targethealth <= 30 && !target.Auras.Contains("Hamstring"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Hamstring");
@@ -141,7 +141,7 @@ public class Warrior : Rotation
 
                 return true;
         }
-        if (Api.Spellbook.CanCast("Rend") && targethealth >= 30 && !target.HasAura("Rend"))
+        if (Api.Spellbook.CanCast("Rend") && targethealth >= 30 && !target.Auras.Contains("Rend"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Rend");
@@ -150,7 +150,7 @@ public class Warrior : Rotation
 
                 return true;
         }
-        if (Api.Spellbook.CanCast("Thunder Clap") && !target.HasAura("Thunder Clap")) //&& Api.EnemiesNearby(10, true, true) >= 2)
+        if (Api.Spellbook.CanCast("Thunder Clap") && !target.Auras.Contains("Thunder Clap")) //&& Api.EnemiesNearby(10, true, true) >= 2)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Thunder Clap");
@@ -159,7 +159,7 @@ public class Warrior : Rotation
 
                 return true;
         }
-        if (Api.Spellbook.CanCast("Sunder Armor") && !target.HasAura("Sunder Armor") && target.AuraStacks("Sunder Armor") < 5)
+        if (Api.Spellbook.CanCast("Sunder Armor") && !target.Auras.Contains("Sunder Armor") && target.Auras.GetStacks("Sunder Armor") < 5)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Sunder Armor");
@@ -168,7 +168,7 @@ public class Warrior : Rotation
 
                 return true;
         }
-        if (!me.HasAura("Battle Shout") && Api.Spellbook.CanCast("Battle Shout") && !Api.Spellbook.OnCooldown("Battle Shout"))
+        if (!me.Auras.Contains("Battle Shout") && Api.Spellbook.CanCast("Battle Shout") && !Api.Spellbook.OnCooldown("Battle Shout"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Battle Shout");

@@ -98,10 +98,10 @@ public class SoDHunter : Rotation
         // Target distance from the player
         var targetDistance = target.Position.Distance2D(me.Position);
 
-        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsLooting() || me.IsFlying() || me.HasAura("Drink") || me.HasAura("Food")) return false;
+        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsLooting() || me.IsFlying() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
 
 
-        if (Api.HasMacro("Chest") && !me.HasPermanent("Aspect of the Lion"))
+        if (Api.HasMacro("Chest") && !me.Auras.Contains("Aspect of the Lion", false))
 
         {
             Console.ForegroundColor = ConsoleColor.Green;
@@ -118,7 +118,7 @@ public class SoDHunter : Rotation
         // Add logic here for actions when pet's health is low, e.g., healing spells
 
 
-        if (Api.Spellbook.CanCast("Aspect of the Cheetah") && !me.HasPermanent("Aspect of the Cheetah") && !me.IsMounted())
+        if (Api.Spellbook.CanCast("Aspect of the Cheetah") && !me.Auras.Contains("Aspect of the Cheetah", false) && !me.IsMounted())
 
         {
             Console.ForegroundColor = ConsoleColor.Green;
@@ -179,7 +179,7 @@ public class SoDHunter : Rotation
                 return true;
             }
         }
-        if (IsValid(pet) && PetHealth < 40 && Api.Spellbook.CanCast("Mend Pet") && !pet.HasAura("Mend Pet") && mana > 10)
+        if (IsValid(pet) && PetHealth < 40 && Api.Spellbook.CanCast("Mend Pet") && !pet.Auras.Contains("Mend Pet") && mana > 10)
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("Pet health is low healing him");
@@ -188,7 +188,7 @@ public class SoDHunter : Rotation
 
                 return true;
         }
-        if (IsValid(pet) && PetHealth < 40 && Api.Spellbook.CanCast("Mend Pet") && !pet.HasAura("Mend Pet") && mana > 10)
+        if (IsValid(pet) && PetHealth < 40 && Api.Spellbook.CanCast("Mend Pet") && !pet.Auras.Contains("Mend Pet") && mana > 10)
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("Pet health is low healing him");
@@ -197,7 +197,7 @@ public class SoDHunter : Rotation
 
                 return true;
         }
-        if (Api.Spellbook.CanCast("Aspect of the Hawk") && !me.HasPermanent("Aspect of the Hawk") && !me.IsMounted() && !me.HasPermanent("Aspect of the Cheetah"))
+        if (Api.Spellbook.CanCast("Aspect of the Hawk") && !me.Auras.Contains("Aspect of the Hawk", false) && !me.IsMounted() && !me.Auras.Contains("Aspect of the Cheetah", false))
 
         {
             Console.ForegroundColor = ConsoleColor.Green;
@@ -216,7 +216,7 @@ public class SoDHunter : Rotation
      reaction != UnitReaction.Honored &&
      reaction != UnitReaction.Revered &&
      reaction != UnitReaction.Exalted) &&
-    mana > 20 && !IsNPC(target) && Api.Spellbook.CanCast("Hunter's Mark") && !target.HasAura("Hunter's Mark") && healthPercentage > 50 && mana > 20 && PetHealth > 50)
+    mana > 20 && !IsNPC(target) && Api.Spellbook.CanCast("Hunter's Mark") && !target.Auras.Contains("Hunter's Mark") && healthPercentage > 50 && mana > 20 && PetHealth > 50)
         {
 
 
@@ -266,7 +266,7 @@ public class SoDHunter : Rotation
         // Target distance from the player
 
         if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsChanneling()) return false;
-        if (me.HasAura("Drink") || me.HasAura("Food")) return false;
+        if (me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
 
         var meTarget = me.Target;
 
@@ -333,7 +333,7 @@ public class SoDHunter : Rotation
             }
         }
 
-        if (Api.Spellbook.CanCast("Aspect of the Hawk") && !me.HasPermanent("Aspect of the Hawk"))
+        if (Api.Spellbook.CanCast("Aspect of the Hawk") && !me.Auras.Contains("Aspect of the Hawk", false))
 
         {
             Console.ForegroundColor = ConsoleColor.Green;
@@ -344,7 +344,7 @@ public class SoDHunter : Rotation
 
                 return true;
         }
-        else if (Api.Spellbook.CanCast("Aspect of the Monkey") && !me.HasPermanent("Aspect of the Monkey") && !me.HasPermanent("Aspect of the Hawk"))
+        else if (Api.Spellbook.CanCast("Aspect of the Monkey") && !me.Auras.Contains("Aspect of the Monkey", false) && !me.Auras.Contains("Aspect of the Hawk", false))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Aspect of the Monkey");
@@ -355,7 +355,7 @@ public class SoDHunter : Rotation
                 return true;
 
         }
-        if (Api.Spellbook.CanCast("Hunter's Mark") && !target.HasAura("Hunter's Mark") && Api.HasMacro("Mark"))
+        if (Api.Spellbook.CanCast("Hunter's Mark") && !target.Auras.Contains("Hunter's Mark") && Api.HasMacro("Mark"))
 
         {
             var reaction = me.GetReaction(target);
@@ -371,7 +371,7 @@ public class SoDHunter : Rotation
                     return true;
             }
         }
-        if (PetHealth <= 30 && Api.Spellbook.CanCast("Mend Pet") && !pet.HasAura("Mend Pet") && mana > 20)
+        if (PetHealth <= 30 && Api.Spellbook.CanCast("Mend Pet") && !pet.Auras.Contains("Mend Pet") && mana > 20)
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("Pet health is low healing him");
@@ -387,7 +387,7 @@ public class SoDHunter : Rotation
         if (!target.IsDead() && targetDistance >= 8)
         {
 
-            if (Api.Spellbook.CanCast("Serpent Sting") && mana > 15 && !target.HasAura("Serpent Sting") && healthPercentage > 35)
+            if (Api.Spellbook.CanCast("Serpent Sting") && mana > 15 && !target.Auras.Contains("Serpent Sting") && healthPercentage > 35)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Casting Serpent Sting");
@@ -397,7 +397,7 @@ public class SoDHunter : Rotation
                     return true;
             }
 
-            if (target.HasAura("Serpent Sting") && Api.HasMacro("Hands"))
+            if (target.Auras.Contains("Serpent Sting") && Api.HasMacro("Hands"))
             {
                 if ((DateTime.Now - lastChimeraShotTime) >= chimeraShotCooldown)
                 {
@@ -445,7 +445,7 @@ public class SoDHunter : Rotation
                     return true;
                 }
             }
-            if (Api.Spellbook.CanCast("Wing Clip") && mana > 40 && !target.HasAura("Wing Clip"))
+            if (Api.Spellbook.CanCast("Wing Clip") && mana > 40 && !target.Auras.Contains("Wing Clip"))
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Casting Wing Clip");
@@ -559,15 +559,15 @@ public class SoDHunter : Rotation
             Console.ResetColor();
             // Additional actions for when the pet's health is low
         }
-        if (me.HasAura("Aspect of the Lion"))
+        if (me.Auras.Contains("Aspect of the Lion"))
         {
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("HasPerHasAuramanent Aspect of the Lion");
+            Console.WriteLine("HasPerAuras.Containsmanent Aspect of the Lion");
             Console.ResetColor();
             // Additional actions for when the pet is dead
         }
         else
-        if (me.HasPermanent("Aspect of the Lion"))
+        if (me.Auras.Contains("Aspect of the Lion", false))
         {
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("HasPermanent Aspect of the Lion");
@@ -579,7 +579,7 @@ public class SoDHunter : Rotation
 
         else
 
-                    if (me.HasPassive("Aspect of the Lion"))
+                    if (me.Auras.HasPassive("Aspect of the Lion"))
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("HasPassive Aspect of the Lion");

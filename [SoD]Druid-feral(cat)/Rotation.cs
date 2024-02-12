@@ -8,7 +8,7 @@ using wShadow.Warcraft.Managers;
 
 
 
-public class Druid : Rotation
+public class FeralDruidSoD : Rotation
 {
     private List<string> npcConditions = new List<string>
     {
@@ -67,7 +67,7 @@ public class Druid : Rotation
         var healthPercentage = me.HealthPercent;
         var mana = me.ManaPercent;
 
-        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.HasAura("Drink") || me.HasAura("Food") || me.IsMounted()) return false;
+        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.Auras.Contains("Drink") || me.Auras.Contains("Food") || me.IsMounted()) return false;
         if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
         {
             LogPlayerStats();
@@ -75,7 +75,7 @@ public class Druid : Rotation
         }
 
 
-        if (Api.Spellbook.CanCast("Mark of the Wild") && !me.HasAura("Mark of the Wild") && (!me.HasPermanent(768) || me.HasPermanent(768)))
+        if (Api.Spellbook.CanCast("Mark of the Wild") && !me.Auras.Contains("Mark of the Wild") && (!me.Auras.Contains(768, false) || me.Auras.Contains(768, false)))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Mark of the Wild");
@@ -85,7 +85,7 @@ public class Druid : Rotation
                 return true;
         }
 
-        if (Api.Spellbook.CanCast("Thorns") && !me.HasAura("Thorns") && (!me.HasPermanent(768) || me.HasPermanent(768)))
+        if (Api.Spellbook.CanCast("Thorns") && !me.Auras.Contains("Thorns") && (!me.Auras.Contains(768, false) || me.Auras.Contains(768, false)))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Thorns");
@@ -95,7 +95,7 @@ public class Druid : Rotation
                 return true;
         }
 
-        if (Api.Spellbook.CanCast("Omen of Clarity") && !me.HasAura("Omen of Clarity") && (!me.HasPermanent(768) || me.HasPermanent(768)))
+        if (Api.Spellbook.CanCast("Omen of Clarity") && !me.Auras.Contains("Omen of Clarity") && (!me.Auras.Contains(768, false) || me.Auras.Contains(768, false)))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Omen of Clarity");
@@ -104,9 +104,9 @@ public class Druid : Rotation
 
                 return true;
         }
-        if (!me.HasPermanent(768) && Api.Spellbook.CanCast(768))
+        if (!me.Auras.Contains(768, false) && Api.Spellbook.CanCast(768))
         {
-            if (Api.Spellbook.CanCast(768) && !me.HasPermanent(768))
+            if (Api.Spellbook.CanCast(768) && !me.Auras.Contains(768, false))
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Casting Cat Form");
@@ -182,7 +182,7 @@ public class Druid : Rotation
                 return true;
             }
         }
-        if (Api.Spellbook.CanCast("Rejuvenation") && !me.HasAura("Rejuvenation") && healthPercentage <= 30 && mana > 15)
+        if (Api.Spellbook.CanCast("Rejuvenation") && !me.Auras.Contains("Rejuvenation") && healthPercentage <= 30 && mana > 15)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Rejuvenation");
@@ -193,7 +193,7 @@ public class Druid : Rotation
             }
         }
 
-        if (Api.Spellbook.CanCast("Healing Touch") && healthPercentage <= 30 && mana > 25 && me.HasAura("Fury of Stormrage"))
+        if (Api.Spellbook.CanCast("Healing Touch") && healthPercentage <= 30 && mana > 25 && me.Auras.Contains("Fury of Stormrage"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Healing Touch");
@@ -226,9 +226,9 @@ public class Druid : Rotation
 
 
 
-        if (!me.HasPermanent(768) && Api.Spellbook.CanCast(768))
+        if (!me.Auras.Contains(768, false) && Api.Spellbook.CanCast(768))
         {
-            if (Api.Spellbook.CanCast(768) && !me.HasPermanent(768))
+            if (Api.Spellbook.CanCast(768) && !me.Auras.Contains(768, false))
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Casting Cat Form");
@@ -241,7 +241,7 @@ public class Druid : Rotation
 
         }
 
-        if (Api.Spellbook.CanCast("Tiger's Fury") && !me.HasAura("Tiger's Fury") && !Api.Spellbook.OnCooldown("Tiger's Fury"))
+        if (Api.Spellbook.CanCast("Tiger's Fury") && !me.Auras.Contains("Tiger's Fury") && !Api.Spellbook.OnCooldown("Tiger's Fury"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Tiger's Fury");
@@ -251,7 +251,7 @@ public class Druid : Rotation
                 return true;
             }
         }
-        if (Api.HasMacro("Roar") && points >= 1 && energy >= 25 && !me.HasAura("Savage Roar") && me.HasPermanent(768))
+        if (Api.HasMacro("Roar") && points >= 1 && energy >= 25 && !me.Auras.Contains("Savage Roar") && me.Auras.Contains(768, false))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine($"Casting Savage Roar");
@@ -260,7 +260,7 @@ public class Druid : Rotation
             if (Api.UseMacro("Roar"))
                 return true;
         }
-        if (Api.HasMacro("Mangle") && points < 3 && energy >= 45 && me.HasPermanent(768))
+        if (Api.HasMacro("Mangle") && points < 3 && energy >= 45 && me.Auras.Contains(768, false))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine($"Casting Mangle (Cat) with {energy} Energy");
@@ -270,7 +270,7 @@ public class Druid : Rotation
                 return true;
         }
 
-        if (Api.Spellbook.CanCast("Claw") && points < 3 && energy >= 45 && me.HasPermanent(768))
+        if (Api.Spellbook.CanCast("Claw") && points < 3 && energy >= 45 && me.Auras.Contains(768, false))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine($"Casting Claw (Cat) with {energy} Energy");
@@ -280,7 +280,7 @@ public class Druid : Rotation
                 return true;
         }
 
-        if (Api.Spellbook.CanCast("Rip") && !target.HasAura("Rip") && target.HealthPercent >= 20 && energy > 30 && points >= 3 && me.HasPermanent(768))
+        if (Api.Spellbook.CanCast("Rip") && !target.Auras.Contains("Rip") && target.HealthPercent >= 20 && energy > 30 && points >= 3 && me.Auras.Contains(768, false))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine($"Casting Rip with {points} Points and {energy} Energy");
@@ -335,7 +335,7 @@ public class Druid : Rotation
         Console.ResetColor();
         Console.ResetColor();
 
-        if (me.HasAura("Fury of Stormrage"))
+        if (me.Auras.Contains("Fury of Stormrage"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Fury of Stormrage");

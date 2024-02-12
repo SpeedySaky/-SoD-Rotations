@@ -93,9 +93,9 @@ public class WarlockSoD : Rotation
         var targetDistance = target.Position.Distance2D(me.Position);
 
         if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsChanneling()) return false;
-        if (me.HasAura("Drink") || me.HasAura("Food")) return false;
+        if (me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
 
-        if (Api.Spellbook.CanCast("Demon Armor") && !me.HasAura("Demon Armor"))
+        if (Api.Spellbook.CanCast("Demon Armor") && !me.Auras.Contains("Demon Armor"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Demon Armor");
@@ -104,7 +104,7 @@ public class WarlockSoD : Rotation
             if (Api.Spellbook.Cast("Demon Armor"))
                 return true;
         }
-        if (Api.Spellbook.CanCast("Demon Skin") && !me.HasAura("Demon Armor") && !me.HasAura("Demon Skin"))
+        if (Api.Spellbook.CanCast("Demon Skin") && !me.Auras.Contains("Demon Armor") && !me.Auras.Contains("Demon Skin"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Demon Skin");
@@ -116,7 +116,7 @@ public class WarlockSoD : Rotation
 
         //if (Api.HasMacro("Hands") && reaction != UnitReaction.Friendly && targethealth>=1)
 
-        var petFamily = Api.Pet.Info.UnitFamily;
+        var petFamily = Api.Pet.Info.GetCreatureFamily();
         var isImp = petFamily == CreatureFamily.Imp; //|| petFamily == CreatureFamily.Felimp;
         var isVoid = petFamily == CreatureFamily.Voidwalker; //|| petFamily == CreatureFamily.Voidlord;
         var isGuard = petFamily == CreatureFamily.Felguard;
@@ -251,7 +251,7 @@ public class WarlockSoD : Rotation
         // Target distance from the player
         var targetDistance = target.Position.Distance2D(me.Position);
 
-        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsChanneling() || me.IsMounted() || me.HasAura("Drink") || me.HasAura("Food")) return false;
+        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsChanneling() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
 
         var pet = me.Pet();
         var PetHealth = 0.0f;
@@ -276,7 +276,7 @@ public class WarlockSoD : Rotation
             }
         }
 
-        if (Api.Spellbook.CanCast("Drain Soul") && shadowApi.Inventory.ItemCount("Soul Shard") <= 2 && targethealth <= 30 && mana > 10)
+        if (Api.Spellbook.CanCast("Drain Soul") && Api.Inventory.ItemCount("Soul Shard") <= 2 && targethealth <= 30 && mana > 10)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Drain Soul");
@@ -323,7 +323,7 @@ public class WarlockSoD : Rotation
                         return true;
                 }
 
-                if (Api.Spellbook.CanCast("Curse of Agony") && !target.HasAura("Curse of Agony") && mana >= 10 && targethealth >= 30)
+                if (Api.Spellbook.CanCast("Curse of Agony") && !target.Auras.Contains("Curse of Agony") && mana >= 10 && targethealth >= 30)
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine("Casting Curse of Agony");
@@ -333,7 +333,7 @@ public class WarlockSoD : Rotation
                         return true;
                 }
 
-                if (Api.Spellbook.CanCast("Corruption") && !target.HasAura("Corruption") && mana >= 10 && targethealth >= 30)
+                if (Api.Spellbook.CanCast("Corruption") && !target.Auras.Contains("Corruption") && mana >= 10 && targethealth >= 30)
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine("Casting Corruption");
@@ -452,7 +452,7 @@ public class WarlockSoD : Rotation
 
         // Target distance from the player
         var targetDistance = target.Position.Distance2D(me.Position);
-        var petFamily = Api.Pet.Info.UnitFamily;
+        var petFamily = Api.Pet.Info.GetCreatureFamily();
 
         // Log the summoned pet family
         if (petFamily == CreatureFamily.Imp || petFamily == CreatureFamily.Felimp)
