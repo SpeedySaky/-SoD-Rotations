@@ -33,11 +33,11 @@ public class RetPala : Rotation
     private bool HasItem(object item) => Api.Inventory.HasItem(item);
     private int debugInterval = 5; // Set the debug interval in seconds
     private DateTime lastDebugTime = DateTime.MinValue;
-    private DateTime lastCrusaderStrikeTime = DateTime.MinValue;
-    private TimeSpan crusaderCooldown = TimeSpan.FromSeconds(7);
+    private DateTime Crusader = DateTime.MinValue;
+    private TimeSpan CrusaderCd = TimeSpan.FromSeconds(7);
 
-    private DateTime lastHandOfReckoningTime = DateTime.MinValue;
-    private TimeSpan reckoningCooldown = TimeSpan.FromSeconds(12);
+    private DateTime Recogning = DateTime.MinValue;
+    private TimeSpan ReckoningCooldown = TimeSpan.FromSeconds(12);
 
     private DateTime lastChest = DateTime.MinValue;
     private TimeSpan ChestCd = TimeSpan.FromSeconds(12);
@@ -214,7 +214,7 @@ public class RetPala : Rotation
             }
         }
 
-        if (Api.Player.Auras.Contains("Divine Protection") && healthPercentage <= 50 && Api.Spellbook.CanCast("Holy Light") )
+        if (Api.Player.Auras.Contains("Divine Protection") && healthPercentage <= 50 && Api.Spellbook.CanCast("Holy Light"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Holy Light");
@@ -332,9 +332,11 @@ public class RetPala : Rotation
                 return true;
             }
         }
+
+
         if (Api.HasMacro("Hands"))
         {
-            if ((DateTime.Now - lastcrusaderShotTime) >= crusader)
+            if ((DateTime.Now - Crusader) >= CrusaderCd)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
 
@@ -342,7 +344,7 @@ public class RetPala : Rotation
                 {
                     if (Api.UseMacro("Hands"))
                     {
-                        lastcrusaderShotTime = DateTime.Now;
+                        Crusader = DateTime.Now;
                         return true;
                     }
                     Console.WriteLine("Casting Crusader Strike");
@@ -352,96 +354,104 @@ public class RetPala : Rotation
                 }
                 else if (hasHandOfReckoning && !me.Auras.Contains("Hand of Reckoning"))
                 {
-                    Console.WriteLine("Casting Hand of Reckoning");
                     if (Api.UseMacro("Hands"))
                     {
-                        lastHandOfReckoningTime = DateTime.Now;
+                        Recogning = DateTime.Now;
                         return true;
                     }
+                    Console.WriteLine("Casting Hand of Reckoning");
                 }
                 else if (hasBeaconOfLight)
                 {
                     Console.WriteLine("Hands rune has Beacon of Light enchantment");
                     // No need to cast Beacon of Light, just log that it has the enchantment
                 }
-                             
+
                 return true;
             }
+            else if (hasBeaconOfLight)
+            {
+                Console.WriteLine("Hands rune has Beacon of Light enchantment");
+                // No need to cast Beacon of Light, just log that it has the enchantment
             }
+
+            return true;
+        }
+    }
 
         //DPS rotation
 
 
 
         return base.CombatPulse();
-    }
-    private bool IsNPC(WowUnit unit)
+}
+private bool IsNPC(WowUnit unit)
+{
+    if (!IsValid(unit))
     {
-        if (!IsValid(unit))
-        {
-            // If the unit is not valid, consider it not an NPC
-            return false;
-        }
-        foreach (var condition in npcConditions)
-        {
-            switch (condition)
-            {
-                case "Innkeeper" when unit.IsInnkeeper():
-                case "Auctioneer" when unit.IsAuctioneer():
-                case "Banker" when unit.IsBanker():
-                case "FlightMaster" when unit.IsFlightMaster():
-                case "GuildBanker" when unit.IsGuildBanker():
-                case "StableMaster" when unit.IsStableMaster():
-                case "Trainer" when unit.IsTrainer():
-                case "Vendor" when unit.IsVendor():
-                case "QuestGiver" when unit.IsQuestGiver():
-                    return true;
-            }
-        }
-
+        // If the unit is not valid, consider it not an NPC
         return false;
     }
-    private void LogPlayerStats()
+    foreach (var condition in npcConditions)
     {
-        var me = Api.Player;
-
-        var mana = me.Mana;
-        var healthPercentage = me.HealthPercent;
-
-
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine($"{mana} Mana available");
-        Console.WriteLine($"{healthPercentage}% Health available");
-
-        // Assuming me is an instance of a player character
-        var hasPoisonDebuff = me.Auras.Contains("Poison");
-
-        if (hasPoisonDebuff)
+        switch (condition)
         {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Have poison debuff");
-            Console.ResetColor();
+            case "Innkeeper" when unit.IsInnkeeper():
+            case "Auctioneer" when unit.IsAuctioneer():
+            case "Banker" when unit.IsBanker():
+            case "FlightMaster" when unit.IsFlightMaster():
+            case "GuildBanker" when unit.IsGuildBanker():
+            case "StableMaster" when unit.IsStableMaster():
+            case "Trainer" when unit.IsTrainer():
+            case "Vendor" when unit.IsVendor():
+            case "QuestGiver" when unit.IsQuestGiver():
+                return true;
         }
-        if (Api.Spellbook.CanCast("Crusader Strike")|| Api.Spellbook.CanCast(407676))
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Can Cast Crusader Strike");
-            Console.ResetColor();
-            
+    }
 
-        }
-        bool hasCrusader = HasEnchantment(EquipmentSlot.Hands, "Crusader Strike");
+    return false;
+}
+private void LogPlayerStats()
+{
+    var me = Api.Player;
+
+    var mana = me.Mana;
+    var healthPercentage = me.HealthPercent;
 
 
+    Console.ForegroundColor = ConsoleColor.Red;
+    Console.WriteLine($"{mana} Mana available");
+    Console.WriteLine($"{healthPercentage}% Health available");
 
-        
-        if (hasCrusader)
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Has Crusade Strike");
-                Console.ResetColor();
-               
-            }
+    // Assuming me is an instance of a player character
+    var hasPoisonDebuff = me.Auras.Contains("Poison");
+
+    if (hasPoisonDebuff)
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Have poison debuff");
         Console.ResetColor();
     }
+    if (Api.Spellbook.CanCast("Crusader Strike") || Api.Spellbook.CanCast(407676))
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Can Cast Crusader Strike");
+        Console.ResetColor();
+
+
+    }
+    bool hasCrusader = HasEnchantment(EquipmentSlot.Hands, "Crusader Strike");
+
+
+
+
+    if (hasCrusader)
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Has Crusade Strike");
+        Console.ResetColor();
+
+    }
+    Console.ResetColor();
+}
 }
