@@ -377,81 +377,85 @@ public class RetPala : Rotation
 
             return true;
         }
-    }
+
+
 
         //DPS rotation
 
 
 
         return base.CombatPulse();
-}
-private bool IsNPC(WowUnit unit)
-{
-    if (!IsValid(unit))
+    }
+
+
+    private bool IsNPC(WowUnit unit)
     {
-        // If the unit is not valid, consider it not an NPC
+        if (!IsValid(unit))
+        {
+            // If the unit is not valid, consider it not an NPC
+            return false;
+        }
+
+        foreach (var condition in npcConditions)
+        {
+            switch (condition)
+            {
+                case "Innkeeper" when unit.IsInnkeeper():
+                case "Auctioneer" when unit.IsAuctioneer():
+                case "Banker" when unit.IsBanker():
+                case "FlightMaster" when unit.IsFlightMaster():
+                case "GuildBanker" when unit.IsGuildBanker():
+                case "StableMaster" when unit.IsStableMaster():
+                case "Trainer" when unit.IsTrainer():
+                case "Vendor" when unit.IsVendor():
+                case "QuestGiver" when unit.IsQuestGiver():
+                    return true;
+            }
+        }
+
         return false;
     }
-    foreach (var condition in npcConditions)
+    private void LogPlayerStats()
     {
-        switch (condition)
+        var me = Api.Player;
+
+        var mana = me.Mana;
+        var healthPercentage = me.HealthPercent;
+
+
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine($"{mana} Mana available");
+        Console.WriteLine($"{healthPercentage}% Health available");
+
+        // Assuming me is an instance of a player character
+        var hasPoisonDebuff = me.Auras.Contains("Poison");
+
+        if (hasPoisonDebuff)
         {
-            case "Innkeeper" when unit.IsInnkeeper():
-            case "Auctioneer" when unit.IsAuctioneer():
-            case "Banker" when unit.IsBanker():
-            case "FlightMaster" when unit.IsFlightMaster():
-            case "GuildBanker" when unit.IsGuildBanker():
-            case "StableMaster" when unit.IsStableMaster():
-            case "Trainer" when unit.IsTrainer():
-            case "Vendor" when unit.IsVendor():
-            case "QuestGiver" when unit.IsQuestGiver():
-                return true;
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Have poison debuff");
+            Console.ResetColor();
         }
-    }
-
-    return false;
-}
-private void LogPlayerStats()
-{
-    var me = Api.Player;
-
-    var mana = me.Mana;
-    var healthPercentage = me.HealthPercent;
+        if (Api.Spellbook.CanCast("Crusader Strike") || Api.Spellbook.CanCast(407676))
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Can Cast Crusader Strike");
+            Console.ResetColor();
 
 
-    Console.ForegroundColor = ConsoleColor.Red;
-    Console.WriteLine($"{mana} Mana available");
-    Console.WriteLine($"{healthPercentage}% Health available");
+        }
+        bool hasCrusader = HasEnchantment(EquipmentSlot.Hands, "Crusader Strike");
 
-    // Assuming me is an instance of a player character
-    var hasPoisonDebuff = me.Auras.Contains("Poison");
 
-    if (hasPoisonDebuff)
-    {
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine("Have poison debuff");
+
+
+        if (hasCrusader)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Has Crusade Strike");
+            Console.ResetColor();
+
+        }
         Console.ResetColor();
     }
-    if (Api.Spellbook.CanCast("Crusader Strike") || Api.Spellbook.CanCast(407676))
-    {
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine("Can Cast Crusader Strike");
-        Console.ResetColor();
-
-
-    }
-    bool hasCrusader = HasEnchantment(EquipmentSlot.Hands, "Crusader Strike");
-
-
-
-
-    if (hasCrusader)
-    {
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine("Has Crusade Strike");
-        Console.ResetColor();
-
-    }
-    Console.ResetColor();
-}
 }
