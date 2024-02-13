@@ -33,8 +33,8 @@ public class Druid : Rotation
 
     private int debugInterval = 20; // Set the debug interval in seconds
     private DateTime lastDebugTime = DateTime.MinValue;
-    private TimeSpan Starsurge = TimeSpan.FromSeconds(1.1);
-    private DateTime StarsurgeCD = DateTime.MinValue;
+    private DateTime Starsurge = DateTime.MinValue;
+    private TimeSpan StarsurgeCD = TimeSpan.FromSeconds(6);
 
     public override void Initialize()
     {
@@ -235,8 +235,37 @@ public class Druid : Rotation
                 return true;
             }
         }
-
-        if (Api.HasMacro("Hands") && !target.Auras.Contains("Sunfire")
+        if (Api.Spellbook.CanCast("Starfire") && me.Auras.Contains(417157))
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Casting Starfire");
+            Console.ResetColor();
+            if (Api.Spellbook.Cast("Starfire"))
+            {
+                return true;
+            }
+        }
+        if (Api.Spellbook.CanCast("Wrath") && me.Auras.Contains(408248))
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Casting Wrath with Eclipse");
+            Console.ResetColor();
+            if (Api.Spellbook.Cast("Wrath"))
+            {
+                return true;
+            }
+        }
+        if (Api.Spellbook.CanCast("Moonfire") && !target.Auras.Contains("Moonfire") && targethealth > 30)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Casting Moonfire");
+            Console.ResetColor();
+            if (Api.Spellbook.Cast("Moonfire"))
+            {
+                return true;
+            }
+        }
+        if (Api.HasMacro("Hands") && !target.Auras.Contains("Sunfire"))
         {
             if (hasSunfire)
             {
@@ -251,11 +280,6 @@ public class Druid : Rotation
 
             }
         }
-
-
-
-
-
         if (Api.HasMacro("Legs"))
         {
             if ((DateTime.Now - Starsurge) >= StarsurgeCD)
@@ -265,10 +289,11 @@ public class Druid : Rotation
                 if (hasStarsurge)
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine("Casting Starsurge");
+                    Console.WriteLine("Casting Legs rune");
                     Console.ResetColor();
-                    if (Api.UseMacro("Hands"))
+                    if (Api.UseMacro("Legs"))
                     {
+                        Starsurge = DateTime.Now;
 
                         return true;
                     }
@@ -276,23 +301,6 @@ public class Druid : Rotation
                 }
             }
         }
-
-
-
-
-
-        if (Api.Spellbook.CanCast("Moonfire") && !target.Auras.Contains("Moonfire") && targethealth > 30)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Moonfire");
-            Console.ResetColor();
-            if (Api.Spellbook.Cast("Moonfire"))
-            {
-                return true;
-            }
-        }
-
-
 
         if (Api.Spellbook.CanCast("Wrath"))
         {
@@ -355,5 +363,32 @@ public class Druid : Rotation
             Console.ResetColor();
         }
 
+        bool hasSunfire = HasEnchantment(EquipmentSlot.Hands, "Sunfire");
+        bool hasStarsurge = HasEnchantment(EquipmentSlot.Legs, "Starsurge");
+        bool hasStormrage = HasEnchantment(EquipmentSlot.Chest, "Fury of Stormrage");
+
+
+        if (hasSunfire)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("HasSunfire");
+            Console.ResetColor();
+
+        }
+
+        if (hasStormrage)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("hasStormrage");
+            Console.ResetColor();
+
+        }
+        if (hasStarsurge)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("hasStarsurge");
+            Console.ResetColor();
+
+        }
     }
 }
