@@ -9,7 +9,10 @@ using wShadow.Warcraft.Managers;
 
 public class Druid : Rotation
 {
-
+    private bool HasEnchantment(EquipmentSlot slot, string enchantmentName)
+    {
+        return Api.Equipment.HasEnchantment(slot, enchantmentName);
+    }
     private List<string> npcConditions = new List<string>
     {
         "Innkeeper", "Auctioneer", "Banker", "FlightMaster", "GuildBanker",
@@ -30,8 +33,8 @@ public class Druid : Rotation
 
     private int debugInterval = 20; // Set the debug interval in seconds
     private DateTime lastDebugTime = DateTime.MinValue;
-    private TimeSpan starsurgeCooldown = TimeSpan.FromSeconds(1.1);
-    private DateTime laststarsurgeTime = DateTime.MinValue;
+    private TimeSpan Starsurge = TimeSpan.FromSeconds(1.1);
+    private DateTime StarsurgeCD = DateTime.MinValue;
 
     public override void Initialize()
     {
@@ -67,7 +70,9 @@ public class Druid : Rotation
 
         var me = Api.Player;
         var healthPercentage = me.HealthPercent;
-        var mana = me.Mana;
+        var mana = me.ManaPercent;
+        var target = Api.Target;
+        var reaction = me.GetReaction(target);
 
         if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
         if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
@@ -106,9 +111,6 @@ public class Druid : Rotation
                 return true;
         }
 
-        var target = Api.Target;
-
-        var reaction = me.GetReaction(target);
 
         if (!target.IsDead() &&
             (reaction != UnitReaction.Friendly &&
@@ -163,6 +165,10 @@ public class Druid : Rotation
         var points = me.ComboPoints;
         string[] HP = { "Major Healing Potion", "Superior Healing Potion", "Greater Healing Potion", "Healing Potion", "Lesser Healing Potion", "Minor Healing Potion" };
         string[] MP = { "Major Mana Potion", "Superior Mana Potion", "Greater Mana Potion", "Mana Potion", "Lesser Mana Potion", "Minor Mana Potion" };
+
+        bool hasSunfire = HasEnchantment(EquipmentSlot.Hands, "Sunfire");
+        bool hasStarsurge = HasEnchantment(EquipmentSlot.Legs, "Starsurge");
+        bool hasStormrage = HasEnchantment(EquipmentSlot.Chest, "Fury of Stormrage");
 
         if (me.HealthPercent <= 70 && (!Api.Inventory.OnCooldown(MP) || !Api.Inventory.OnCooldown(HP)))
         {
@@ -229,37 +235,52 @@ public class Druid : Rotation
                 return true;
             }
         }
-        if (!target.Auras.Contains("Sunfire") && targethealth > 30 && Api.HasMacro("Sunfire"))
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Sunfire");
-            Console.ResetColor();
-            if (Api.UseMacro("Sunfire"))
-            {
-                return true;
-            }
-        }
 
-        if (Api.HasMacro("Starsurge"))
+        if (Api.HasMacro("Hands") && !target.Auras.Contains("Sunfire")
         {
-            if ((DateTime.Now - laststarsurgeTime) >= starsurgeCooldown)
+            if (hasSunfire)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Casting Starsurge");
+                Console.WriteLine("Casting Sunfire");
                 Console.ResetColor();
-
-                if (Api.UseMacro("Starsurge"))
+                if (Api.UseMacro("Hands"))
                 {
-                    laststarsurgeTime = DateTime.Now;
+
                     return true;
                 }
-            }
-            else
-            {
-                // If the cooldown period for Chimera Shot hasn't elapsed yet
-                Console.WriteLine("Starsurge is on cooldown. Skipping cast.");
+
             }
         }
+
+
+
+
+
+        if (Api.HasMacro("Legs"))
+        {
+            if ((DateTime.Now - Starsurge) >= StarsurgeCD)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+
+                if (hasStarsurge)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Casting Starsurge");
+                    Console.ResetColor();
+                    if (Api.UseMacro("Hands"))
+                    {
+
+                        return true;
+                    }
+
+                }
+            }
+        }
+
+
+
+
+
         if (Api.Spellbook.CanCast("Moonfire") && !target.Auras.Contains("Moonfire") && targethealth > 30)
         {
             Console.ForegroundColor = ConsoleColor.Green;

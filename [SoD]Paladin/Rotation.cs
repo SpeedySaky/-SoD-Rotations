@@ -214,7 +214,7 @@ public class RetPala : Rotation
             }
         }
 
-        if (Api.Player.Auras.Contains("Divine Protection") && healthPercentage <= 50 && Api.Spellbook.CanCast("Holy Light"))
+        if (me.Auras.Contains("Divine Protection") && healthPercentage <= 50 && Api.Spellbook.CanCast("Holy Light"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Holy Light");
