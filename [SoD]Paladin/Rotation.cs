@@ -33,8 +33,12 @@ public class RetPala : Rotation
     private bool HasItem(object item) => Api.Inventory.HasItem(item);
     private int debugInterval = 5; // Set the debug interval in seconds
     private DateTime lastDebugTime = DateTime.MinValue;
-    private DateTime lastcrusaderShotTime = DateTime.MinValue;
-    private TimeSpan crusader = TimeSpan.FromSeconds(7);
+    private DateTime lastCrusaderStrikeTime = DateTime.MinValue;
+    private TimeSpan crusaderCooldown = TimeSpan.FromSeconds(7);
+
+    private DateTime lastHandOfReckoningTime = DateTime.MinValue;
+    private TimeSpan reckoningCooldown = TimeSpan.FromSeconds(12);
+
     private DateTime lastChest = DateTime.MinValue;
     private TimeSpan ChestCd = TimeSpan.FromSeconds(12);
 
@@ -330,7 +334,7 @@ public class RetPala : Rotation
         }
         if (Api.HasMacro("Hands"))
         {
-            if ((DateTime.Now - lastcrusaderShotTime) >= crusader)
+            if ((DateTime.Now - lastCrusaderStrikeTime) >= crusaderCooldown)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
 
@@ -338,7 +342,7 @@ public class RetPala : Rotation
                 {
                     if (Api.UseMacro("Hands"))
                     {
-                        lastcrusaderShotTime = DateTime.Now;
+                        lastCrusaderStrikeTime = DateTime.Now;
                         return true;
                     }
                     Console.WriteLine("Casting Crusader Strike");
@@ -348,13 +352,23 @@ public class RetPala : Rotation
                 }
                 else if (hasHandOfReckoning && !me.Auras.Contains("Hand of Reckoning"))
                 {
-                    Console.WriteLine("Casting Hand of Reckoning");
                     if (Api.UseMacro("Hands"))
                     {
+                        lastHandOfReckoningTime = DateTime.Now;
                         return true;
                     }
+                    Console.WriteLine("Casting Hand of Reckoning");
                 }
                 else if (hasBeaconOfLight)
+                {
+                    Console.WriteLine("Hands rune has Beacon of Light enchantment");
+                    // No need to cast Beacon of Light, just log that it has the enchantment
+                }
+
+                return true;
+            }
+        }
+        else if (hasBeaconOfLight)
                 {
                     Console.WriteLine("Hands rune has Beacon of Light enchantment");
                     // No need to cast Beacon of Light, just log that it has the enchantment
