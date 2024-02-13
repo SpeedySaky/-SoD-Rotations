@@ -334,7 +334,7 @@ public class RetPala : Rotation
         }
         if (Api.HasMacro("Hands"))
         {
-            if ((DateTime.Now - lastCrusaderStrikeTime) >= crusaderCooldown)
+            if ((DateTime.Now - lastcrusaderShotTime) >= crusader)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
 
@@ -342,7 +342,7 @@ public class RetPala : Rotation
                 {
                     if (Api.UseMacro("Hands"))
                     {
-                        lastCrusaderStrikeTime = DateTime.Now;
+                        lastcrusaderShotTime = DateTime.Now;
                         return true;
                     }
                     Console.WriteLine("Casting Crusader Strike");
@@ -352,23 +352,14 @@ public class RetPala : Rotation
                 }
                 else if (hasHandOfReckoning && !me.Auras.Contains("Hand of Reckoning"))
                 {
+                    Console.WriteLine("Casting Hand of Reckoning");
                     if (Api.UseMacro("Hands"))
                     {
                         lastHandOfReckoningTime = DateTime.Now;
                         return true;
                     }
-                    Console.WriteLine("Casting Hand of Reckoning");
                 }
                 else if (hasBeaconOfLight)
-                {
-                    Console.WriteLine("Hands rune has Beacon of Light enchantment");
-                    // No need to cast Beacon of Light, just log that it has the enchantment
-                }
-
-                return true;
-            }
-        }
-        else if (hasBeaconOfLight)
                 {
                     Console.WriteLine("Hands rune has Beacon of Light enchantment");
                     // No need to cast Beacon of Light, just log that it has the enchantment
@@ -391,7 +382,6 @@ public class RetPala : Rotation
             // If the unit is not valid, consider it not an NPC
             return false;
         }
-
         foreach (var condition in npcConditions)
         {
             switch (condition)
