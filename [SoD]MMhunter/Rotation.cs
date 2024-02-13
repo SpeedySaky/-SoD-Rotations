@@ -26,6 +26,7 @@ public class Hunter : Rotation
         }
         return true;
     }
+    private bool HasItem(object item) => Api.Inventory.HasItem(item);
 
     private int debugInterval = 5; // Set the debug interval in seconds
     private DateTime lastDebugTime = DateTime.MinValue;
@@ -70,8 +71,8 @@ public class Hunter : Rotation
         var me = Api.Player;
         var healthPercentage = me.HealthPercent;
         var mana = me.ManaPercent;
-        var targetDistance = target.Position.Distance2D(me.Position);
         var target = Api.Target;
+        var targetDistance = target.Position.Distance2D(me.Position);
         var pet = me.Pet();
         var PetHealth = 0.0f;
         if (IsValid(pet))
@@ -85,29 +86,26 @@ public class Hunter : Rotation
             LogPlayerStats();
             lastDebugTime = DateTime.Now; // Update lastDebugTime
         }
-        
+
         if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsChanneling()) return false;
         if (me.Auras.Contains("Drink") || me.Auras.Contains("Food") || me.IsMounted()) return false;
 
 
-        if (Api.HasMacro("Lion") && !me.Auras.Contains("Aspect of the Lion"))
+        if (Api.HasMacro("Chest") && !me.Auras.Contains("Heart of the Lion",false))
 
         {
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Aspect of the Lion");
+            Console.WriteLine("Casting Heart of the Lion");
             Console.ResetColor();
 
-            if (Api.UseMacro("Lion"))
+            if (Api.UseMacro("Chest"))
 
                 return true;
 
         }
 
 
-        // Add logic here for actions when pet's health is low, e.g., healing spells
-
-
-        if (Api.Spellbook.CanCast("Aspect of the Cheetah") && !me.Auras.Contains("Aspect of the Cheetah"))
+        if (Api.Spellbook.CanCast("Aspect of the Cheetah") && !me.Auras.Contains("Aspect of the Cheetah",false))
 
         {
             Console.ForegroundColor = ConsoleColor.Green;
@@ -124,17 +122,17 @@ public class Hunter : Rotation
         if (Api.Spellbook.CanCast("Hunter's Mark") && !target.Auras.Contains("Hunter's Mark") && !target.IsDead() && (reaction != UnitReaction.Friendly && reaction != UnitReaction.Honored && reaction != UnitReaction.Revered && reaction != UnitReaction.Exalted) &&
 mana > 20 && !IsNPC(target) && healthPercentage > 50 && mana > 20 && PetHealth > 50)
 
+        {
             {
-                              {
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine("Casting Mark");
-                    Console.ResetColor();
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Mark");
+                Console.ResetColor();
 
-                    if (Api.UseMacro("Mark"))
-                    {
-                        return true;
-                    }
-                
+                if (Api.UseMacro("Mark"))
+                {
+                    return true;
+                }
+
 
             }
         }
@@ -250,7 +248,7 @@ mana > 20 && !IsNPC(target) && healthPercentage > 50 && mana > 20 && PetHealth >
             }
         }
 
-        if (Api.Spellbook.CanCast("Aspect of the Hawk") && !me.Auras.Contains("Aspect of the Hawk"))
+        if (Api.Spellbook.CanCast("Aspect of the Hawk") && !me.Auras.Contains("Aspect of the Hawk", false))
 
         {
             Console.ForegroundColor = ConsoleColor.Green;
@@ -261,7 +259,7 @@ mana > 20 && !IsNPC(target) && healthPercentage > 50 && mana > 20 && PetHealth >
 
                 return true;
         }
-        else if (Api.Spellbook.CanCast("Aspect of the Monkey") && !me.Auras.Contains("Aspect of the Monkey") && !me.Auras.Contains("Aspect of the Hawk"))
+        else if (Api.Spellbook.CanCast("Aspect of the Monkey") && !me.Auras.Contains("Aspect of the Monkey", false) && !me.Auras.Contains("Aspect of the Hawk", false))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Aspect of the Monkey");
@@ -311,15 +309,15 @@ mana > 20 && !IsNPC(target) && healthPercentage > 50 && mana > 20 && PetHealth >
                     return true;
             }
 
-            if (target.Auras.Contains("Serpent Sting") && Api.HasMacro("Chimera"))
+            if (target.Auras.Contains("Serpent Sting") && Api.HasMacro("Hands"))
             {
                 if ((DateTime.Now - lastChimeraShotTime) >= chimeraShotCooldown)
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine("Casting Chimera Shot");
+                    Console.WriteLine("Casting Hands rune");
                     Console.ResetColor();
 
-                    if (Api.UseMacro("Chimera"))
+                    if (Api.UseMacro("Hands"))
                     {
                         lastChimeraShotTime = DateTime.Now;
                         return true;
@@ -328,7 +326,7 @@ mana > 20 && !IsNPC(target) && healthPercentage > 50 && mana > 20 && PetHealth >
                 else
                 {
                     // If the cooldown period for Chimera Shot hasn't elapsed yet
-                    Console.WriteLine("Chimera Shot is on cooldown. Skipping cast.");
+                    Console.WriteLine("Handds rune is on cooldown. Skipping cast.");
                 }
             }
 
@@ -347,13 +345,13 @@ mana > 20 && !IsNPC(target) && healthPercentage > 50 && mana > 20 && PetHealth >
         if (!target.IsDead() && targetDistance <= 7)
         {
 
-            if (Api.HasMacro("Flanking") && (DateTime.Now - lastFlanking) >= FlankingCooldown)
+            if (Api.HasMacro("Legs") && (DateTime.Now - lastFlanking) >= FlankingCooldown)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Casting Flanking Strike.");
+                Console.WriteLine("Casting Legs rune.");
                 Console.ResetColor();
 
-                if (Api.UseMacro("Flanking"))
+                if (Api.UseMacro("Legs"))
                 {
                     lastFlanking = DateTime.Now; // Update the lastCallPetTime after successful casting
                     return true;
@@ -386,7 +384,33 @@ mana > 20 && !IsNPC(target) && healthPercentage > 50 && mana > 20 && PetHealth >
 
         return base.CombatPulse();
     }
+    private bool IsNPC(WowUnit unit)
+    {
+        if (!IsValid(unit))
+        {
+            // If the unit is not valid, consider it not an NPC
+            return false;
+        }
 
+        foreach (var condition in npcConditions)
+        {
+            switch (condition)
+            {
+                case "Innkeeper" when unit.IsInnkeeper():
+                case "Auctioneer" when unit.IsAuctioneer():
+                case "Banker" when unit.IsBanker():
+                case "FlightMaster" when unit.IsFlightMaster():
+                case "GuildBanker" when unit.IsGuildBanker():
+                case "StableMaster" when unit.IsStableMaster():
+                case "Trainer" when unit.IsTrainer():
+                case "Vendor" when unit.IsVendor():
+                case "QuestGiver" when unit.IsQuestGiver():
+                    return true;
+            }
+        }
+
+        return false;
+    }
 
     private void LogPlayerStats()
     {
@@ -447,33 +471,7 @@ mana > 20 && !IsNPC(target) && healthPercentage > 50 && mana > 20 && PetHealth >
             Console.ResetColor();
             // Additional actions for when the pet's health is low
         }
-        if (me.Auras.Contains("Aspect of the Lion"))
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("HasPerAuras.Containsmanent Aspect of the Lion");
-            Console.ResetColor();
-            // Additional actions for when the pet is dead
-        }
-        else
-        if (me.Auras.Contains("Aspect of the Lion"))
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("Auras.Contains Aspect of the Lion");
-            Console.ResetColor();
-            // Additional actions for when the pet is dead
-        }
-
-        // Log the pet's health only when its status changes
-
-        else
-
-                    if (me.Auras.Contains("Aspect of the Lion"))
-        {
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("Auras.Contains Aspect of the Lion");
-            Console.ResetColor();
-            // Additional actions for when the pet's health is low
-        }
+        
         // Remaining code...
     }
 }
