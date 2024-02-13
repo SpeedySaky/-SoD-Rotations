@@ -26,6 +26,10 @@ public class RetPala : Rotation
         }
         return true;
     }
+    private bool HasEnchantment(EquipmentSlot slot, string enchantmentName)
+    {
+        return Api.Equipment.HasEnchantment(slot, enchantmentName);
+    }
     private bool HasItem(object item) => Api.Inventory.HasItem(item);
     private int debugInterval = 5; // Set the debug interval in seconds
     private DateTime lastDebugTime = DateTime.MinValue;
@@ -139,9 +143,14 @@ public class RetPala : Rotation
         var targethp = target.HealthPercent;
         if (me.IsDead() || me.IsGhost() || me.IsCasting()) return false;
         if (me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
+        bool hasCrusaderStrike = HasEnchantment(EquipmentSlot.Hands, "Crusader Strike");
+        bool hasHandOfReckoning = HasEnchantment(EquipmentSlot.Hands, "Hand of Reckoning");
+        bool hasBeaconOfLight = HasEnchantment(EquipmentSlot.Hands, "Beacon of Light");
 
         string[] HP = { "Major Healing Potion", "Superior Healing Potion", "Greater Healing Potion", "Healing Potion", "Lesser Healing Potion", "Minor Healing Potion" };
         string[] MP = { "Major Mana Potion", "Superior Mana Potion", "Greater Mana Potion", "Mana Potion", "Lesser Mana Potion", "Minor Mana Potion" };
+
+        bool hasCrusader = HasEnchantment(EquipmentSlot.Hands, "Crusader Strike");
 
         if (me.HealthPercent <= 70 && (!Api.Inventory.OnCooldown(MP) || !Api.Inventory.OnCooldown(HP)))
         {
@@ -319,46 +328,42 @@ public class RetPala : Rotation
                 return true;
             }
         }
-        if (Api.HasMacro("Chest"))
-        {
-            if ((DateTime.Now - lastChest) >= ChestCd)
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Casting Chest rune");
-                Console.ResetColor();
-
-                if (Api.UseMacro("Chest"))
-                {
-                    lastChest = DateTime.Now;
-                    return true;
-                }
-            }
-            else
-            {
-                // If the cooldown period for Chimera Shot hasn't elapsed yet
-                Console.WriteLine("Hands rune is on cooldown. Skipping cast.");
-            }
-        }
         if (Api.HasMacro("Hands"))
         {
             if ((DateTime.Now - lastcrusaderShotTime) >= crusader)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Casting Hands rune");
-                Console.ResetColor();
 
-                if (Api.UseMacro("Hands"))
+                if (hasCrusaderStrike)
                 {
-                    lastcrusaderShotTime = DateTime.Now;
-                    return true;
+                    if (Api.UseMacro("Hands"))
+                    {
+                        lastcrusaderShotTime = DateTime.Now;
+                        return true;
+                    }
+                    Console.WriteLine("Casting Crusader Strike");
+                    // Add logic to cast Crusader Strike using API method
+                    // Example: if (Api.UseSpell("Crusader Strike"))
+                    // Replace "Crusader Strike" with the correct API method for casting the spell
                 }
+                else if (hasHandOfReckoning && !me.Auras.Contains("Hand of Reckoning"))
+                {
+                    Console.WriteLine("Casting Hand of Reckoning");
+                    if (Api.UseMacro("Hands"))
+                    {
+                        return true;
+                    }
+                }
+                else if (hasBeaconOfLight)
+                {
+                    Console.WriteLine("Hands rune has Beacon of Light enchantment");
+                    // No need to cast Beacon of Light, just log that it has the enchantment
+                }
+                             
+                return true;
             }
-            else
-            {
-                // If the cooldown period for Chimera Shot hasn't elapsed yet
-                Console.WriteLine("Hands rune is on cooldown. Skipping cast.");
             }
-        }
+
         //DPS rotation
 
 
@@ -421,6 +426,18 @@ public class RetPala : Rotation
             
 
         }
+        bool hasCrusader = HasEnchantment(EquipmentSlot.Hands, "Crusader Strike");
+
+
+
+        
+        if (hasCrusader)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Has Crusade Strike");
+                Console.ResetColor();
+               
+            }
         Console.ResetColor();
     }
 }
