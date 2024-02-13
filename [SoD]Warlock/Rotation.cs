@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using wShadow.Warcraft.Classes;
 using wShadow.Warcraft.Defines;
 using wShadow.Warcraft.Managers;
+
+
 public class WarlockSoD : Rotation
 {
 
