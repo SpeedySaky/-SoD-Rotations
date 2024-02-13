@@ -490,7 +490,6 @@ public class WarlockSoD : Rotation
 
 
 
-        ShadowApi shadowApi = new ShadowApi();
         // Access the Bank property and use its methods
         if (HasItem("Hearthstone"))
         {
