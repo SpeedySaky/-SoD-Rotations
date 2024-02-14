@@ -255,7 +255,7 @@ public class Druid : Rotation
                 return true;
             }
         }
-        if (Api.Spellbook.CanCast("Moonfire") && !target.Auras.Contains("Moonfire") && targethealth > 30)
+        if (Api.Spellbook.CanCast("Moonfire") && !target.Auras.Contains("Moonfire") && targethealth > 30 && mana>= 10)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Moonfire");
