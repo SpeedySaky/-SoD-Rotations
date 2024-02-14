@@ -278,7 +278,7 @@ public class WarlockSoD : Rotation
             }
         }
 
-        if (Api.Spellbook.CanCast("Drain Soul") && ItemCount("Soul Shard") <= 2 && targethealth <= 30 && mana > 10)
+        if (Api.Spellbook.CanCast("Drain Soul") && Api.Inventory.ItemCount("Soul Shard") <= 2 && targethealth <= 30 && mana > 10)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Drain Soul");
