@@ -211,17 +211,8 @@ public class SoDHunter : Rotation
         var reaction = me.GetReaction(target);
 
 
-        if (!target.IsDead() &&
-    (reaction != UnitReaction.Friendly &&
-     reaction != UnitReaction.Honored &&
-     reaction != UnitReaction.Revered &&
-     reaction != UnitReaction.Exalted) &&
-    mana > 20 && !IsNPC(target) && Api.Spellbook.CanCast("Hunter's Mark") && !target.Auras.Contains("Hunter's Mark") && healthPercentage > 50 && mana > 20 && PetHealth > 50)
+        if (!target.IsDead() && (reaction != UnitReaction.Friendly && reaction != UnitReaction.Honored && reaction != UnitReaction.Revered && reaction != UnitReaction.Exalted) && mana > 20 && !IsNPC(target) && Api.Spellbook.CanCast("Hunter's Mark") && !target.Auras.Contains("Hunter's Mark") && healthPercentage > 50 && mana > 20 && PetHealth > 50)
         {
-
-
-
-
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Mark");
             Console.ResetColor();
