@@ -91,7 +91,7 @@ public class Hunter : Rotation
         if (me.Auras.Contains("Drink") || me.Auras.Contains("Food") || me.IsMounted()) return false;
 
 
-        if (Api.HasMacro("Chest") && !me.Auras.Contains("Heart of the Lion",false))
+        if (Api.HasMacro("Chest") && !me.Auras.Contains("Heart of the Lion", false))
 
         {
             Console.ForegroundColor = ConsoleColor.Green;
@@ -105,7 +105,7 @@ public class Hunter : Rotation
         }
 
 
-        if (Api.Spellbook.CanCast("Aspect of the Cheetah") && !me.Auras.Contains("Aspect of the Cheetah",false))
+        if (Api.Spellbook.CanCast("Aspect of the Cheetah") && !me.Auras.Contains("Aspect of the Cheetah", false))
 
         {
             Console.ForegroundColor = ConsoleColor.Green;
@@ -192,7 +192,7 @@ mana > 20 && !IsNPC(target) && healthPercentage > 50 && mana > 20 && PetHealth >
                 return true;
             }
         }
-        
+
         return base.PassivePulse();
 
     }
@@ -223,6 +223,42 @@ mana > 20 && !IsNPC(target) && healthPercentage > 50 && mana > 20 && PetHealth >
 
         var meTarget = me.Target;
 
+        string[] HP = { "Major Healing Potion", "Superior Healing Potion", "Greater Healing Potion", "Healing Potion", "Lesser Healing Potion", "Minor Healing Potion" };
+        string[] MP = { "Major Mana Potion", "Superior Mana Potion", "Greater Mana Potion", "Mana Potion", "Lesser Mana Potion", "Minor Mana Potion" };
+
+        if (me.HealthPercent <= 70 && (!Api.Inventory.OnCooldown(MP) || !Api.Inventory.OnCooldown(HP)))
+        {
+            foreach (string hpot in HP)
+            {
+                if (HasItem(hpot))
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Using Healing potion");
+                    Console.ResetColor();
+                    if (Api.Inventory.Use(hpot))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        if (me.ManaPercent <= 50 && (!Api.Inventory.OnCooldown(MP) || !Api.Inventory.OnCooldown(HP)))
+        {
+            foreach (string manapot in MP)
+            {
+                if (HasItem(manapot))
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Using mana potion");
+                    Console.ResetColor();
+                    if (Api.Inventory.Use(manapot))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
         if (!IsValid(pet) && Api.Spellbook.CanCast("Revive Pet"))
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
@@ -472,7 +508,7 @@ mana > 20 && !IsNPC(target) && healthPercentage > 50 && mana > 20 && PetHealth >
             Console.ResetColor();
             // Additional actions for when the pet's health is low
         }
-        
+
         // Remaining code...
     }
 }

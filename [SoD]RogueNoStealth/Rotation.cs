@@ -134,6 +134,26 @@ public class RogueNoStealth : Rotation
         if (me.IsDead() || me.IsGhost() || me.IsCasting()) return false;
         if (me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
 
+        string[] HP = { "Major Healing Potion", "Superior Healing Potion", "Greater Healing Potion", "Healing Potion", "Lesser Healing Potion", "Minor Healing Potion" };
+
+        if (me.HealthPercent <= 70 &&  !Api.Inventory.OnCooldown(HP))
+        {
+            foreach (string hpot in HP)
+            {
+                if (HasItem(hpot))
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Using Healing potion");
+                    Console.ResetColor();
+                    if (Api.Inventory.Use(hpot))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        
         if (Api.Spellbook.CanCast("Kick") && !Api.Spellbook.OnCooldown("Kick") && (target.IsCasting() || target.IsChanneling()))
         {
             Console.ForegroundColor = ConsoleColor.Green;
