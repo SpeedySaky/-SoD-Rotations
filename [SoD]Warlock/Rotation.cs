@@ -289,12 +289,7 @@ public class WarlockSoD : Rotation
                 return true;
             }
         }
-        if (me.InCombat() && me.Target != null && me.Target.IsValid())
-        {
-
-            // Single Target Abilities
-            if (!target.IsDead())
-            {
+        
                 if ((DateTime.Now - lastLegs) >= LegsCD)
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
@@ -391,26 +386,12 @@ public class WarlockSoD : Rotation
                     if (Api.Spellbook.Cast("Shoot"))
                         return true;
                 }
-            }
+            
 
 
-            // Check if in combat and if there are multiple targets nearby
-            if (me.InCombat() && Api.UnfriendlyUnitsNearby(10, true) >= 2)
-            {
 
-                // Multi-Target Abilities
-
-                if (!target.IsDead())
-                {
-                    // Logic for multi-target abilities, e.g. AoE spells, debuffs, etc.
-                    // Example: if (me.CanCast("AoE_Spell") && target.Distance < 8)
-                    // {
-                    //     me.Cast("AoE_Spell");
-                    // }
-                }
-
-            }
-        }
+               
+        
         return base.CombatPulse();
     }
     private bool IsNPC(WowUnit unit)
