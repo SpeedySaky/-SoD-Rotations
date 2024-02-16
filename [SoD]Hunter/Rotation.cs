@@ -112,7 +112,7 @@ public class SoDHunter : Rotation
         if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsLooting() || me.IsFlying() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
 
 
-        if (Api.HasMacro("Chest") && !me.Auras.Contains("Heart of the Lion", false))
+        if (Api.HasMacro("Chest") && !me.Auras.Contains(409583, false))
 
         {
             Console.ForegroundColor = ConsoleColor.Green;
@@ -144,7 +144,7 @@ public class SoDHunter : Rotation
 
 
 
-        if ((DateTime.Now - lastCallPetTime) >= callPetCooldown && pet.IsDead() && Api.Spellbook.CanCast("Call Pet"))
+        if ((DateTime.Now - lastCallPetTime) >= callPetCooldown && (pet.IsDead() || PetHealth < 1) && Api.Spellbook.CanCast("Call Pet"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Call Pet.");
@@ -354,7 +354,17 @@ public class SoDHunter : Rotation
             }
         }
 
+        if (Api.Spellbook.CanCast("Intimidation") && Api.Spellbook.HasSpell("Intimidation") && !Api.Spellbook.OnCooldown("Intimidation") && IsValid(pet) && (target.IsCasting() || target.IsChanneling()))
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Casting Intimidation");
+            Console.ResetColor();
 
+            if (Api.Spellbook.Cast("Intimidation"))
+            {
+                return true;
+            }
+        }
         if (Api.Spellbook.CanCast("Hunter's Mark") && !target.Auras.Contains("Hunter's Mark") && Api.HasMacro("Mark"))
         {
 
@@ -367,6 +377,17 @@ public class SoDHunter : Rotation
 
             }
 
+        }
+        if (Api.Spellbook.CanCast("Bestial Wrath") && Api.Spellbook.HasSpell("Bestial Wrath") && !Api.Spellbook.OnCooldown("Bestial Wrath"))
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Casting Bestial Wrath");
+            Console.ResetColor();
+
+            if (Api.Spellbook.Cast("Bestial Wrath"))
+            {
+                return true;
+            }
         }
         if (PetHealth <= 30 && Api.Spellbook.CanCast("Mend Pet") && !pet.Auras.Contains("Mend Pet") && mana > 20)
         {
@@ -405,6 +426,17 @@ public class SoDHunter : Rotation
 
         if (!target.IsDead() && targetDistance >= 8 && (Api.Inventory.ItemCount(Arrows) >= 1 || Api.Inventory.ItemCount(Bullets) >= 1))
         {
+            if (Api.Spellbook.CanCast("Rapid Fire") && Api.UnfriendlyUnitsNearby(10, true) >= 2 && !Api.Spellbook.OnCooldown("Rapid Fire"))
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Rapid Fire");
+                Console.ResetColor();
+
+                if (Api.Spellbook.Cast("Rapid Fire"))
+
+                    return true;
+
+            }
             if (Api.Spellbook.CanCast("Aspect of the Hawk") && !me.Auras.Contains("Aspect of the Hawk", false) && targetDistance > 12)
 
             {
@@ -446,7 +478,15 @@ public class SoDHunter : Rotation
                     Console.WriteLine("Hands Rune is on cooldown. Skipping cast.");
                 }
             }
+            if (Api.Spellbook.CanCast("Aimed Shot") && mana > 30 && targethealth > 20)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Aimed Shot");
+                Console.ResetColor();
 
+                if (Api.Spellbook.Cast("Aimed Shot"))
+                    return true;
+            }
             if (Api.Spellbook.CanCast("Multi Shot") && targetDistanceToPet <= 8)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
@@ -477,6 +517,17 @@ public class SoDHunter : Rotation
                 Console.ResetColor();
 
                 if (Api.Spellbook.Cast("Aspect of the Monkey"))
+
+                    return true;
+
+            }
+            if (Api.Spellbook.CanCast("Deterrence") && Api.UnfriendlyUnitsNearby(10, true) >= 2 && !Api.Spellbook.OnCooldown("Deterrence"))
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Deterrence");
+                Console.ResetColor();
+
+                if (Api.Spellbook.Cast("Deterrence"))
 
                     return true;
 
@@ -632,18 +683,18 @@ public class SoDHunter : Rotation
             Console.ResetColor();
             // Additional actions for when the pet's health is low
         }
-        if (me.Auras.Contains("Aspect of the Lion"))
+        if (me.Auras.Contains(409583, false))
         {
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("HasPerAuras.Containsmanent Aspect of the Lion");
+            Console.WriteLine("Has 409583");
             Console.ResetColor();
             // Additional actions for when the pet is dead
         }
         else
-        if (me.Auras.Contains("Aspect of the Lion", false))
+        if (me.Auras.Contains(409580, false))
         {
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("HasPermanent Aspect of the Lion");
+            Console.WriteLine("Has 409583");
             Console.ResetColor();
             // Additional actions for when the pet is dead
         }
@@ -652,10 +703,10 @@ public class SoDHunter : Rotation
 
         else
 
-                    if (me.Auras.HasPassive("Aspect of the Lion"))
+                    if (me.Auras.Contains("Heart of the Lion"))
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("HasPassive Aspect of the Lion");
+            Console.WriteLine("Hass Heart of the Lion");
             Console.ResetColor();
             // Additional actions for when the pet's health is low
         }
