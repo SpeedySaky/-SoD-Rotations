@@ -397,7 +397,7 @@ public class SoDHunter : Rotation
             else
             {
                 // If the cooldown period for Chimera Shot hasn't elapsed yet
-                Console.WriteLine("Belt rune is on cooldown. Skipping cast.");
+                Console.WriteLine("Legs rune is on cooldown. Skipping cast.");
             }
         }
         string[] Arrows = { "Thorium Headed Arrow", "Jagged Arrow", "Razor Arrow", "Sharp Arrow", "Rough Arrow", "Doomshot", "Ice Threaded Arrow", "Explosive Arrow" };
