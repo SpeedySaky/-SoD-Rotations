@@ -101,7 +101,7 @@ public class SoDHunter : Rotation
         if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsLooting() || me.IsFlying() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
 
 
-        if (Api.HasMacro("Chest") && !me.Auras.Contains("Aspect of the Lion", false))
+        if (Api.HasMacro("Chest") && !me.Auras.Contains("Heart of the Lion", false))
 
         {
             Console.ForegroundColor = ConsoleColor.Green;
@@ -133,7 +133,7 @@ public class SoDHunter : Rotation
 
 
 
-        if ((DateTime.Now - lastCallPetTime) >= callPetCooldown && !IsValid(pet) && Api.Spellbook.CanCast("Call Pet"))
+        if ((DateTime.Now - lastCallPetTime) >= callPetCooldown && pet.IsDead() && Api.Spellbook.CanCast("Call Pet"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Call Pet.");
@@ -146,7 +146,7 @@ public class SoDHunter : Rotation
             }
         }
         // Additional actions for when the pet is dead
-        if (!IsValid(pet) && Api.Spellbook.CanCast("Revive Pet"))
+        if (pet.IsDead() && Api.Spellbook.CanCast("Revive Pet"))
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("Casting Revive Pet");
@@ -179,7 +179,7 @@ public class SoDHunter : Rotation
                 return true;
             }
         }
-        if (IsValid(pet) && PetHealth < 40 && Api.Spellbook.CanCast("Mend Pet") && !pet.Auras.Contains("Mend Pet") && mana > 10)
+        if (!pet.IsDead() && PetHealth < 40 && Api.Spellbook.CanCast("Mend Pet") && !pet.Auras.Contains("Mend Pet") && mana > 10)
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("Pet health is low healing him");
@@ -188,15 +188,7 @@ public class SoDHunter : Rotation
 
                 return true;
         }
-        if (IsValid(pet) && PetHealth < 40 && Api.Spellbook.CanCast("Mend Pet") && !pet.Auras.Contains("Mend Pet") && mana > 10)
-        {
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("Pet health is low healing him");
-            Console.ResetColor();
-            if (Api.Spellbook.Cast("Mend Pet"))
 
-                return true;
-        }
         if (Api.Spellbook.CanCast("Aspect of the Hawk") && !me.Auras.Contains("Aspect of the Hawk", false) && !me.IsMounted() && !me.Auras.Contains("Aspect of the Cheetah", false))
 
         {
@@ -508,7 +500,7 @@ public class SoDHunter : Rotation
         var healthPercentage = me.HealthPercent;
 
         // Power percentages for different resources
-        var mana = me.Mana;
+        var mana = me.ManaPercent;
 
         var targetDistance = target.Position.Distance2D(me.Position);
 
@@ -531,19 +523,7 @@ public class SoDHunter : Rotation
             // Additional actions for when the pet is dead
         }
         else
-        if (Api.HasPet())
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("Pet is not summoned.");
-            Console.ResetColor();
-            // Additional actions for when the pet is dead
-        }
-
-        // Log the pet's health only when its status changes
-
-        else
-
-                    if (pet.IsDead())
+        if (pet.IsDead())
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("Pet is dead.");
