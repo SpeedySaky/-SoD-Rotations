@@ -200,7 +200,7 @@ public class SoDHunter : Rotation
                 return true;
         }
 
-        if (Api.Spellbook.CanCast("Aspect of the Hawk") && !me.Auras.Contains("Aspect of the Hawk", false) && !me.IsMounted() && !me.Auras.Contains("Aspect of the Cheetah", false))
+        if (Api.Spellbook.CanCast("Aspect of the Hawk") && !me.Auras.Contains("Aspect of the Hawk", false) && !me.Auras.Contains("Aspect of the Cheetah", false))
 
         {
             Console.ForegroundColor = ConsoleColor.Green;
@@ -277,6 +277,8 @@ public class SoDHunter : Rotation
         bool hasSpecialist = HasEnchantment(EquipmentSlot.Waist, "Melee Specialist");
         //feet
         bool hasDW = HasEnchantment(EquipmentSlot.Feet, "Dual Wield Specialization");
+        string[] Arrows = { "Thorium Headed Arrow", "Jagged Arrow", "Razor Arrow", "Sharp Arrow", "Rough Arrow", "Doomshot", "Ice Threaded Arrow", "Explosive Arrow" };
+        string[] Bullets = { "Thorium Shells", "Ice Threaded Bullet", "Rockshard Pellets", "Mithril Gyro-Shot", "Accurate Slugs", "Hi-Impact Mithril Slugs", "Exploding Shot", "Crafted Solid Shot", "Solid Shot", "Crafted Heavy Shot", "Heavy Shot", "Crafted Light Shot" };
 
 
 
@@ -365,13 +367,13 @@ public class SoDHunter : Rotation
                 return true;
             }
         }
-        if (Api.Spellbook.CanCast("Hunter's Mark") && !target.Auras.Contains("Hunter's Mark") && Api.HasMacro("Mark"))
+        if (Api.Spellbook.CanCast("Hunter's Mark") && !target.Auras.Contains("Hunter's Mark"))
         {
 
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Mark");
             Console.ResetColor();
-            if (Api.UseMacro("Mark"))
+            if (Api.Spellbook.Cast("Hunter's Mark"))
             {
                 return true;
 
@@ -401,30 +403,9 @@ public class SoDHunter : Rotation
         }
 
 
-        if (Api.HasMacro("Legs") && hasCommand && !pet.IsDead())
-        {
-            if ((DateTime.Now - Command) >= CommandCD)
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Casting Legs rune");
-                Console.ResetColor();
 
-                if (Api.UseMacro("Legs"))
-                {
-                    Command = DateTime.Now;
-                    return true;
-                }
-            }
-            else
-            {
-                // If the cooldown period for Chimera Shot hasn't elapsed yet
-                Console.WriteLine("Legs rune is on cooldown. Skipping cast.");
-            }
-        }
-        string[] Arrows = { "Thorium Headed Arrow", "Jagged Arrow", "Razor Arrow", "Sharp Arrow", "Rough Arrow", "Doomshot", "Ice Threaded Arrow", "Explosive Arrow" };
-        string[] Bullets = { "Thorium Shells", "Ice Threaded Bullet", "Rockshard Pellets", "Mithril Gyro-Shot", "Accurate Slugs", "Hi-Impact Mithril Slugs", "Exploding Shot", "Crafted Solid Shot", "Solid Shot", "Crafted Heavy Shot", "Heavy Shot", "Crafted Light Shot" };
 
-        if (!target.IsDead() && targetDistance >= 8 && (Api.Inventory.ItemCount(Arrows) >= 1 || Api.Inventory.ItemCount(Bullets) >= 1))
+        if (targetDistance >= 8)
         {
             if (Api.Spellbook.CanCast("Rapid Fire") && Api.UnfriendlyUnitsNearby(10, true) >= 2 && !Api.Spellbook.OnCooldown("Rapid Fire"))
             {
@@ -437,7 +418,27 @@ public class SoDHunter : Rotation
                     return true;
 
             }
-            if (Api.Spellbook.CanCast("Aspect of the Hawk") && !me.Auras.Contains("Aspect of the Hawk", false) && targetDistance > 12)
+            if (Api.HasMacro("Legs") && hasCommand)
+            {
+                if ((DateTime.Now - Command) >= CommandCD)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Casting Legs rune");
+                    Console.ResetColor();
+
+                    if (Api.UseMacro("Legs"))
+                    {
+                        Command = DateTime.Now;
+                        return true;
+                    }
+                }
+                else
+                {
+                    // If the cooldown period for Chimera Shot hasn't elapsed yet
+                    Console.WriteLine("Legs rune is on cooldown. Skipping cast.");
+                }
+            }
+            if (Api.Spellbook.CanCast("Aspect of the Hawk") && !me.Auras.Contains("Aspect of the Hawk", false))
 
             {
                 Console.ForegroundColor = ConsoleColor.Green;
@@ -786,7 +787,19 @@ public class SoDHunter : Rotation
             Console.ResetColor();
 
         }
+        string[] Arrows = { "Skinning Knife ", "Thorium Headed Arrow", "Jagged Arrow", "Razor Arrow", "Sharp Arrow", "Rough Arrow" };
+        string[] Bullets = { "Thorium Shells", "Ice Threaded Bullet", "Rockshard Pellets", "Mithril Gyro-Shot", "Accurate Slugs", "Hi-Impact Mithril Slugs", "Exploding Shot", "Crafted Solid Shot", "Solid Shot", "Crafted Heavy Shot", "Heavy Shot", "Crafted Light Shot" };
+
+        Console.WriteLine($"Arrow Count: {Api.Inventory.ItemCount(Arrows)}");
+        Console.WriteLine($"Bullet Count: {Api.Inventory.ItemCount(Bullets)}");
+        if (HasItem(Arrows))
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Has arrows");
+            Console.ResetColor();
 
 
+
+        }
     }
 }
