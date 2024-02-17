@@ -110,9 +110,26 @@ public class SoDHunter : Rotation
         var targetDistance = target.Position.Distance2D(me.Position);
 
         if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsLooting() || me.IsFlying() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
+        bool hasLion = HasEnchantment(EquipmentSlot.Chest, "Heart of the Lion");
+
+        string[] Arrows = { "Thorium Headed Arrow", "Jagged Arrow", "Razor Arrow", "Sharp Arrow", "Rough Arrow", "Doomshot", "Ice Threaded Arrow", "Explosive Arrow" };
+        string[] Bullets = { "Thorium Shells", "Ice Threaded Bullet", "Rockshard Pellets", "Mithril Gyro-Shot", "Accurate Slugs", "Hi-Impact Mithril Slugs", "Exploding Shot", "Crafted Solid Shot", "Solid Shot", "Crafted Heavy Shot", "Heavy Shot", "Crafted Light Shot" };
 
 
-        if (Api.HasMacro("Chest") && !me.Auras.Contains(409583, false))
+
+        foreach (string arrow in Arrows)
+        {
+            if (HasItem(arrow))
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine($"Have {arrow}");
+                Console.ResetColor(); // Reset color after printing each arrow
+            }
+        }
+
+
+
+        if (Api.HasMacro("Chest") && !me.Auras.Contains(409583, false) && hasLion)
 
         {
             Console.ForegroundColor = ConsoleColor.Green;
@@ -277,9 +294,6 @@ public class SoDHunter : Rotation
         bool hasSpecialist = HasEnchantment(EquipmentSlot.Waist, "Melee Specialist");
         //feet
         bool hasDW = HasEnchantment(EquipmentSlot.Feet, "Dual Wield Specialization");
-        string[] Arrows = { "Thorium Headed Arrow", "Jagged Arrow", "Razor Arrow", "Sharp Arrow", "Rough Arrow", "Doomshot", "Ice Threaded Arrow", "Explosive Arrow" };
-        string[] Bullets = { "Thorium Shells", "Ice Threaded Bullet", "Rockshard Pellets", "Mithril Gyro-Shot", "Accurate Slugs", "Hi-Impact Mithril Slugs", "Exploding Shot", "Crafted Solid Shot", "Solid Shot", "Crafted Heavy Shot", "Heavy Shot", "Crafted Light Shot" };
-
 
 
         if (me.HealthPercent <= 70 && (!Api.Inventory.OnCooldown(MP) || !Api.Inventory.OnCooldown(HP)))
@@ -403,9 +417,17 @@ public class SoDHunter : Rotation
         }
 
 
+        string[] Arrows = { "Thorium Headed Arrow", "Jagged Arrow", "Razor Arrow", "Sharp Arrow", "Rough Arrow", "Doomshot", "Ice Threaded Arrow", "Explosive Arrow" };
+        string[] Bullets = { "Thorium Shells", "Ice Threaded Bullet", "Rockshard Pellets", "Mithril Gyro-Shot", "Accurate Slugs", "Hi-Impact Mithril Slugs", "Exploding Shot", "Crafted Solid Shot", "Solid Shot", "Crafted Heavy Shot", "Heavy Shot", "Crafted Light Shot" };
+
+        bool hasArrows = false;
+        bool hasBullets = false;
 
 
-        if (targetDistance >= 8)
+
+        // Assuming targetDistance is declared and initialized
+        if (targetDistance >= 8 && (hasArrows || hasBullets))
+
         {
             if (Api.Spellbook.CanCast("Rapid Fire") && Api.UnfriendlyUnitsNearby(10, true) >= 2 && !Api.Spellbook.OnCooldown("Rapid Fire"))
             {
@@ -787,19 +809,10 @@ public class SoDHunter : Rotation
             Console.ResetColor();
 
         }
-        string[] Arrows = { "Skinning Knife ", "Thorium Headed Arrow", "Jagged Arrow", "Razor Arrow", "Sharp Arrow", "Rough Arrow" };
-        string[] Bullets = { "Thorium Shells", "Ice Threaded Bullet", "Rockshard Pellets", "Mithril Gyro-Shot", "Accurate Slugs", "Hi-Impact Mithril Slugs", "Exploding Shot", "Crafted Solid Shot", "Solid Shot", "Crafted Heavy Shot", "Heavy Shot", "Crafted Light Shot" };
-
-        Console.WriteLine($"Arrow Count: {Api.Inventory.ItemCount(Arrows)}");
-        Console.WriteLine($"Bullet Count: {Api.Inventory.ItemCount(Bullets)}");
-        if (HasItem(Arrows))
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Has arrows");
-            Console.ResetColor();
 
 
-
-        }
     }
 }
+
+
+
