@@ -116,19 +116,6 @@ public class SoDHunter : Rotation
         string[] Bullets = { "Thorium Shells", "Ice Threaded Bullet", "Rockshard Pellets", "Mithril Gyro-Shot", "Accurate Slugs", "Hi-Impact Mithril Slugs", "Exploding Shot", "Crafted Solid Shot", "Solid Shot", "Crafted Heavy Shot", "Heavy Shot", "Crafted Light Shot" };
 
 
-
-        foreach (string arrow in Arrows)
-        {
-            if (HasItem(arrow))
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($"Have {arrow}");
-                Console.ResetColor(); // Reset color after printing each arrow
-            }
-        }
-
-
-
         if (Api.HasMacro("Chest") && !me.Auras.Contains(409583, false) && hasLion)
 
         {
@@ -296,7 +283,7 @@ public class SoDHunter : Rotation
         bool hasDW = HasEnchantment(EquipmentSlot.Feet, "Dual Wield Specialization");
 
 
-        if (me.HealthPercent <= 70 && (!Api.Inventory.OnCooldown(MP) || !Api.Inventory.OnCooldown(HP)))
+        if (healthPercentage <= 70 && (!Api.Inventory.OnCooldown(MP) || !Api.Inventory.OnCooldown(HP)))
         {
             foreach (string hpot in HP)
             {
@@ -313,7 +300,7 @@ public class SoDHunter : Rotation
             }
         }
 
-        if (me.ManaPercent <= 50 && (!Api.Inventory.OnCooldown(MP) || !Api.Inventory.OnCooldown(HP)))
+        if (mana <= 50 && (!Api.Inventory.OnCooldown(MP) || !Api.Inventory.OnCooldown(HP)))
         {
             foreach (string manapot in MP)
             {
@@ -420,8 +407,8 @@ public class SoDHunter : Rotation
         string[] Arrows = { "Thorium Headed Arrow", "Jagged Arrow", "Razor Arrow", "Sharp Arrow", "Rough Arrow", "Doomshot", "Ice Threaded Arrow", "Explosive Arrow" };
         string[] Bullets = { "Thorium Shells", "Ice Threaded Bullet", "Rockshard Pellets", "Mithril Gyro-Shot", "Accurate Slugs", "Hi-Impact Mithril Slugs", "Exploding Shot", "Crafted Solid Shot", "Solid Shot", "Crafted Heavy Shot", "Heavy Shot", "Crafted Light Shot" };
 
-        bool hasArrows = false;
-        bool hasBullets = false;
+        bool hasArrows = true;
+        bool hasBullets = true;
 
 
 
@@ -471,7 +458,7 @@ public class SoDHunter : Rotation
 
                     return true;
             }
-            if (Api.Spellbook.CanCast("Serpent Sting") && mana > 15 && !target.Auras.Contains("Serpent Sting") && healthPercentage > 35)
+            if (Api.Spellbook.CanCast("Serpent Sting") && mana > 15 && !target.Auras.Contains("Serpent Sting") && targethealth > 35)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Casting Serpent Sting");
