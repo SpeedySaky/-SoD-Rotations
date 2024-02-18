@@ -263,17 +263,8 @@ public class Druid : Rotation
                 return true;
             }
         }
-        if (Api.Spellbook.CanCast("Wrath") && me.Auras.Contains(408248))
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Wrath with Eclipse");
-            Console.ResetColor();
-            if (Api.Spellbook.Cast("Wrath"))
-            {
-                return true;
-            }
-        }
-        if (Api.Spellbook.CanCast("Moonfire") && !target.Auras.Contains("Moonfire") && targethealth > 30 && mana >= 10)
+
+        if (Api.Spellbook.CanCast("Moonfire") && !target.Auras.Contains("Moonfire") && targethealth > 30 && mana >= 5)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Moonfire");
@@ -283,7 +274,7 @@ public class Druid : Rotation
                 return true;
             }
         }
-        if (Api.HasMacro("Hands") && !target.Auras.Contains("Sunfire") && mana >= 10)
+        if (Api.HasMacro("Hands") && !target.Auras.Contains("Sunfire") && mana >= 5)
         {
             if (hasSunfire)
             {
@@ -319,7 +310,16 @@ public class Druid : Rotation
                 }
             }
         }
-
+        if (Api.Spellbook.CanCast("Wrath") && me.Auras.Contains(408248))
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Casting Wrath with Eclipse");
+            Console.ResetColor();
+            if (Api.Spellbook.Cast("Wrath"))
+            {
+                return true;
+            }
+        }
         if (Api.Spellbook.CanCast("Wrath"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
