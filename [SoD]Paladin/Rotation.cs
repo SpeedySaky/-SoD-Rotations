@@ -102,8 +102,17 @@ public class RetPala : Rotation
                 return true;
             }
         }
+        var hasPoisonDebuff = me.Auras.Contains("Poison") || me.Auras.Contains("Rabies") || me.Auras.Contains("Tetanus") || me.Auras.Contains("Infected Bite") || me.Auras.Contains("Contagion of Rot");
 
+        if (hasPoisonDebuff && Api.Spellbook.CanCast("Purify") && mana > 32)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Have poison debuff casting Purify");
+            Console.ResetColor();
+            if (Api.Spellbook.Cast("Purify"))
 
+                return true;
+        }
 
 
         if (Api.Spellbook.CanCast("Blessing of Wisdom") && !me.Auras.Contains("Blessing of Might") && !me.Auras.Contains("Blessing of Wisdom") && mana < 30)
@@ -126,7 +135,7 @@ public class RetPala : Rotation
                 return true;
             }
         }
-        if(Api.Spellbook.CanCast("Sanctity Aura") && !me.Auras.Contains("Sanctity Aura", false))
+        if (Api.Spellbook.CanCast("Sanctity Aura") && !me.Auras.Contains("Sanctity Aura", false))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Sanctity Aura");
@@ -250,7 +259,7 @@ public class RetPala : Rotation
             }
         }
         else
-          if (Api.Spellbook.CanCast("Devotion Aura") && !me.Auras.Contains("Devotion Aura", false) && !me.Auras.Contains("Sanctity Aura", false))
+         if (Api.Spellbook.CanCast("Devotion Aura") && !me.Auras.Contains("Devotion Aura", false) && !me.Auras.Contains("Sanctity Aura", false))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Devotion Aura");
@@ -261,7 +270,6 @@ public class RetPala : Rotation
                 return true;
             }
         }
-        var hasPoisonDebuff = me.Auras.Contains("Poison") || me.Auras.Contains("Rabies") || me.Auras.Contains("Tetanus") || me.Auras.Contains("Infected Bite");
         if (Api.Spellbook.CanCast("Divine Protection") && Api.Player.HealthPercent < 45 && !me.IsCasting() && !Api.Player.Auras.Contains("Forbearance", false) && !Api.Spellbook.OnCooldown("Divine Protection"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
@@ -314,17 +322,6 @@ public class RetPala : Rotation
             {
                 return true;
             }
-        }
-
-
-        if (hasPoisonDebuff && Api.Spellbook.CanCast("Purify") && mana > 32)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Have poison debuff casting Purify");
-            Console.ResetColor();
-            if (Api.Spellbook.Cast("Purify"))
-
-                return true;
         }
 
         if (Api.Spellbook.CanCast("Holy Light") && healthPercentage <= 50 && mana > 20)
