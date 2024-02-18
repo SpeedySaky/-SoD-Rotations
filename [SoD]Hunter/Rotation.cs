@@ -148,7 +148,7 @@ public class SoDHunter : Rotation
 
 
 
-        if ((DateTime.Now - lastCallPetTime) >= callPetCooldown && (pet.IsDead() || PetHealth < 1) && Api.Spellbook.CanCast("Call Pet"))
+        if ((DateTime.Now - lastCallPetTime) >= callPetCooldown && (!IsValid(pet) || PetHealth < 1) && Api.Spellbook.CanCast("Call Pet"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Call Pet.");
@@ -161,7 +161,7 @@ public class SoDHunter : Rotation
             }
         }
         // Additional actions for when the pet is dead
-        if (pet.IsDead() && Api.Spellbook.CanCast("Revive Pet"))
+        if (!IsValid(pet) && Api.Spellbook.CanCast("Revive Pet"))
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("Casting Revive Pet");
@@ -194,7 +194,7 @@ public class SoDHunter : Rotation
                 return true;
             }
         }
-        if (!pet.IsDead() && PetHealth < 40 && Api.Spellbook.CanCast("Mend Pet") && !pet.Auras.Contains("Mend Pet") && mana > 10)
+        if (IsValid(pet) && PetHealth < 40 && Api.Spellbook.CanCast("Mend Pet") && !pet.Auras.Contains("Mend Pet") && mana > 10)
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("Pet health is low healing him");
@@ -317,7 +317,7 @@ public class SoDHunter : Rotation
             }
         }
 
-        if ((DateTime.Now - lastCallPetTime) >= callPetCooldown && pet.IsDead() && Api.Spellbook.CanCast("Call Pet"))
+        if ((DateTime.Now - lastCallPetTime) >= callPetCooldown && !IsValid(pet) && Api.Spellbook.CanCast("Call Pet"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Call Pet.");
@@ -330,7 +330,7 @@ public class SoDHunter : Rotation
             }
         }
         // Additional actions for when the pet is dead
-        if (pet.IsDead() && Api.Spellbook.CanCast("Revive Pet"))
+        if (!IsValid(pet) && Api.Spellbook.CanCast("Revive Pet"))
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("Casting Revive Pet");
@@ -678,7 +678,7 @@ public class SoDHunter : Rotation
 
         // Check the status of the pet and log accordingly
 
-        if (!pet.IsDead())
+        if (IsValid(pet))
         {
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("Pet is alive.");
@@ -686,7 +686,7 @@ public class SoDHunter : Rotation
             // Additional actions for when the pet is dead
         }
         else
-        if (pet.IsDead())
+        if (!IsValid(pet))
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("Pet is dead.");
