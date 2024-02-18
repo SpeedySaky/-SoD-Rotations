@@ -110,7 +110,7 @@ public class Druid : Rotation
 
                 return true;
         }
-        if (Api.Spellbook.CanCast("Moonkin Form") && !me.Auras.Contains("Moonkin Form",false))
+        if (Api.Spellbook.CanCast("Moonkin Form") && !me.Auras.Contains("Moonkin Form", false))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Moonkin Form");
@@ -273,7 +273,7 @@ public class Druid : Rotation
                 return true;
             }
         }
-        if (Api.Spellbook.CanCast("Moonfire") && !target.Auras.Contains("Moonfire") && targethealth > 30 && mana>= 10)
+        if (Api.Spellbook.CanCast("Moonfire") && !target.Auras.Contains("Moonfire") && targethealth > 30 && mana >= 10)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Moonfire");
@@ -283,7 +283,7 @@ public class Druid : Rotation
                 return true;
             }
         }
-        if (Api.HasMacro("Hands") && !target.Auras.Contains("Sunfire"))
+        if (Api.HasMacro("Hands") && !target.Auras.Contains("Sunfire") && mana >= 10)
         {
             if (hasSunfire)
             {
