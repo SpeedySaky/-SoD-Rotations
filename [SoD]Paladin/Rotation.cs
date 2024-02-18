@@ -126,7 +126,19 @@ public class RetPala : Rotation
                 return true;
             }
         }
-        if (Api.Spellbook.CanCast("Devotion Aura") && !me.Auras.Contains("Devotion Aura", false))
+        if(Api.Spellbook.CanCast("Sanctity Aura") && !me.Auras.Contains("Sanctity Aura", false))
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Casting Sanctity Aura");
+            Console.ResetColor();
+
+            if (Api.Spellbook.Cast("Sanctity Aura"))
+            {
+                return true;
+            }
+        }
+        else
+        if (Api.Spellbook.CanCast("Devotion Aura") && !me.Auras.Contains("Devotion Aura", false) && !me.Auras.Contains("Sanctity Aura", false))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Devotion Aura");
@@ -226,7 +238,19 @@ public class RetPala : Rotation
         }
 
 
-        if (Api.Spellbook.CanCast("Devotion Aura") && !me.Auras.Contains("Devotion Aura", false))
+        if (Api.Spellbook.CanCast("Sanctity Aura") && !me.Auras.Contains("Sanctity Aura", false))
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Casting Sanctity Aura");
+            Console.ResetColor();
+
+            if (Api.Spellbook.Cast("Sanctity Aura"))
+            {
+                return true;
+            }
+        }
+        else
+          if (Api.Spellbook.CanCast("Devotion Aura") && !me.Auras.Contains("Devotion Aura", false) && !me.Auras.Contains("Sanctity Aura", false))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Devotion Aura");
