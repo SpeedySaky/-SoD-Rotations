@@ -110,6 +110,15 @@ public class Druid : Rotation
 
                 return true;
         }
+        if (Api.Spellbook.CanCast("Moonkin Form") && !me.Auras.Contains("Moonkin Form",false))
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Casting Moonkin Form");
+            Console.ResetColor();
+            if (Api.Spellbook.Cast("Moonkin Form"))
+
+                return true;
+        }
 
 
         if (!target.IsDead() &&
@@ -234,6 +243,15 @@ public class Druid : Rotation
             {
                 return true;
             }
+        }
+        if (Api.Spellbook.CanCast("Moonkin Form") && !me.Auras.Contains("Moonkin Form", false))
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Casting Moonkin Form");
+            Console.ResetColor();
+            if (Api.Spellbook.Cast("Moonkin Form"))
+
+                return true;
         }
         if (Api.Spellbook.CanCast("Starfire") && me.Auras.Contains(417157))
         {
