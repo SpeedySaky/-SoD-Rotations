@@ -33,8 +33,15 @@ public class RetPala : Rotation
     private bool HasItem(object item) => Api.Inventory.HasItem(item);
     private int debugInterval = 5; // Set the debug interval in seconds
     private DateTime lastDebugTime = DateTime.MinValue;
+
     private DateTime Crusader = DateTime.MinValue;
     private TimeSpan CrusaderCd = TimeSpan.FromSeconds(7);
+
+    private DateTime Storm = DateTime.MinValue;
+    private TimeSpan StormCd = TimeSpan.FromSeconds(10.5);
+
+    private DateTime Shield = DateTime.MinValue;
+    private TimeSpan ShieldCd = TimeSpan.FromSeconds(30);
 
     private DateTime Recogning = DateTime.MinValue;
     private TimeSpan ReckoningCooldown = TimeSpan.FromSeconds(12);
@@ -154,7 +161,35 @@ public class RetPala : Rotation
         string[] HP = { "Major Healing Potion", "Superior Healing Potion", "Greater Healing Potion", "Healing Potion", "Lesser Healing Potion", "Minor Healing Potion" };
         string[] MP = { "Major Mana Potion", "Superior Mana Potion", "Greater Mana Potion", "Mana Potion", "Lesser Mana Potion", "Minor Mana Potion" };
 
+        //runes
+        //legs
+        bool hasExemplar = HasEnchantment(EquipmentSlot.Legs, "Inspiration Exemplar");
+        bool hasSacrifice = HasEnchantment(EquipmentSlot.Legs, "Divine Sacrifice");
+        bool hasExorcist = HasEnchantment(EquipmentSlot.Legs, "Exorcist");
+        bool hasShield = HasEnchantment(EquipmentSlot.Legs, "Avenger's Shield");
+        bool hasRebuke = HasEnchantment(EquipmentSlot.Legs, "Rebuke");
+
+        //waist
+        bool hasSheath = HasEnchantment(EquipmentSlot.Waist, "Sheath of Light");
+        bool hasInfusion = HasEnchantment(EquipmentSlot.Waist, "Infusion of Light");
+        bool hasJudgements = HasEnchantment(EquipmentSlot.Waist, "Enlightened Judgements");
+
+        //feet
+        bool hasArt = HasEnchantment(EquipmentSlot.Feet, "The Art of War");
+        bool hasSacred = HasEnchantment(EquipmentSlot.Feet, "Sacred Shield");
+        bool hasGuarded = HasEnchantment(EquipmentSlot.Feet, "Guarded by the Light");
+
+        //hands
+        bool hasBeacon = HasEnchantment(EquipmentSlot.Hands, "Beacon of Light");
+        bool hasReckoning = HasEnchantment(EquipmentSlot.Hands, "Hand of Reckoning");
         bool hasCrusader = HasEnchantment(EquipmentSlot.Hands, "Crusader Strike");
+
+        //chest
+        bool hasStorm = HasEnchantment(EquipmentSlot.Chest, "Divine Storm");
+        bool hasMartyrdom = HasEnchantment(EquipmentSlot.Chest, "Seal of Martyrdom");
+        bool hasLordaeron = HasEnchantment(EquipmentSlot.Chest, "Horn of Lordaeron");
+        bool hasAegis = HasEnchantment(EquipmentSlot.Chest, "Aegis");
+
 
         if (me.HealthPercent <= 70 && (!Api.Inventory.OnCooldown(MP) || !Api.Inventory.OnCooldown(HP)))
         {
@@ -334,6 +369,72 @@ public class RetPala : Rotation
         }
 
 
+
+        if (Api.HasMacro("Legs"))
+        {
+            if (hasRebuke && (target.IsCasting() || target.IsChanneling()) && Api.Spellbook.OnCooldown("Hammer of Justice"))
+            {
+                if (Api.UseMacro("Legs"))
+                    Console.WriteLine("Casting Rebuke rune");
+
+                {
+                    return true;
+                }
+            }
+            else
+
+        if (hasShield)
+            {
+                if ((DateTime.Now - Shield) >= ShieldCd)
+                {
+                    if (Api.UseMacro("Legs"))
+                        Console.WriteLine("Casting Avenger's Shield rune");
+
+                    {
+                        Shield = DateTime.Now;
+                        return true;
+                    }
+                }
+            }
+            if (hasExorcist && !Api.Spellbook.OnCooldown("Exorcism"))
+            {
+                if (Api.UseMacro("Legs"))
+                    Console.WriteLine("Casting Exorcist rune");
+
+                {
+                    return true;
+                }
+            }
+
+        }
+        if (Api.HasMacro("Chest"))
+        {
+            if (hasAegis && !me.Auras.Contains("Aegis"))
+            {
+                if (Api.UseMacro("Chest"))
+                    Console.WriteLine("Casting Aegis rune");
+
+                {
+                    return true;
+                }
+            }
+            else
+             if (hasStorm)
+            {
+                if ((DateTime.Now - Storm) >= StormCd)
+                {
+
+                    if (Api.UseMacro("Chest"))
+                        Console.WriteLine("Casting Divine Storm rune");
+
+                    {
+                        Storm = DateTime.Now;
+                        return true;
+                    }
+                }
+            }
+        }
+
         if (Api.HasMacro("Hands"))
         {
             if ((DateTime.Now - Crusader) >= CrusaderCd)
@@ -448,9 +549,6 @@ public class RetPala : Rotation
         }
         bool hasCrusader = HasEnchantment(EquipmentSlot.Hands, "Crusader Strike");
 
-
-
-
         if (hasCrusader)
         {
             Console.ForegroundColor = ConsoleColor.Green;
@@ -458,6 +556,162 @@ public class RetPala : Rotation
             Console.ResetColor();
 
         }
-        Console.ResetColor();
+        bool hasAegis = HasEnchantment(EquipmentSlot.Chest, "Aegis");
+
+        if (hasAegis)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Has Aegis");
+            Console.ResetColor();
+
+        }
+        bool hasRebuke = HasEnchantment(EquipmentSlot.Legs, "Rebuke");
+
+        if (hasRebuke)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Has Rebuke");
+            Console.ResetColor();
+
+        }
+        bool hasLordaeron = HasEnchantment(EquipmentSlot.Chest, "Horn of Lordaeron");
+
+        if (hasLordaeron)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Has Horn of Lordaeron");
+            Console.ResetColor();
+
+        }
+        bool hasReckoning = HasEnchantment(EquipmentSlot.Hands, "Hand of Reckoning");
+
+        if (hasReckoning)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Has Hand of Reckoning");
+            Console.ResetColor();
+
+        }
+        bool hasMartyrdom = HasEnchantment(EquipmentSlot.Chest, "Seal of Martyrdom");
+
+        if (hasMartyrdom)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Has Seal of Martyrdom");
+            Console.ResetColor();
+
+        }
+        bool hasStorm = HasEnchantment(EquipmentSlot.Chest, "Divine Storm");
+
+        if (hasStorm)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Has Divine Storm");
+            Console.ResetColor();
+
+        }
+        bool hasShield = HasEnchantment(EquipmentSlot.Legs, "Avenger's Shield");
+
+        if (hasShield)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Has Avenger's Shield");
+            Console.ResetColor();
+
+        }
+        bool hasExorcist = HasEnchantment(EquipmentSlot.Legs, "Exorcist");
+
+        if (hasExorcist)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Has Exorcist");
+            Console.ResetColor();
+
+        }
+        bool hasSacrifice = HasEnchantment(EquipmentSlot.Legs, "Divine Sacrifice");
+
+        if (hasSacrifice)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Has Divine Sacrifice");
+            Console.ResetColor();
+
+        }
+        bool hasBeacon = HasEnchantment(EquipmentSlot.Hands, "Beacon of Light");
+
+        if (hasBeacon)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Has Beacon of Light");
+            Console.ResetColor();
+
+        }
+        bool hasJudgements = HasEnchantment(EquipmentSlot.Waist, "Enlightened Judgements");
+
+        if (hasJudgements)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Has Enlightened Judgements");
+            Console.ResetColor();
+
+        }
+        bool hasGuarded = HasEnchantment(EquipmentSlot.Feet, "Guarded by the Light");
+
+        if (hasGuarded)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Has Guarded by the Light");
+            Console.ResetColor();
+
+        }
+        bool hasSacred = HasEnchantment(EquipmentSlot.Feet, "Sacred Shield");
+
+        if (hasSacred)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Has Sacred Shield");
+            Console.ResetColor();
+
+        }
+        bool hasArt = HasEnchantment(EquipmentSlot.Feet, "The Art of War");
+
+        if (hasArt)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Has The Art of War");
+            Console.ResetColor();
+
+        }
+        bool hasInfusion = HasEnchantment(EquipmentSlot.Waist, "Infusion of Light");
+
+        if (hasInfusion)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Has Infusion of Light");
+            Console.ResetColor();
+
+        }
+        bool hasSheath = HasEnchantment(EquipmentSlot.Waist, "Sheath of Light");
+
+        if (hasSheath)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Has Sheath of Light");
+            Console.ResetColor();
+
+        }
+        bool hasExemplar = HasEnchantment(EquipmentSlot.Legs, "Inspiration Exemplar");
+
+        if (hasExemplar)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Has Inspiration Exemplar");
+            Console.ResetColor();
+
+        }
+
+
+
+
     }
 }
