@@ -377,20 +377,6 @@ public class RetPala : Rotation
                 return true;
             }
         }
-
-        if (Api.Spellbook.CanCast("Judgement") && mana > 15 && !Api.Spellbook.OnCooldown("Judgement") && !Api.Spellbook.OnCooldown("Judgement") && (me.Auras.Contains("Seal of Righteousness") || me.Auras.Contains("Seal of Command")))
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Judgement");
-            Console.ResetColor();
-            if (Api.Spellbook.Cast("Judgement"))
-            {
-                return true;
-            }
-        }
-
-
-
         if (Api.HasMacro("Legs"))
         {
             if (hasRebuke && (target.IsCasting() || target.IsChanneling()) && Api.Spellbook.OnCooldown("Hammer of Justice"))
@@ -498,6 +484,21 @@ public class RetPala : Rotation
                 Console.WriteLine("Hands rune has Beacon of Light enchantment");
                 // No need to cast Beacon of Light, just log that it has the enchantment
             }
+
+            if (Api.Spellbook.CanCast("Judgement") && mana > 15 && !Api.Spellbook.OnCooldown("Judgement") && !Api.Spellbook.OnCooldown("Judgement") && (me.Auras.Contains("Seal of Righteousness") || me.Auras.Contains("Seal of Command")))
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Casting Judgement");
+            Console.ResetColor();
+            if (Api.Spellbook.Cast("Judgement"))
+            {
+                return true;
+            }
+        }
+
+
+
+       
 
             return true;
         }
