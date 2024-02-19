@@ -102,7 +102,56 @@ public class RetPala : Rotation
                 return true;
             }
         }
-        var hasPoisonDebuff = me.Auras.Contains("Poison") || me.Auras.Contains("Rabies") || me.Auras.Contains("Tetanus") || me.Auras.Contains("Infected Bite") || me.Auras.Contains("Contagion of Rot");
+        var hasPoisonDebuff = me.Auras.Contains("Contagion of Rot") ||
+                              me.Auras.Contains("Bonechewer Rot") ||
+                              me.Auras.Contains("Ghoul Rot") ||
+                              me.Auras.Contains("Maggot Slime") ||
+                              me.Auras.Contains("Corrupted Strength") ||
+                              me.Auras.Contains("Corrupted Agility") ||
+                              me.Auras.Contains("Corrupted Intellect") ||
+                              me.Auras.Contains("Corrupted Stamina") ||
+                              me.Auras.Contains("Black Rot") ||
+                              me.Auras.Contains("Volatile Infection") ||
+                              me.Auras.Contains("Ghoul Plague") ||
+                              me.Auras.Contains("Corrupting Plague") ||
+                              me.Auras.Contains("Lacerating Bite") ||
+                              me.Auras.Contains("Sporeskin") ||
+                              me.Auras.Contains("Cadaver Worms") ||
+                              me.Auras.Contains("Rabies") ||
+                              me.Auras.Contains("Diseased Shot") ||
+                              me.Auras.Contains("Tetanus") ||
+                              me.Auras.Contains("Dredge Sickness") ||
+                              me.Auras.Contains("Noxious Catalyst") ||
+                              me.Auras.Contains("Spirit Decay") ||
+                              me.Auras.Contains("Withered Touch") ||
+                              me.Auras.Contains("Putrid Enzyme") ||
+                              me.Auras.Contains("Infected Wound") ||
+                              me.Auras.Contains("Infected Spine") ||
+                              me.Auras.Contains("Black Sludge") ||
+                              me.Auras.Contains("Silithid Pox") ||
+                              me.Auras.Contains("Festering Rash") ||
+                              me.Auras.Contains("Dark Sludge") ||
+                              me.Auras.Contains("Fevered Fatigue") ||
+                              me.Auras.Contains("Muculent Fever") ||
+                              me.Auras.Contains("Infected Bite") ||
+                              me.Auras.Contains("Fungal Decay") ||
+                              me.Auras.Contains("Diseased Spit") ||
+                              me.Auras.Contains("Choking Vines") ||
+                              me.Auras.Contains("Fevered Disease") ||
+                              me.Auras.Contains("Lingering Vines") ||
+                              me.Auras.Contains("Festering Wound") ||
+                              me.Auras.Contains("Creeping Vines") ||
+                              me.Auras.Contains("Parasite") ||
+                              me.Auras.Contains("Wandering Plague") ||
+                              me.Auras.Contains("Irradiated") ||
+                              me.Auras.Contains("Dark Plague") ||
+                              me.Auras.Contains("Plague Mind") ||
+                              me.Auras.Contains("Diseased Slime") ||
+                              me.Auras.Contains("Putrid Stench") ||
+                              me.Auras.Contains("Wither") ||
+                              me.Auras.Contains("Seething Plague") ||
+                              me.Auras.Contains("Death's Door") ||
+                              me.Auras.Contains("Plague Strike");
 
         if (hasPoisonDebuff && Api.Spellbook.CanCast("Purify") && mana > 32)
         {
