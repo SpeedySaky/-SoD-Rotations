@@ -102,7 +102,7 @@ public class RetPala : Rotation
                 return true;
             }
         }
-        var hasPoisonDebuff = me.Auras.Contains("Contagion of Rot") ||
+        var hasDisease = me.Auras.Contains("Contagion of Rot") ||
                               me.Auras.Contains("Bonechewer Rot") ||
                               me.Auras.Contains("Ghoul Rot") ||
                               me.Auras.Contains("Maggot Slime") ||
@@ -153,7 +153,7 @@ public class RetPala : Rotation
                               me.Auras.Contains("Death's Door") ||
                               me.Auras.Contains("Plague Strike");
 
-        if (hasPoisonDebuff && Api.Spellbook.CanCast("Purify") && mana > 32)
+        if (hasDisease && Api.Spellbook.CanCast("Purify") && mana > 32)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Have poison debuff casting Purify");
