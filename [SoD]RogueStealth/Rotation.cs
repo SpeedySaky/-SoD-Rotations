@@ -196,7 +196,7 @@ public class RogueStealth : Rotation
                 return true;
             }
         }
-        else if (Api.Spellbook.CanCast("Kidney Shot") && energy >= 25 && points >= 1)
+        else if (Api.Spellbook.CanCast("Kidney Shot") && energy >= 25 && points >= 1    )
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Kidney Shot");
