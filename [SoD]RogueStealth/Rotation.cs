@@ -165,24 +165,23 @@ public class RogueStealth : Rotation
         var targetDistance = target.Position.Distance2D(me.Position);
         string[] HP = { "Major Healing Potion", "Superior Healing Potion", "Greater Healing Potion", "Healing Potion", "Lesser Healing Potion", "Minor Healing Potion" };
 
-
-
-        if (me.HealthPercent <= 70 && !Api.Inventory.OnCooldown(HP))
+        foreach (string hpot in HP)
         {
-            foreach (string hpot in HP)
+            if (HasItem(hpot) && !Api.Inventory.OnCooldown(hpot))
             {
-                if (HasItem(hpot))
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine($"Using {hpot}");
+                Console.ResetColor();
+
+                if (Api.Inventory.Use(hpot))
                 {
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine("Using Healing potion");
-                    Console.ResetColor();
-                    if (Api.Inventory.Use(hpot))
-                    {
-                        return true;
-                    }
+                    return true;
                 }
             }
         }
+
+        // Additional code for when no usable healing potion is found
+
 
 
 
@@ -238,7 +237,7 @@ public class RogueStealth : Rotation
 
         if (Api.HasMacro("Chest"))
         {
-            if (hasQuick && (DateTime.Now - lastQuickdraw) >= QuickdrawCooldown && energy >= 20 && targetDistance <= 20 && Api.Inventory.ItemCount(Arrows) >= 1)
+            if (hasQuick && (DateTime.Now - lastQuickdraw) >= QuickdrawCooldown && energy >= 20 && targetDistance >= 8 && Api.Inventory.ItemCount(Arrows) >= 1)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Casting Chest Rune");
@@ -386,7 +385,7 @@ public class RogueStealth : Rotation
             }
 
         }
-        if (Api.Spellbook.CanCast("Evasion") && !me.Auras.Contains("Evasion", false) && Api.UnfriendlyUnitsNearby(10, true) >= 2 && !Api.Spellbook.OnCooldown("Evasion"))
+        if (Api.Spellbook.CanCast("Evasion") && !me.Auras.Contains("Evasion", false) && Api.UnfriendlyUnitsNearby(5, true) >= 2 && !Api.Spellbook.OnCooldown("Evasion"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine($"Casting Evasion");
@@ -395,8 +394,25 @@ public class RogueStealth : Rotation
             if (Api.Spellbook.Cast("Evasion"))
                 return true;
         }
+        if (Api.Spellbook.HasSpell("Blade Flurry") && Api.UnfriendlyUnitsNearby(5, true) >= 2 && !Api.Spellbook.OnCooldown("Blade Flurry") && energy >= 25)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine($"Casting Blade Flurry ");
+            Console.ResetColor();
 
-        if (Api.Spellbook.HasSpell("Slice and Dice") && points >= 2 && !me.Auras.Contains("Slice and Dice", false) && energy >= 25)
+            if (Api.Spellbook.Cast("Blade Flurry"))
+                return true;
+        }
+        if (Api.Spellbook.HasSpell("Rupture") && points >= 2 && !target.Auras.Contains("Rupture") && energy >= 25)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine($"Casting Rupture ");
+            Console.ResetColor();
+
+            if (Api.Spellbook.Cast("Rupture"))
+                return true;
+        }
+        if (Api.Spellbook.HasSpell("Slice and Dice") && points >= 2 && !me.Auras.Contains("Slice and Dice") && energy >= 25)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine($"Casting Slice and Dice ");
@@ -514,6 +530,25 @@ public class RogueStealth : Rotation
 
         }
         Console.ResetColor();
+        string[] HP = { "Major Healing Potion", "Superior Healing Potion", "Greater Healing Potion", "Healing Potion", "Lesser Healing Potion", "Minor Healing Potion" };
+
+        foreach (string hpot in HP)
+        {
+            if (HasItem(hpot))
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine($"Have {hpot}");
+                Console.ResetColor();
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"Do not have {hpot}");
+                Console.ResetColor();
+            }
+        }
+
+
 
 
 
