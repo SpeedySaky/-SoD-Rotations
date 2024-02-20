@@ -228,8 +228,6 @@ public class RetPala : Rotation
         bool hasHandOfReckoning = HasEnchantment(EquipmentSlot.Hands, "Hand of Reckoning");
         bool hasBeaconOfLight = HasEnchantment(EquipmentSlot.Hands, "Beacon of Light");
 
-        string[] HP = { "Major Healing Potion", "Superior Healing Potion", "Greater Healing Potion", "Healing Potion", "Lesser Healing Potion", "Minor Healing Potion" };
-        string[] MP = { "Major Mana Potion", "Superior Mana Potion", "Greater Mana Potion", "Mana Potion", "Lesser Mana Potion", "Minor Mana Potion" };
 
         //runes
         //legs
@@ -260,40 +258,41 @@ public class RetPala : Rotation
         bool hasLordaeron = HasEnchantment(EquipmentSlot.Chest, "Horn of Lordaeron");
         bool hasAegis = HasEnchantment(EquipmentSlot.Chest, "Aegis");
 
+        string[] HP = { "Major Healing Potion", "Superior Healing Potion", "Greater Healing Potion", "Healing Potion", "Lesser Healing Potion", "Minor Healing Potion" };
+        string[] MP = { "Major Mana Potion", "Superior Mana Potion", "Greater Mana Potion", "Mana Potion", "Lesser Mana Potion", "Minor Mana Potion" };
 
-        if (me.HealthPercent <= 70 && (!Api.Inventory.OnCooldown(MP) || !Api.Inventory.OnCooldown(HP)))
+        foreach (string hpot in HP)
         {
-            foreach (string hpot in HP)
+            if (HasItem(hpot) && (!Api.Inventory.OnCooldown(hpot) || !Api.Inventory.OnCooldown(MP)) && healthPercentage < 70)
             {
-                if (HasItem(hpot))
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine($"Using {hpot}");
+                Console.ResetColor();
+
+                if (Api.Inventory.Use(hpot))
                 {
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine("Using Healing potion");
-                    Console.ResetColor();
-                    if (Api.Inventory.Use(hpot))
-                    {
-                        return true;
-                    }
+                    return true;
                 }
             }
         }
 
-        if (me.ManaPercent <= 50 && (!Api.Inventory.OnCooldown(MP) || !Api.Inventory.OnCooldown(HP)))
+        foreach (string mpot in MP)
         {
-            foreach (string manapot in MP)
+            if (HasItem(mpot) && (!Api.Inventory.OnCooldown(mpot) || !Api.Inventory.OnCooldown(HP)) && mana < 50)
             {
-                if (HasItem(manapot))
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine($"Using {mpot}");
+                Console.ResetColor();
+
+                if (Api.Inventory.Use(mpot))
                 {
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine("Using mana potion");
-                    Console.ResetColor();
-                    if (Api.Inventory.Use(manapot))
-                    {
-                        return true;
-                    }
+                    return true;
                 }
             }
         }
+
+
+
 
 
         if (Api.Spellbook.CanCast("Sanctity Aura") && !me.Auras.Contains("Sanctity Aura", false))
@@ -535,19 +534,19 @@ public class RetPala : Rotation
             }
 
             if (Api.Spellbook.CanCast("Judgement") && mana > 15 && !Api.Spellbook.OnCooldown("Judgement") && !Api.Spellbook.OnCooldown("Judgement") && (me.Auras.Contains("Seal of Righteousness") || me.Auras.Contains("Seal of Command")))
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Judgement");
-            Console.ResetColor();
-            if (Api.Spellbook.Cast("Judgement"))
             {
-                return true;
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Judgement");
+                Console.ResetColor();
+                if (Api.Spellbook.Cast("Judgement"))
+                {
+                    return true;
+                }
             }
-        }
 
 
 
-       
+
 
             return true;
         }
