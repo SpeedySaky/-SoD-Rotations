@@ -236,12 +236,7 @@ public class Warrior : Rotation
 
         var rage = me.Rage;
         var healthPercentage = me.HealthPercent;
-        if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
-        {
-            LogPlayerStats();
-            lastDebugTime = DateTime.Now;
-        }
-
+       
         Console.ForegroundColor = ConsoleColor.Red;
         Console.WriteLine($"{rage} Rage available");
         Console.WriteLine($"{healthPercentage}% Health available");
