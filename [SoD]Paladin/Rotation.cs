@@ -383,7 +383,7 @@ public class RetPala : Rotation
 
         }
 
-        if (Api.Spellbook.CanCast("Consecration") && !Api.Spellbook.OnCooldown("Consecration") && targethp >= 30 && mana > 30)
+        if (Api.Spellbook.CanCast("Consecration") && !Api.Spellbook.OnCooldown("Consecration") && targethp >= 30 && mana > 30 && Api.UnfriendlyUnitsNearby(5, true) >= 2)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Consecration");

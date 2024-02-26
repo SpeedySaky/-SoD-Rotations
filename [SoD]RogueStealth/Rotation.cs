@@ -258,7 +258,7 @@ public class RogueStealth : Rotation
 
         if (Api.HasMacro("Legs"))
         {
-            if (hasBetween && (DateTime.Now - lastBetween) >= BetweenCooldown && energy >= 35 && points >= 3)
+            if (hasBetween  && energy >= 35 && points >= 3)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Casting Between your eyes Rune");

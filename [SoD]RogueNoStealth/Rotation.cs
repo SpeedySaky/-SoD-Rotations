@@ -87,6 +87,16 @@ public class RogueNoStealth : Rotation
         if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
 
 
+        if (Api.Spellbook.CanCast("Sprint") && !Api.Spellbook.OnCooldown("Sprint"))
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Casting Sprint");
+            Console.ResetColor();
+            if (Api.Spellbook.Cast("Sprint"))
+            {
+                return true;
+            }
+        }
 
         return base.PassivePulse();
 
@@ -153,8 +163,8 @@ public class RogueNoStealth : Rotation
             }
         }
 
-        
-        if (Api.Spellbook.CanCast("Kick") && !Api.Spellbook.OnCooldown("Kick") && (target.IsCasting() || target.IsChanneling()))
+
+        if ((Api.Spellbook.CanCast("Kick") || Api.Spellbook.CanCast("Kidney Shot")) && (!Api.Spellbook.OnCooldown("Kick") || !Api.Spellbook.OnCooldown("Kidney Shot")) && (target.IsCasting() || target.IsChanneling()))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Kick");
@@ -164,9 +174,48 @@ public class RogueNoStealth : Rotation
                 return true;
             }
         }
-        if (Api.HasMacro("Chest") && energy >= 20)
+        else if (Api.Spellbook.CanCast("Kidney Shot") && energy >= 25 && points >= 1)
         {
-            if ((DateTime.Now - lastQuickdraw) >= QuickdrawCooldown)
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Casting Kidney Shot");
+            Console.ResetColor();
+
+            if (Api.Spellbook.Cast("Kidney Shot"))
+            {
+                return true;
+            }
+        }
+
+
+        //legs
+        bool hasBetween = HasEnchantment(EquipmentSlot.Legs, "Between the Eyes");
+        bool hasDance = HasEnchantment(EquipmentSlot.Legs, "Blade Dance");
+        bool hasEnvenom = HasEnchantment(EquipmentSlot.Legs, "Envenom");
+        //hands
+        bool hasShadowstrike = HasEnchantment(EquipmentSlot.Hands, "Shadowstrike");
+        bool hasMutilate = HasEnchantment(EquipmentSlot.Hands, "Mutilate");
+        bool hasSaber = HasEnchantment(EquipmentSlot.Hands, "Saber Slash");
+        bool hasShiv = HasEnchantment(EquipmentSlot.Hands, "Shiv");
+        bool hasGauche = HasEnchantment(EquipmentSlot.Hands, "Main Gauche");
+        //chest
+        bool hasQuick = HasEnchantment(EquipmentSlot.Chest, "Quick Draw");
+        bool hasSlaughter = HasEnchantment(EquipmentSlot.Chest, "Slaughter from the Shadows");
+        bool hasBrew = HasEnchantment(EquipmentSlot.Chest, "Deadly Brew");
+        bool hasWound = HasEnchantment(EquipmentSlot.Chest, "Just a Flesh Wound");
+        //waist
+        bool hasKnife = HasEnchantment(EquipmentSlot.Waist, "Poisoned Knife");
+        bool hasShadowstep = HasEnchantment(EquipmentSlot.Waist, "Shadowstep");
+        bool hasShuriken = HasEnchantment(EquipmentSlot.Waist, "Shuriken Toss");
+        //feet
+        bool hasSubtlety = HasEnchantment(EquipmentSlot.Feet, "Master of Subtlety");
+        bool hasPunches = HasEnchantment(EquipmentSlot.Feet, "Rolling with the Punches");
+        bool hasWaylay = HasEnchantment(EquipmentSlot.Feet, "Waylay");
+        //Arows
+        string[] Arrows = { "Thorium Headed Arrow", "Jagged Arrow", "Razor Arrow", "Sharp Arrow", "Rough Arrow" };
+
+        if (Api.HasMacro("Chest"))
+        {
+            if (hasQuick && (DateTime.Now - lastQuickdraw) >= QuickdrawCooldown && energy >= 20 && targetDistance >= 8 && Api.Inventory.ItemCount(Arrows) >= 1)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Casting Chest Rune");
@@ -180,32 +229,141 @@ public class RogueNoStealth : Rotation
             }
             else
             {
-                // If the cooldown period for Chimera Shot hasn't elapsed yet
+                // If the cooldown period for Quick Draw hasn't elapsed yet
                 Console.WriteLine("Chest rune is on cooldown. Skipping cast.");
             }
         }
 
-        if (Api.HasMacro("Legs") && energy >= 35)
+        if (Api.HasMacro("Legs"))
         {
-            if ((DateTime.Now - lastBetween) >= BetweenCooldown)
+            if (hasBetween && (DateTime.Now - lastBetween) >= BetweenCooldown && energy >= 35 && points >= 3)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Casting Legs Rune");
+                Console.WriteLine("Casting Between your eyes Rune");
                 Console.ResetColor();
 
                 if (Api.UseMacro("Legs"))
                 {
-                    lastBetween = DateTime.Now;
+                    lastQuickdraw = DateTime.Now;
                     return true;
                 }
             }
-            else
+            else if (hasEnvenom && target.Auras.Contains("Deadly Poison") && points >= 2 && energy >= 35)
             {
-                // If the cooldown period for Chimera Shot hasn't elapsed yet
-                Console.WriteLine("Legs rune is on cooldown. Skipping cast.");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Envenom Rune");
+                Console.ResetColor();
+
+                if (Api.UseMacro("Legs"))
+                {
+                    return true;
+                }
+            }
+            else if (hasDance && points >= 2 && Api.UnfriendlyUnitsNearby(10, true) >= 2)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Blade Dance Rune");
+                Console.ResetColor();
+
+                if (Api.UseMacro("Legs"))
+                {
+                    return true;
+                }
             }
         }
-        if (Api.Spellbook.CanCast("Evasion") && !me.Auras.Contains("Evasion", false) && Api.UnfriendlyUnitsNearby(10, true) >= 2 && !Api.Spellbook.OnCooldown("Evasion"))
+
+
+        if (Api.HasMacro("Hands"))
+        {
+            if (hasGauche && (DateTime.Now - Gauche) >= GaucheCD && energy >= 35)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Gauche Rune");
+                Console.ResetColor();
+
+                if (Api.UseMacro("Hands"))
+                {
+                    Gauche = DateTime.Now;
+                    return true;
+                }
+            }
+            else if (hasMutilate && energy >= 40)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Mutilate Rune");
+                Console.ResetColor();
+
+                if (Api.UseMacro("Hands"))
+                {
+                    return true;
+                }
+            }
+            else if (hasSaber && energy >= 45 && !target.Auras.Contains("Saber Slash"))
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Blade Dance Rune");
+                Console.ResetColor();
+
+                if (Api.UseMacro("Hands"))
+                {
+                    return true;
+                }
+            }
+
+            else if (hasShiv && energy >= 20 && points < 5)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Blade Dance Rune");
+                Console.ResetColor();
+
+                if (Api.UseMacro("Hands"))
+                {
+                    return true;
+                }
+            }
+        }
+
+        if (Api.HasMacro("Waist"))
+        {
+            if (hasKnife && energy >= 25 && (DateTime.Now - Knife) >= KnifeCD && points < 3)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Poisoned Knife Rune");
+                Console.ResetColor();
+
+                if (Api.UseMacro("Waist"))
+                {
+                    Knife = DateTime.Now;
+
+                    return true;
+                }
+            }
+            else if (hasShadowstep && targetDistance <= 25 && (DateTime.Now - Shadowstep) >= ShadowstepCD)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Shadowstep Rune");
+                Console.ResetColor();
+
+                if (Api.UseMacro("Waist"))
+                {
+                    Shadowstep = DateTime.Now;
+                    return true;
+                }
+            }
+            else if (hasShuriken && energy >= 30 && targetDistance <= 25 && Api.UnfriendlyUnitsNearby(10, true) >= 2)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Shuriken Rune");
+                Console.ResetColor();
+
+                if (Api.UseMacro("Waist"))
+                {
+                    return true;
+                }
+            }
+
+        }
+        if (Api.Spellbook.CanCast("Evasion") && !me.Auras.Contains("Evasion", false) && Api.UnfriendlyUnitsNearby(5, true) >= 2 && !Api.Spellbook.OnCooldown("Evasion"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine($"Casting Evasion");
@@ -214,9 +372,25 @@ public class RogueNoStealth : Rotation
             if (Api.Spellbook.Cast("Evasion"))
                 return true;
         }
+        if (Api.Spellbook.HasSpell("Blade Flurry") && Api.UnfriendlyUnitsNearby(5, true) >= 2 && !Api.Spellbook.OnCooldown("Blade Flurry") && energy >= 25)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine($"Casting Blade Flurry ");
+            Console.ResetColor();
 
+            if (Api.Spellbook.Cast("Blade Flurry"))
+                return true;
+        }
+        if (Api.Spellbook.HasSpell("Rupture") && points >= 2 && !target.Auras.Contains("Rupture") && energy >= 25)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine($"Casting Rupture ");
+            Console.ResetColor();
 
-        if (Api.Spellbook.HasSpell("Slice and Dice") && points >= 2 && !me.Auras.Contains("Slice and Dice", false) && energy >= 25)
+            if (Api.Spellbook.Cast("Rupture"))
+                return true;
+        }
+        if (Api.Spellbook.HasSpell("Slice and Dice") && points >= 2 && !me.Auras.Contains("Slice and Dice") && energy >= 25)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine($"Casting Slice and Dice ");
@@ -225,7 +399,7 @@ public class RogueNoStealth : Rotation
             if (Api.Spellbook.Cast("Slice and Dice"))
                 return true;
         }
-        if (Api.Spellbook.CanCast("Eviscerate") && points == 5 && energy >= 35)
+        if (Api.Spellbook.CanCast("Eviscerate") && points >= 3 && energy >= 35)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine($"Casting Eviscerate ");
