@@ -196,7 +196,7 @@ public class RogueStealth : Rotation
                 return true;
             }
         }
-        else if (Api.Spellbook.CanCast("Kidney Shot") && energy >= 25 && points >= 1    )
+        else if (Api.Spellbook.CanCast("Kidney Shot") && energy >= 25 && points >= 1 && (target.IsCasting() || target.IsChanneling()))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Kidney Shot");
@@ -237,7 +237,7 @@ public class RogueStealth : Rotation
 
         if (Api.HasMacro("Chest"))
         {
-            if (hasQuick && (DateTime.Now - lastQuickdraw) >= QuickdrawCooldown && energy >= 20 && targetDistance >= 8 && Api.Inventory.ItemCount(Arrows) >= 1)
+            if (hasQuick && (DateTime.Now - lastQuickdraw) >= QuickdrawCooldown && energy >= 20 && Api.Inventory.ItemCount(Arrows) >= 1)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Casting Chest Rune");
@@ -249,16 +249,12 @@ public class RogueStealth : Rotation
                     return true;
                 }
             }
-            else
-            {
-                // If the cooldown period for Quick Draw hasn't elapsed yet
-                Console.WriteLine("Chest rune is on cooldown. Skipping cast.");
-            }
+           
         }
 
         if (Api.HasMacro("Legs"))
         {
-            if (hasBetween  && energy >= 35 && points >= 3)
+            if (hasBetween && (DateTime.Now - lastBetween) >= BetweenCooldown && energy >= 35 && points >= 2 && targetDistance >= 5)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Casting Between your eyes Rune");
@@ -266,7 +262,7 @@ public class RogueStealth : Rotation
 
                 if (Api.UseMacro("Legs"))
                 {
-                    lastQuickdraw = DateTime.Now;
+                    lastBetween = DateTime.Now;
                     return true;
                 }
             }
@@ -332,7 +328,7 @@ public class RogueStealth : Rotation
                 }
             }
 
-            else if (hasShiv && energy >= 20 && points<5)
+            else if (hasShiv && energy >= 20 && points < 5)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Casting Blade Dance Rune");
@@ -360,7 +356,7 @@ public class RogueStealth : Rotation
                     return true;
                 }
             }
-            else if (hasShadowstep && targetDistance<=25 && (DateTime.Now - Shadowstep) >= ShadowstepCD)
+            else if (hasShadowstep && targetDistance <= 25 && (DateTime.Now - Shadowstep) >= ShadowstepCD)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Casting Shadowstep Rune");

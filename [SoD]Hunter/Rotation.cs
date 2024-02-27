@@ -133,7 +133,7 @@ public class SoDHunter : Rotation
         // Add logic here for actions when pet's health is low, e.g., healing spells
 
 
-        if (Api.Spellbook.CanCast("Aspect of the Cheetah") && !me.Auras.Contains("Aspect of the Cheetah", false) && !me.IsMounted())
+        if (Api.Spellbook.CanCast("Aspect of the Cheetah") && !me.Auras.Contains("Aspect of the Cheetah", false) && !me.IsMounted() && !me.Auras.Contains(415423, false))
 
         {
             Console.ForegroundColor = ConsoleColor.Green;
@@ -204,7 +204,7 @@ public class SoDHunter : Rotation
                 return true;
         }
 
-        if (Api.Spellbook.CanCast("Aspect of the Hawk") && !me.Auras.Contains("Aspect of the Hawk", false) && !me.Auras.Contains("Aspect of the Cheetah", false))
+        if (Api.Spellbook.CanCast("Aspect of the Hawk") && !me.Auras.Contains("Aspect of the Hawk", false) && !me.Auras.Contains("Aspect of the Cheetah", false) && me.Auras.Contains(415423, false))
 
         {
             Console.ForegroundColor = ConsoleColor.Green;
@@ -263,8 +263,6 @@ public class SoDHunter : Rotation
 
         if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsChanneling()) return false;
 
-        string[] HP = { "Major Healing Potion", "Superior Healing Potion", "Greater Healing Potion", "Healing Potion", "Lesser Healing Potion", "Minor Healing Potion" };
-        string[] MP = { "Major Mana Potion", "Superior Mana Potion", "Greater Mana Potion", "Mana Potion", "Lesser Mana Potion", "Minor Mana Potion" };
 
         //runes
         //legs
@@ -282,6 +280,8 @@ public class SoDHunter : Rotation
         //feet
         bool hasDW = HasEnchantment(EquipmentSlot.Feet, "Dual Wield Specialization");
 
+        string[] HP = { "Major Healing Potion", "Superior Healing Potion", "Greater Healing Potion", "Healing Potion", "Lesser Healing Potion", "Minor Healing Potion" };
+        string[] MP = { "Major Mana Potion", "Superior Mana Potion", "Greater Mana Potion", "Mana Potion", "Lesser Mana Potion", "Minor Mana Potion" };
 
         if (healthPercentage <= 70 && (!Api.Inventory.OnCooldown(MP) || !Api.Inventory.OnCooldown(HP)))
         {
@@ -392,7 +392,7 @@ public class SoDHunter : Rotation
                 return true;
             }
         }
-        if (PetHealth <= 30 && Api.Spellbook.CanCast("Mend Pet") && !pet.Auras.Contains("Mend Pet") && mana > 20)
+        if (IsValid(pet) && PetHealth <= 30 && Api.Spellbook.CanCast("Mend Pet") && !pet.Auras.Contains("Mend Pet") && mana > 20)
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("Pet health is low healing him");
