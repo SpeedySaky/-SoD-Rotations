@@ -85,7 +85,7 @@ public class Warrior : Rotation
      reaction != UnitReaction.Exalted) &&
      !IsNPC(target))
         {
-            if (Api.Spellbook.CanCast("Charge") && targetDistance >= 8 && targetDistance <= 23 && !Api.Spellbook.OnCooldown("Charge"))
+            if (Api.Spellbook.CanCast("Charge") && targetDistance > 8 && targetDistance < 25 && !Api.Spellbook.OnCooldown("Charge"))
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Charge");
@@ -106,11 +106,7 @@ public class Warrior : Rotation
         var rage = me.Rage;
         var target = Api.Target;
         var targethealth = target.HealthPercent;
-        if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
-        {
-            LogPlayerStats();
-            lastDebugTime = DateTime.Now;
-        }
+        
         string[] HP = { "Major Healing Potion", "Superior Healing Potion", "Greater Healing Potion", "Healing Potion", "Lesser Healing Potion", "Minor Healing Potion" };
 
         if (me.HealthPercent <= 70 && !Api.Inventory.OnCooldown(HP))
@@ -141,7 +137,7 @@ public class Warrior : Rotation
 
                 return true;
         }
-        if (Api.Spellbook.CanCast("Rend") && targethealth >= 30 && !target.Auras.Contains("Rend"))
+        if (Api.Spellbook.CanCast("Rend") && targethealth >= 30 && !target.Auras.Contains("Rend") && rage >10) 
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Rend");
@@ -150,7 +146,7 @@ public class Warrior : Rotation
 
                 return true;
         }
-        if (Api.Spellbook.CanCast("Thunder Clap") && !target.Auras.Contains("Thunder Clap")) //&& Api.EnemiesNearby(10, true, true) >= 2)
+        if (Api.Spellbook.CanCast("Thunder Clap") && !target.Auras.Contains("Thunder Clap") && rage >20 && targethealth >= 30) //&& Api.EnemiesNearby(10, true, true) >= 2)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Thunder Clap");
@@ -168,7 +164,7 @@ public class Warrior : Rotation
 
                 return true;
         }
-        if (!me.Auras.Contains("Battle Shout") && Api.Spellbook.CanCast("Battle Shout") && !Api.Spellbook.OnCooldown("Battle Shout"))
+        if (!me.Auras.Contains("Battle Shout") && Api.Spellbook.CanCast("Battle Shout") && rage >10)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Battle Shout");
@@ -179,7 +175,7 @@ public class Warrior : Rotation
 
         }
 
-        if (Api.Spellbook.CanCast("Overpower"))
+        if (Api.Spellbook.CanCast("Overpower") && rage >5 )
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Overpower");
@@ -189,12 +185,22 @@ public class Warrior : Rotation
                 return true;
 
         }
-        if (Api.Spellbook.CanCast("Heroic Strike"))
+        if (Api.Spellbook.CanCast("Heroic Strike") && rage>15)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Heroic Strike");
             Console.ResetColor();
             if (Api.Spellbook.Cast("Heroic Strike"))
+
+                return true;
+
+        }
+        if (Api.Spellbook.CanCast("Attack"))
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Casting Attack");
+            Console.ResetColor();
+            if (Api.Spellbook.Cast("Attack"))
 
                 return true;
 
