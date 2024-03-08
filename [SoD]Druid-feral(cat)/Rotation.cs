@@ -108,31 +108,7 @@ public class FeralDruidSoD : Rotation
                 return true;
         }
 
-        if (target == null && !me.Auras.Contains("Cat Form", false))
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Cat Form");
-            Console.ResetColor();
-
-            if (Api.Spellbook.Cast("Cat Form"))
-            {
-                return true;
-            }
-        }
-        else
-        {
-            if (reaction != UnitReaction.Friendly && reaction != UnitReaction.Honored && reaction != UnitReaction.Revered && reaction != UnitReaction.Exalted && mana > 20 && !IsNPC(target) && !me.Auras.Contains("Cat Form", false))
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Casting Cat Form");
-                Console.ResetColor();
-
-                if (Api.Spellbook.Cast("Cat Form"))
-                {
-                    return true;
-                }
-            }
-        }
+       
 
 
 
@@ -256,13 +232,13 @@ public class FeralDruidSoD : Rotation
                 return true;
             }
         }
-        if (Api.HasMacro("Roar") && points >= 1 && energy >= 25 && !me.Auras.Contains("Savage Roar") && me.Auras.Contains("Cat Form", false))
+        if (Api.HasMacro("Legs") && points >= 1 && energy >= 25 && !me.Auras.Contains(407988) && me.Auras.Contains("Cat Form", false))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine($"Casting Savage Roar");
             Console.ResetColor();
 
-            if (Api.UseMacro("Roar"))
+            if (Api.UseMacro("Legs"))
                 return true;
         }
         if (Api.HasMacro("Mangle") && points < 3 && energy >= 45 && me.Auras.Contains("Cat Form", false))

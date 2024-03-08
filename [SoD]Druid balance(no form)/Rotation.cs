@@ -364,7 +364,7 @@ public class Druid : Rotation
     {
         var me = Api.Player;
 
-        var mana = me.Mana;
+        var mana = me.ManaPercent;
         var healthPercentage = me.HealthPercent;
 
 

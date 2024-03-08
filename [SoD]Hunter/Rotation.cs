@@ -447,7 +447,7 @@ public class SoDHunter : Rotation
                     Console.WriteLine("Legs rune is on cooldown. Skipping cast.");
                 }
             }
-            if (Api.Spellbook.CanCast("Aspect of the Hawk") && !me.Auras.Contains("Aspect of the Hawk", false))
+            if (Api.Spellbook.CanCast("Aspect of the Hawk") && !me.Auras.Contains("Aspect of the Hawk", false) && mana >70)
 
             {
                 Console.ForegroundColor = ConsoleColor.Green;
@@ -458,6 +458,19 @@ public class SoDHunter : Rotation
 
                     return true;
             }
+            else
+            if (Api.Spellbook.CanCast("Aspect of the Viper") && !me.Auras.Contains("Aspect of the Viper", false) && mana < 30)
+
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Aspect of the Viper");
+                Console.ResetColor();
+
+                if (Api.Spellbook.Cast("Aspect of the Viper"))
+
+                    return true;
+            }
+
             if (Api.Spellbook.CanCast("Serpent Sting") && mana > 15 && !target.Auras.Contains("Serpent Sting") && targethealth > 35)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
@@ -520,17 +533,7 @@ public class SoDHunter : Rotation
 
         if (!target.IsDead() && targetDistance <= 8)
         {
-            if (Api.Spellbook.CanCast("Aspect of the Monkey") && !me.Auras.Contains("Aspect of the Monkey", false))
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Casting Aspect of the Monkey");
-                Console.ResetColor();
-
-                if (Api.Spellbook.Cast("Aspect of the Monkey"))
-
-                    return true;
-
-            }
+            
             if (Api.Spellbook.CanCast("Deterrence") && Api.UnfriendlyUnitsNearby(10, true) >= 2 && !Api.Spellbook.OnCooldown("Deterrence"))
             {
                 Console.ForegroundColor = ConsoleColor.Green;
@@ -583,15 +586,7 @@ public class SoDHunter : Rotation
                 if (Api.Spellbook.Cast("Wing Clip"))
                     return true;
             }
-            if (Api.Spellbook.CanCast("Mongoose Bite") && mana > 15)
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Casting Mongoose Bite");
-                Console.ResetColor();
-
-                if (Api.Spellbook.Cast("Mongoose Bite"))
-                    return true;
-            }
+            
             if (Api.Spellbook.CanCast("Raptor Strike") && mana > 15)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
