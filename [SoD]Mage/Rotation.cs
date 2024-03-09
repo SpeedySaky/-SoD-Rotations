@@ -26,6 +26,28 @@ public class MageSoD : Rotation
         }
         return true;
     }
+    private bool HasEnchantment(EquipmentSlot slot, string enchantmentName)
+    {
+        return Api.Equipment.HasEnchantment(slot, enchantmentName);
+    }
+    //runes 
+
+    // Gloves
+      
+
+    // Chest
+
+    // Pants
+    private DateTime lastLivingFlameRune = DateTime.MinValue;
+    private TimeSpan LivingFlameRuneCooldown = TimeSpan.FromSeconds(65);
+
+    private DateTime lastArcaneSurgeRune = DateTime.MinValue;
+    private TimeSpan ArcaneSurgeRuneCooldown = TimeSpan.FromSeconds(130);
+
+    private DateTime lastIcyVeinsRune = DateTime.MinValue;
+    private TimeSpan IcyVeinsRuneCooldown = TimeSpan.FromSeconds(190);
+
+
     private bool HasItem(object item) => Api.Inventory.HasItem(item);
     private int debugInterval = 5; // Set the debug interval in seconds
     private DateTime lastDebugTime = DateTime.MinValue;
@@ -251,7 +273,33 @@ public class MageSoD : Rotation
         var mana = me.ManaPercent;
         string[] HP = { "Major Healing Potion", "Superior Healing Potion", "Greater Healing Potion", "Healing Potion", "Lesser Healing Potion", "Minor Healing Potion" };
         string[] MP = { "Major Mana Potion", "Superior Mana Potion", "Greater Mana Potion", "Mana Potion", "Lesser Mana Potion", "Minor Mana Potion" };
+        // Belt
+        bool hasFrostBoltRune = HasEnchantment(EquipmentSlot.Waist, "Spellfrost Bolt");
+        bool hasFrostfireBoltRune = HasEnchantment(EquipmentSlot.Waist, "Frostfire Bolt");
+        bool hasHotStreakRune = HasEnchantment(EquipmentSlot.Waist, "Hot Streak");
+        bool hasMissileBarrageRune = HasEnchantment(EquipmentSlot.Waist, "Missile Barrag");
 
+        // Boots
+        bool hasSpellPowerRune = HasEnchantment(EquipmentSlot.Feet, "Spell Power");
+        bool hasChronostaticPreservationRune = HasEnchantment(EquipmentSlot.Feet, "Chronostatic Preservation");
+        bool hasBrainFreezeRune = HasEnchantment(EquipmentSlot.Feet, "Brain Freeze");
+        // Gloves
+        bool hasIceLanceRune = HasEnchantment(EquipmentSlot.Hands, "Ice Lance");
+        bool hasLivingBombRune = HasEnchantment(EquipmentSlot.Hands, "Living Bomb");
+        bool hasArcaneBlastRune = HasEnchantment(EquipmentSlot.Hands, "Arcane Blast");
+        bool hasRewindTimeRune = HasEnchantment(EquipmentSlot.Hands, "Rewind Time");
+
+        // Chest
+        bool hasEnlightenmentRune = HasEnchantment(EquipmentSlot.Chest, "Enlightenment");
+        bool hasBurnoutRune = HasEnchantment(EquipmentSlot.Chest, "Burnout");
+        bool hasFingersOfFrostRune = HasEnchantment(EquipmentSlot.Chest, "Fingers of Frost");
+        bool hasRegenerationRune = HasEnchantment(EquipmentSlot.Chest, "Regeneration");
+
+        // Pants
+        bool hasLivingFlameRune = HasEnchantment(EquipmentSlot.Legs, "Living Flame");
+        bool hasArcaneSurgeRune = HasEnchantment(EquipmentSlot.Legs, "Arcane Surge");
+        bool hasIcyVeinsRune = HasEnchantment(EquipmentSlot.Legs, "Icy Vein");
+        bool hasMassRegenerationRune = HasEnchantment(EquipmentSlot.Legs, "Mass Regeneration");
         if (me.HealthPercent <= 70 && (!Api.Inventory.OnCooldown(MP) || !Api.Inventory.OnCooldown(HP)))
         {
             foreach (string hpot in HP)
@@ -347,6 +395,113 @@ public class MageSoD : Rotation
             // Single Target Abilities
             if (!target.IsDead())
             {
+                if (hasIceLanceRune && target.Auras.Contains("Frozen") && Api.HasMacro("Hands") && mana > 8)
+                {
+
+                    Console.WriteLine("Casting Ice Lance rune");
+                    Console.ResetColor();
+
+                    if (Api.UseMacro("Hands"))
+                        return true;
+                }
+
+                if (hasLivingBombRune && Api.HasMacro("Hands") && mana > 22 && target.Auras.Contains("Living Bomb"))
+                {
+
+                    Console.WriteLine("Casting Living Bomb rune");
+                    Console.ResetColor();
+
+                    if (Api.UseMacro("Hands"))
+                        return true;
+                }
+
+                if (hasArcaneBlastRune && Api.HasMacro("Hands") && mana > 7)
+                {
+
+                    Console.WriteLine("Casting Living Bomb rune");
+                    Console.ResetColor();
+
+                    if (Api.UseMacro("Hands"))
+                        return true;
+                }
+               
+                if (hasFrostBoltRune && Api.HasMacro("Belt") && mana > 12)
+                {
+
+                    Console.WriteLine("Casting Spellfrost Bolt rune");
+                    Console.ResetColor();
+
+                    if (Api.UseMacro("Hands"))
+                        return true;
+                }
+             
+                if (hasFrostfireBoltRune && Api.HasMacro("Belt") && mana > 14)
+                {
+
+                    Console.WriteLine("Casting Frostfire Bolt rune");
+                    Console.ResetColor();
+
+                    if (Api.UseMacro("Hands"))
+                        return true;
+                }
+              
+                if (hasHotStreakRune && me.Aura.Contains("Hot Streak"))
+                {
+
+                    Console.WriteLine("Casting Pyroblast with Hot Streak");
+                    Console.ResetColor();
+
+                    if (Api.Spellbook.Cast("Pyroblast"))
+                        return true;
+                }
+              
+                if (hasBrainFreezeRune && me.Aura.Contains("Brain Freeze"))
+                {
+
+                    Console.WriteLine("Casting Fireball with Brain Freeze");
+                    Console.ResetColor();
+
+                    if (Api.Spellbook.Cast("Fireball"))
+                        return true;
+                }
+               
+                if (hasIcyVeinsRune && Api.HasMacro("Legs") && mana > 3 && (DateTime.Now - lastIcyVeinsRune) >= IcyVeinsRuneCooldown)
+                {
+
+                    Console.WriteLine("Casting Icy Veins rune");
+                    Console.ResetColor();
+
+                    if (Api.UseMacro("Legs"))
+                        lastIcyVeinsRune = DateTime.Now;
+
+                    return true;
+                }
+                
+                if (hasLivingFlameRune && Api.HasMacro("Legs") && mana > 11 && (DateTime.Now - lastLivingFlameRune) >= LivingFlameRuneCooldown)
+                {
+
+                    Console.WriteLine("Casting Living Flame rune");
+                    Console.ResetColor();
+
+                    if (Api.UseMacro("Legs"))
+                        lastLivingFlameRune = DateTime.Now;
+
+                    return true;
+                }
+                
+                if (hasArcaneSurgeRune && Api.HasMacro("Legs") && (DateTime.Now - lastArcaneSurgeRune) >= ArcaneSurgeRuneCooldown)
+                {
+
+                    Console.WriteLine("Casting Arcane Surge rune");
+                    Console.ResetColor();
+
+                    if (Api.UseMacro("Legs"))
+                        lastArcaneSurgeRune = DateTime.Now;
+
+                    return true;
+                }
+
+
                 if (Api.Spellbook.CanCast("Frost Nova") && targetDistance <= 8 && !Api.Spellbook.OnCooldown("Frost Nova"))
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
@@ -473,7 +628,6 @@ public class MageSoD : Rotation
         var me = Api.Player;
         var target = Api.Target;
         var mana = me.Mana;
-        ShadowApi shadowApi = new ShadowApi();
 
         // Health percentage of the player
         var healthPercentage = me.HealthPercent;
@@ -535,6 +689,33 @@ public class MageSoD : Rotation
             Console.WriteLine("Have curse debuff");
             Console.ResetColor();
         }
+        // Belt
+        bool hasFrostBoltRune = HasEnchantment(EquipmentSlot.Waist, "Spellfrost Bolt");
+        bool hasFrostfireBoltRune = HasEnchantment(EquipmentSlot.Waist, "Frostfire Bolt");
+        bool hasHotStreakRune = HasEnchantment(EquipmentSlot.Waist, "Hot Streak");
+        bool hasMissileBarrageRune = HasEnchantment(EquipmentSlot.Waist, "Missile Barrage");
+
+        // Boots
+        bool hasSpellPowerRune = HasEnchantment(EquipmentSlot.Feet, "Spell Power");
+        bool hasChronostaticPreservationRune = HasEnchantment(EquipmentSlot.Feet, "Chronostatic Preservation");
+        bool hasBrainFreezeRune = HasEnchantment(EquipmentSlot.Feet, "Brain Freeze");
+        // Gloves
+        bool hasIceLanceRune = HasEnchantment(EquipmentSlot.Hands, "Ice Lance");
+        bool hasLivingBombRune = HasEnchantment(EquipmentSlot.Hands, "Living Bomb");
+        bool hasArcaneBlastRune = HasEnchantment(EquipmentSlot.Hands, "Arcane Blast");
+        bool hasRewindTimeRune = HasEnchantment(EquipmentSlot.Hands, "Rewind Time");
+
+        // Chest
+        bool hasEnlightenmentRune = HasEnchantment(EquipmentSlot.Chest, "Enlightenment");
+        bool hasBurnoutRune = HasEnchantment(EquipmentSlot.Chest, "Burnout");
+        bool hasFingersOfFrostRune = HasEnchantment(EquipmentSlot.Chest, "Fingers of Frost");
+        bool hasRegenerationRune = HasEnchantment(EquipmentSlot.Chest, "Regeneration");
+
+        // Pants
+        bool hasLivingFlameRune = HasEnchantment(EquipmentSlot.Legs, "Living Flame");
+        bool hasArcaneSurgeRune = HasEnchantment(EquipmentSlot.Legs, "Arcane Surge");
+        bool hasIcyVeinsRune = HasEnchantment(EquipmentSlot.Legs, "Icy Veins");
+        bool hasMassRegenerationRune = HasEnchantment(EquipmentSlot.Legs, "Mass Regeneration");
 
 
         Console.ResetColor();
