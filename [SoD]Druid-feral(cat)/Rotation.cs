@@ -130,6 +130,7 @@ public class FeralDruidSoD : Rotation
         var points = me.ComboPoints;
         string[] HP = { "Major Healing Potion", "Superior Healing Potion", "Greater Healing Potion", "Healing Potion", "Lesser Healing Potion", "Minor Healing Potion" };
         string[] MP = { "Major Mana Potion", "Superior Mana Potion", "Greater Mana Potion", "Mana Potion", "Lesser Mana Potion", "Minor Mana Potion" };
+        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.Auras.Contains("Drink") || me.Auras.Contains("Food") || me.IsMounted()) return false;
 
         if (me.HealthPercent <= 70 && (!Api.Inventory.OnCooldown(MP) || !Api.Inventory.OnCooldown(HP)))
         {

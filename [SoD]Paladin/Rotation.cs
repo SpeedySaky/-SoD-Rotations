@@ -85,7 +85,7 @@ public class RetPala : Rotation
         var healthPercentage = me.HealthPercent;
         var mana = me.ManaPercent;
 
-        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
+        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
 
         if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
         {
@@ -222,8 +222,7 @@ public class RetPala : Rotation
         var mana = me.ManaPercent;
         var target = Api.Target;
         var targethp = target.HealthPercent;
-        if (me.IsDead() || me.IsGhost() || me.IsCasting()) return false;
-        if (me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
+        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
         bool hasCrusaderStrike = HasEnchantment(EquipmentSlot.Hands, "Crusader Strike");
         bool hasHandOfReckoning = HasEnchantment(EquipmentSlot.Hands, "Hand of Reckoning");
         bool hasBeaconOfLight = HasEnchantment(EquipmentSlot.Hands, "Beacon of Light");

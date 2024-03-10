@@ -69,7 +69,7 @@ public class Warrior : Rotation
         if (!IsValid(target))
             return true;
 
-        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
+        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
         var targetDistance = target.Position.Distance2D(me.Position);
         if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
         {
@@ -106,7 +106,8 @@ public class Warrior : Rotation
         var rage = me.Rage;
         var target = Api.Target;
         var targethealth = target.HealthPercent;
-        
+        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
+
         string[] HP = { "Major Healing Potion", "Superior Healing Potion", "Greater Healing Potion", "Healing Potion", "Lesser Healing Potion", "Minor Healing Potion" };
 
         if (me.HealthPercent <= 70 && !Api.Inventory.OnCooldown(HP))

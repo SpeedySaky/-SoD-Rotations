@@ -60,8 +60,7 @@ public class FuryWarriorSoD : Rotation
         if (!IsValid(target))
             return true;
 
-        if (me.IsDead() || me.IsGhost() || me.IsCasting()) return false;
-        if (me.HasAura("Drink") || me.HasAura("Food")) return false;
+        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
         var targetDistance = target.Position.Distance2D(me.Position);
 
 
@@ -89,6 +88,7 @@ public class FuryWarriorSoD : Rotation
         var target = Api.Target;
         var targethealth = target.HealthPercent;
         string[] HP = { "Major Healing Potion", "Superior Healing Potion", "Greater Healing Potion", "Healing Potion", "Lesser Healing Potion", "Minor Healing Potion" };
+        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
 
         if (me.HealthPercent <= 70 && !Api.Inventory.OnCooldown(HP))
         {

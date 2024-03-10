@@ -94,8 +94,7 @@ public class WarlockSoD : Rotation
         // Target distance from the player
         var targetDistance = target.Position.Distance2D(me.Position);
 
-        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsChanneling()) return false;
-        if (me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
+        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
 
         if (Api.Spellbook.CanCast("Demon Armor") && !me.Auras.Contains("Demon Armor"))
         {
@@ -207,6 +206,7 @@ public class WarlockSoD : Rotation
         var mana = me.ManaPercent;
         var targethealth = target.HealthPercent;
         var healthPercentage = me.HealthPercent;
+        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
 
         if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
         {

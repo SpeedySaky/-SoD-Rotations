@@ -87,8 +87,7 @@ public class Hunter : Rotation
             lastDebugTime = DateTime.Now; // Update lastDebugTime
         }
 
-        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsChanneling()) return false;
-        if (me.Auras.Contains("Drink") || me.Auras.Contains("Food") || me.IsMounted()) return false;
+        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
 
 
         if (Api.HasMacro("Chest") && !me.Auras.Contains("Heart of the Lion", false))
@@ -218,8 +217,7 @@ mana > 20 && !IsNPC(target) && healthPercentage > 50 && mana > 20 && PetHealth >
             lastDebugTime = DateTime.Now; // Update lastDebugTime
         }
 
-        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsChanneling()) return false;
-        if (me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
+        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
 
         var meTarget = me.Target;
 
