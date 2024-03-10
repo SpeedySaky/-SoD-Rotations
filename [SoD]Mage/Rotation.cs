@@ -113,25 +113,25 @@ public class MageSoD : Rotation
                 return true;
             }
         }
-        string[] GemTypes = { "Mana Agate", "Mana Sapphire", "Mana Emerald", "Mana Ruby", "Mana Citrine", "Mana Jade" };
-        bool needsgem = true;
+        //string[] GemTypes = { "Mana Agate", "Mana Sapphire", "Mana Emerald", "Mana Ruby", "Mana Citrine", "Mana Jade" };
+        //  bool needsgem = true;
 
-        foreach (string gemType in GemTypes)
-        {
-            if (shadowApi.Inventory.HasItem(gemType))
-            {
-                needsgem = false;
-                break;
-            }
-        }
-        if (Api.Spellbook.CanCast("Conjure Mana Agate") && needsgem)
-        {
-            if (Api.Spellbook.Cast("Conjure Mana Agate"))
-            {
-                Console.WriteLine("Conjure Mana Gem.");
-                // Add further actions if needed after conjuring water
-            }
-        }
+        //  foreach (string gemType in GemTypes)
+        //  {
+        //if (shadowApi.Inventory.HasItem(gemType))
+        //  {
+        // needsgem = false;
+        //   break;
+        // }
+        // }
+        //   if (Api.Spellbook.CanCast("Conjure Mana Agate") && needsgem)
+        //  {
+        // if (Api.Spellbook.Cast("Conjure Mana Agate"))
+        //   {
+        // Console.WriteLine("Conjure Mana Gem.");
+        // Add further actions if needed after conjuring water
+        //}
+        //}
         if (Api.Spellbook.CanCast("Ice Armor") && !me.Auras.Contains("Ice Armor"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
