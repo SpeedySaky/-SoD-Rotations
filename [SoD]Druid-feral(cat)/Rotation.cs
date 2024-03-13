@@ -107,7 +107,7 @@ public class FeralDruidSoD : Rotation
 
                 return true;
         }
-        if (Api.Spellbook.CanCast("Rejuvenation") && health <= 60 && !me.Auras.Contains("Rejuvenation"))
+        if (Api.Spellbook.CanCast("Rejuvenation") && healthPercentage <= 60 && !me.Auras.Contains("Rejuvenation"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Rejuvenation");
@@ -116,7 +116,7 @@ public class FeralDruidSoD : Rotation
                 return true;
         }
 
-        if (Api.Spellbook.CanCast("Regrowth") && health <= 40 && !me.Auras.Contains("Regrowth"))
+        if (Api.Spellbook.CanCast("Regrowth") && healthPercentage <= 40 && !me.Auras.Contains("Regrowth"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Regrowth");
@@ -124,7 +124,7 @@ public class FeralDruidSoD : Rotation
             if (Api.Spellbook.Cast("Regrowth"))
                 return true;
         }
-        if (Api.Spellbook.CanCast("Healing Touch") && health <= 30)
+        if (Api.Spellbook.CanCast("Healing Touch") && healthPercentage <= 30)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Healing Touch");
