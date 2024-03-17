@@ -33,7 +33,7 @@ public class MageSoD : Rotation
     //runes 
 
     // Gloves
-      
+
 
     // Chest
 
@@ -230,9 +230,9 @@ public class MageSoD : Rotation
             Console.WriteLine("Trying to cast Pyroblast");
 
             // Try casting Pyroblast
-            if (Api.Spellbook.CanCast("Pyroblast") && Api.Spellbook.Cast("Pyroblast") && ((DateTime.Now - lastPyro) >= PyroCD))
+            if (Api.Spellbook.CanCast("Pyroblast"))
             {
-                lastPyro = DateTime.Now;
+                Api.Spellbook.Cast("Pyroblast")
                 Console.WriteLine("Casting Pyroblast");
                 return true;
             }
@@ -426,7 +426,7 @@ public class MageSoD : Rotation
                     if (Api.UseMacro("Hands"))
                         return true;
                 }
-               
+
                 if (hasFrostBoltRune && Api.HasMacro("Belt") && mana > 12)
                 {
 
@@ -436,7 +436,7 @@ public class MageSoD : Rotation
                     if (Api.UseMacro("Hands"))
                         return true;
                 }
-             
+
                 if (hasFrostfireBoltRune && Api.HasMacro("Belt") && mana > 14)
                 {
 
@@ -446,7 +446,7 @@ public class MageSoD : Rotation
                     if (Api.UseMacro("Hands"))
                         return true;
                 }
-              
+
                 if (hasHotStreakRune && me.Aura.Contains("Hot Streak"))
                 {
 
@@ -456,7 +456,7 @@ public class MageSoD : Rotation
                     if (Api.Spellbook.Cast("Pyroblast"))
                         return true;
                 }
-              
+
                 if (hasBrainFreezeRune && me.Aura.Contains("Brain Freeze"))
                 {
 
@@ -466,7 +466,7 @@ public class MageSoD : Rotation
                     if (Api.Spellbook.Cast("Fireball"))
                         return true;
                 }
-               
+
                 if (hasIcyVeinsRune && Api.HasMacro("Legs") && mana > 3 && (DateTime.Now - lastIcyVeinsRune) >= IcyVeinsRuneCooldown)
                 {
 
@@ -478,7 +478,7 @@ public class MageSoD : Rotation
 
                     return true;
                 }
-                
+
                 if (hasLivingFlameRune && Api.HasMacro("Legs") && mana > 11 && (DateTime.Now - lastLivingFlameRune) >= LivingFlameRuneCooldown)
                 {
 
@@ -490,7 +490,7 @@ public class MageSoD : Rotation
 
                     return true;
                 }
-                
+
                 if (hasArcaneSurgeRune && Api.HasMacro("Legs") && (DateTime.Now - lastArcaneSurgeRune) >= ArcaneSurgeRuneCooldown)
                 {
 
@@ -514,7 +514,7 @@ public class MageSoD : Rotation
                         return true;
                 }
 
-                if (Api.Spellbook.CanCast("Pyroblast") && ((DateTime.Now - lastPyro) >= PyroCD) && !Api.Spellbook.OnCooldown("Pyroblast") && !target.Auras.Contains("Pyroblast") && targethealth > 20)
+                if (Api.Spellbook.CanCast("Pyroblast") && !Api.Spellbook.OnCooldown("Pyroblast") && !target.Auras.Contains("Pyroblast") && targethealth > 20)
                 {
                     lastPyro = DateTime.Now;
                     Console.ForegroundColor = ConsoleColor.Green;
