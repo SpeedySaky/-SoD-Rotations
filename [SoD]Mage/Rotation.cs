@@ -514,7 +514,7 @@ public class MageSoD : Rotation
                         return true;
                 }
 
-                if (Api.Spellbook.CanCast("Pyroblast") && !Api.Spellbook.OnCooldown("Pyroblast") && !target.Auras.Contains("Pyroblast") && targethealth > 20)
+                if (Api.Spellbook.CanCast("Pyroblast") && !target.Auras.Contains("Pyroblast") && targethealth > 20)
                 {
                     lastPyro = DateTime.Now;
                     Console.ForegroundColor = ConsoleColor.Green;
