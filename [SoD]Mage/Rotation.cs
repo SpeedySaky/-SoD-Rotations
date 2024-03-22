@@ -185,7 +185,7 @@ public class MageSoD : Rotation
         }
 
         // Now needsWater and needsFood variables will indicate if the character needs water or food
-        if (needsWater)
+        if (!needsWater) // If the character does not have water
         {
             if (Api.Spellbook.CanCast("Conjure Water"))
             {
@@ -197,7 +197,7 @@ public class MageSoD : Rotation
             }
         }
 
-        if (needsFood)
+        if (!needsFood) // If the character does not have food
         {
             if (Api.Spellbook.CanCast("Conjure Food"))
             {
