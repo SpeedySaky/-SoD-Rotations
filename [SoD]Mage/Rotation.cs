@@ -248,8 +248,7 @@ public class MageSoD : Rotation
             }
         }
 
-        // If none of the conditions are met or casting both spells fail
-        return false;
+       
 
         return base.PassivePulse();
 
@@ -447,7 +446,7 @@ public class MageSoD : Rotation
                         return true;
                 }
               
-                if (hasHotStreakRune && me.Aura.Contains("Hot Streak"))
+                if (hasHotStreakRune && me.Auras.Contains("Hot Streak"))
                 {
 
                     Console.WriteLine("Casting Pyroblast with Hot Streak");
@@ -457,7 +456,7 @@ public class MageSoD : Rotation
                         return true;
                 }
               
-                if (hasBrainFreezeRune && me.Aura.Contains("Brain Freeze"))
+                if (hasBrainFreezeRune && me.Auras.Contains("Brain Freeze"))
                 {
 
                     Console.WriteLine("Casting Fireball with Brain Freeze");
@@ -666,7 +665,7 @@ public class MageSoD : Rotation
         int foodCount = 0;
         foreach (string foodType in foodTypes)
         {
-            int count = shadowApi.Inventory.ItemCount(foodType);
+            int count = Api.Inventory.ItemCount(foodType);
             foodCount += count;
         }
 
@@ -674,7 +673,7 @@ public class MageSoD : Rotation
         int waterCount = 0;
         foreach (string waterType in waterTypes)
         {
-            int count = shadowApi.Inventory.ItemCount(waterType);
+            int count = Api.Inventory.ItemCount(waterType);
             waterCount += count;
         }
 
