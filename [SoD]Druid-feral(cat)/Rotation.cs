@@ -107,8 +107,32 @@ public class FeralDruidSoD : Rotation
 
                 return true;
         }
+        if (Api.Spellbook.CanCast("Rejuvenation") && healthPercentage <= 60 && !me.Auras.Contains("Rejuvenation"))
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Casting Rejuvenation");
+            Console.ResetColor();
+            if (Api.Spellbook.Cast("Rejuvenation"))
+                return true;
+        }
 
-       
+        if (Api.Spellbook.CanCast("Regrowth") && healthPercentage <= 40 && !me.Auras.Contains("Regrowth"))
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Casting Regrowth");
+            Console.ResetColor();
+            if (Api.Spellbook.Cast("Regrowth"))
+                return true;
+        }
+        if (Api.Spellbook.CanCast("Healing Touch") && healthPercentage <= 30)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Casting Healing Touch");
+            Console.ResetColor();
+            if (Api.Spellbook.Cast("Healing Touch"))
+                return true;
+        }
+
 
 
 

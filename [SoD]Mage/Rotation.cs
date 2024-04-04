@@ -1,4 +1,4 @@
-using System;
+seusing System;
 using System.Threading;
 using wShadow.Templates;
 using System.Collections.Generic;
@@ -33,7 +33,7 @@ public class MageSoD : Rotation
     //runes 
 
     // Gloves
-      
+
 
     // Chest
 
@@ -64,8 +64,8 @@ public class MageSoD : Rotation
         // The simplest calculation for optimal ticks (to avoid key spam and false attempts)
 
         // Assuming wShadow is an instance of some class containing UnitRatings property
-        SlowTick = 600;
-        FastTick = 200;
+        SlowTick = 800;
+        FastTick = 400 ;
 
         // You can also use this method to add to various action lists.
 
@@ -98,9 +98,8 @@ public class MageSoD : Rotation
         var healthPercentage = me.HealthPercent;
         var mana = me.ManaPercent;
         var targetDistance = target.Position.Distance2D(me.Position);
-        ShadowApi shadowApi = new ShadowApi();
 
-        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
+        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling()  || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
         var hasaura = me.Auras.Contains("Curse of Stalvan") || me.Auras.Contains("Curse of Blood");
 
         if (hasaura && Api.Spellbook.CanCast("Remove Lesser Curse"))
@@ -141,7 +140,8 @@ public class MageSoD : Rotation
             if (Api.Spellbook.Cast("Ice Armor"))
                 return true;
         }
-        else if (Api.Spellbook.CanCast("Frost Armor") && !me.Auras.Contains("Frost Armor") && !me.Auras.Contains("Ice Armor"))
+
+        if (Api.Spellbook.CanCast("Frost Armor") && !me.Auras.Contains("Frost Armor") && !me.Auras.Contains("Ice Armor"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Frost Armor");
@@ -164,23 +164,30 @@ public class MageSoD : Rotation
 
         string[] waterTypes = { "Conjured Mana Strudel", "Conjured Mountain Spring Water", "Conjured Crystal Water", "Conjured Sparkling Water", "Conjured Mineral Water", "Conjured Spring Water", "Conjured Purified Water", "Conjured Fresh Water", "Conjured Water" };
         string[] foodTypes = { "Conjured Mana Strudel", "Conjured Cinnamon Roll", "Conjured Sweet Roll", "Conjured Sourdough", "Conjured Pumpernickel", "Conjured Rye", "Conjured Bread", "Conjured Muffin" };
-        bool needsWater = true;
+        bool needsWater = false; // Initialize as false
+        bool needsFood = false; // Initialize as false
 
         foreach (string waterType in waterTypes)
         {
-            if (HasItem(waterType))
+            if (Api.Inventory.HasItem(waterType))
             {
-                needsWater = false;
+                needsWater = true; // Set to true if the character has water
                 break;
             }
         }
 
-        // Now needsWater variable will indicate if the character needs water
-        if (needsWater)
+        foreach (string foodType in foodTypes)
         {
-            // Add logic here to conjure water or perform any action needed to acquire water
-            // Example: Cast "Conjure Water" spell
-            // Assuming the API allows for conjuring water in a similar way to casting spells
+            if (Api.Inventory.HasItem(foodType))
+            {
+                needsFood = true; // Set to true if the character has food
+                break;
+            }
+        }
+
+        // Now needsWater and needsFood variables will indicate if the character needs water or food
+        if (!needsWater) // If the character does not have water
+        {
             if (Api.Spellbook.CanCast("Conjure Water"))
             {
                 if (Api.Spellbook.Cast("Conjure Water"))
@@ -190,30 +197,19 @@ public class MageSoD : Rotation
                 }
             }
         }
-        bool needsFood = true;
 
-        foreach (string foodType in foodTypes)
-        {
-            if (shadowApi.Inventory.HasItem(foodType))
-            {
-                needsFood = false;
-                break;
-            }
-        }
-
-        // Now needsWater variable will indicate if the character needs food
-        if (needsFood)
+        if (!needsFood) // If the character does not have food
         {
             if (Api.Spellbook.CanCast("Conjure Food"))
             {
                 if (Api.Spellbook.Cast("Conjure Food"))
                 {
                     Console.WriteLine("Conjured Food.");
-                    // Add further actions if needed after conjuring water
+                    // Add further actions if needed after conjuring food
                 }
-
             }
         }
+
 
 
 
@@ -230,9 +226,9 @@ public class MageSoD : Rotation
             Console.WriteLine("Trying to cast Pyroblast");
 
             // Try casting Pyroblast
-            if (Api.Spellbook.CanCast("Pyroblast") && Api.Spellbook.Cast("Pyroblast") && ((DateTime.Now - lastPyro) >= PyroCD))
+            if (Api.Spellbook.CanCast("Pyroblast"))
             {
-                lastPyro = DateTime.Now;
+                Api.Spellbook.Cast("Pyroblast");
                 Console.WriteLine("Casting Pyroblast");
                 return true;
             }
@@ -248,7 +244,7 @@ public class MageSoD : Rotation
             }
         }
 
-       
+        // If none of the conditions are met or casting both spells fail
 
         return base.PassivePulse();
 
@@ -425,7 +421,7 @@ public class MageSoD : Rotation
                     if (Api.UseMacro("Hands"))
                         return true;
                 }
-               
+
                 if (hasFrostBoltRune && Api.HasMacro("Belt") && mana > 12)
                 {
 
@@ -435,7 +431,7 @@ public class MageSoD : Rotation
                     if (Api.UseMacro("Hands"))
                         return true;
                 }
-             
+
                 if (hasFrostfireBoltRune && Api.HasMacro("Belt") && mana > 14)
                 {
 
@@ -445,7 +441,7 @@ public class MageSoD : Rotation
                     if (Api.UseMacro("Hands"))
                         return true;
                 }
-              
+
                 if (hasHotStreakRune && me.Auras.Contains("Hot Streak"))
                 {
 
@@ -455,7 +451,7 @@ public class MageSoD : Rotation
                     if (Api.Spellbook.Cast("Pyroblast"))
                         return true;
                 }
-              
+
                 if (hasBrainFreezeRune && me.Auras.Contains("Brain Freeze"))
                 {
 
@@ -465,7 +461,7 @@ public class MageSoD : Rotation
                     if (Api.Spellbook.Cast("Fireball"))
                         return true;
                 }
-               
+
                 if (hasIcyVeinsRune && Api.HasMacro("Legs") && mana > 3 && (DateTime.Now - lastIcyVeinsRune) >= IcyVeinsRuneCooldown)
                 {
 
@@ -477,7 +473,7 @@ public class MageSoD : Rotation
 
                     return true;
                 }
-                
+
                 if (hasLivingFlameRune && Api.HasMacro("Legs") && mana > 11 && (DateTime.Now - lastLivingFlameRune) >= LivingFlameRuneCooldown)
                 {
 
@@ -489,7 +485,7 @@ public class MageSoD : Rotation
 
                     return true;
                 }
-                
+
                 if (hasArcaneSurgeRune && Api.HasMacro("Legs") && (DateTime.Now - lastArcaneSurgeRune) >= ArcaneSurgeRuneCooldown)
                 {
 
@@ -513,7 +509,7 @@ public class MageSoD : Rotation
                         return true;
                 }
 
-                if (Api.Spellbook.CanCast("Pyroblast") && ((DateTime.Now - lastPyro) >= PyroCD) && !Api.Spellbook.OnCooldown("Pyroblast") && !target.Auras.Contains("Pyroblast") && targethealth > 20)
+                if (Api.Spellbook.CanCast("Pyroblast") && !target.Auras.Contains("Pyroblast") && targethealth > 20)
                 {
                     lastPyro = DateTime.Now;
                     Console.ForegroundColor = ConsoleColor.Green;
