@@ -1,4 +1,4 @@
-using System;
+seusing System;
 using System.Threading;
 using wShadow.Templates;
 using System.Collections.Generic;
@@ -140,7 +140,8 @@ public class MageSoD : Rotation
             if (Api.Spellbook.Cast("Ice Armor"))
                 return true;
         }
-        else if (Api.Spellbook.CanCast("Frost Armor") && !me.Auras.Contains("Frost Armor") && !me.Auras.Contains("Ice Armor"))
+
+        if (Api.Spellbook.CanCast("Frost Armor") && !me.Auras.Contains("Frost Armor") && !me.Auras.Contains("Ice Armor"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Frost Armor");
