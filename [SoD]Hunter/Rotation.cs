@@ -204,7 +204,7 @@ public class SoDHunter : Rotation
                 return true;
         }
 
-        if (Api.Spellbook.CanCast("Aspect of the Hawk") && !me.Auras.Contains("Aspect of the Hawk", false) && !me.Auras.Contains("Aspect of the Cheetah", false) && me.Auras.Contains(415423, false))
+        if (Api.Spellbook.CanCast("Aspect of the Hawk") && !me.Auras.Contains("Aspect of the Hawk", false) && !me.Auras.Contains("Aspect of the Cheetah", false) && !me.Auras.Contains(415423, false))
 
         {
             Console.ForegroundColor = ConsoleColor.Green;
