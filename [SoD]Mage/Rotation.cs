@@ -402,7 +402,7 @@ public class MageSoD : Rotation
                         return true;
                 }
 
-                if (hasLivingBombRune && Api.HasMacro("Hands") && mana > 22 && target.Auras.Contains("Living Bomb"))
+                if (hasLivingBombRune && Api.HasMacro("Hands") && mana > 22 && !target.Auras.Contains("Living Bomb"))
                 {
 
                     Console.WriteLine("Casting Living Bomb rune");
