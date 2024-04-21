@@ -9,7 +9,10 @@ using wShadow.Warcraft.Managers;
 
 public class RogueNoStealth : Rotation
 {
-
+    private bool HasEnchantment(EquipmentSlot slot, string enchantmentName)
+    {
+        return Api.Equipment.HasEnchantment(slot, enchantmentName);
+    }
     private List<string> npcConditions = new List<string>
     {
         "Innkeeper", "Auctioneer", "Banker", "FlightMaster", "GuildBanker",
@@ -26,14 +29,20 @@ public class RogueNoStealth : Rotation
         }
         return true;
     }
-    private int debugInterval = 5; // Set the debug interval in seconds
-    private DateTime lastDebugTime = DateTime.MinValue;
 
     private bool HasItem(object item) => Api.Inventory.HasItem(item);
+    private int debugInterval = 5; // Set the debug interval in seconds
+    private DateTime lastDebugTime = DateTime.MinValue;
     private DateTime lastQuickdraw = DateTime.MinValue;
-    private TimeSpan QuickdrawCooldown = TimeSpan.FromSeconds(11);
+    private TimeSpan QuickdrawCooldown = TimeSpan.FromSeconds(10);
     private DateTime lastBetween = DateTime.MinValue;
     private TimeSpan BetweenCooldown = TimeSpan.FromSeconds(10);
+    private DateTime Gauche = DateTime.MinValue;
+    private TimeSpan GaucheCD = TimeSpan.FromSeconds(20);
+    private DateTime Knife = DateTime.MinValue;
+    private TimeSpan KnifeCD = TimeSpan.FromSeconds(6);
+    private DateTime Shadowstep = DateTime.MinValue;
+    private TimeSpan ShadowstepCD = TimeSpan.FromSeconds(30);
 
     public override void Initialize()
     {
@@ -143,25 +152,8 @@ public class RogueNoStealth : Rotation
 
         if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
 
-        string[] HP = { "Major Healing Potion", "Superior Healing Potion", "Greater Healing Potion", "Healing Potion", "Lesser Healing Potion", "Minor Healing Potion" };
 
-        if (me.HealthPercent <= 70 &&  !Api.Inventory.OnCooldown(HP))
-        {
-            foreach (string hpot in HP)
-            {
-                if (HasItem(hpot))
-                {
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine("Using Healing potion");
-                    Console.ResetColor();
-                    if (Api.Inventory.Use(hpot))
-                    {
-                        return true;
-                    }
-                }
-            }
-        }
-
+       
 
         if ((Api.Spellbook.CanCast("Kick") || Api.Spellbook.CanCast("Kidney Shot")) && (!Api.Spellbook.OnCooldown("Kick") || !Api.Spellbook.OnCooldown("Kidney Shot")) && (target.IsCasting() || target.IsChanneling()))
         {
