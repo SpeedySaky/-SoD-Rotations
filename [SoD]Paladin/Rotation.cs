@@ -37,6 +37,9 @@ public class RetPala : Rotation
     private DateTime Crusader = DateTime.MinValue;
     private TimeSpan CrusaderCd = TimeSpan.FromSeconds(7);
 
+    private DateTime Hammer = DateTime.MinValue;
+    private TimeSpan HammerCd = TimeSpan.FromSeconds(7);
+
     private DateTime Storm = DateTime.MinValue;
     private TimeSpan StormCd = TimeSpan.FromSeconds(10.5);
 
@@ -84,6 +87,10 @@ public class RetPala : Rotation
         var me = Api.Player;
         var healthPercentage = me.HealthPercent;
         var mana = me.ManaPercent;
+        var target = Api.Target;
+		
+
+
 
         if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
 
@@ -92,6 +99,19 @@ public class RetPala : Rotation
             LogPlayerStats();
             lastDebugTime = DateTime.Now; // Update lastDebugTime
         }
+		
+		bool CanSelfBuff = false;
+		
+		if(target.Guid.Equals(me.Guid))
+			CanSelfBuff = true;
+		
+		if(target.Guid.IsEmpty())
+			CanSelfBuff = true;
+		
+			
+		
+		
+		
         if (Api.Spellbook.CanCast("Holy Light") && healthPercentage <= 50 && mana > 20)
         {
             Console.ForegroundColor = ConsoleColor.Green;
@@ -164,26 +184,19 @@ public class RetPala : Rotation
         }
 
 
-        if (Api.Spellbook.CanCast("Blessing of Wisdom") && !me.Auras.Contains("Blessing of Might") && !me.Auras.Contains("Blessing of Wisdom") && mana < 30)
+        if (Api.Spellbook.CanCast("Blessing of Wisdom") && !me.Auras.Contains("Blessing of Wisdom") && mana > 15)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Blessing of Wisdom");
             Console.ResetColor();
+
             if (Api.Spellbook.Cast("Blessing of Wisdom"))
             {
                 return true;
             }
         }
-        else if (!me.Auras.Contains("Blessing of Might") && mana > 30)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Blessing of Might");
-            Console.ResetColor();
-            if (Api.Spellbook.Cast("Blessing of Might"))
-            {
-                return true;
-            }
-        }
+
+        
         if (Api.Spellbook.CanCast("Sanctity Aura") && !me.Auras.Contains("Sanctity Aura", false))
         {
             Console.ForegroundColor = ConsoleColor.Green;
@@ -196,13 +209,13 @@ public class RetPala : Rotation
             }
         }
         else
-        if (Api.Spellbook.CanCast("Devotion Aura") && !me.Auras.Contains("Devotion Aura", false) && !me.Auras.Contains("Sanctity Aura", false))
+        if (Api.Spellbook.CanCast("Concentration Aura") && !me.Auras.Contains("Concentration Aura", false) && !me.Auras.Contains("Sanctity Aura", false))
         {
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Devotion Aura");
+            Console.WriteLine("Casting Concentration Aura");
             Console.ResetColor();
 
-            if (Api.Spellbook.Cast("Devotion Aura"))
+            if (Api.Spellbook.Cast("Concentration Aura"))
             {
                 return true;
             }
@@ -222,13 +235,16 @@ public class RetPala : Rotation
         var mana = me.ManaPercent;
         var target = Api.Target;
         var targethp = target.HealthPercent;
+        var targetHealth = Api.Target.HealthPercent;
         if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
         bool hasCrusaderStrike = HasEnchantment(EquipmentSlot.Hands, "Crusader Strike");
         bool hasHandOfReckoning = HasEnchantment(EquipmentSlot.Hands, "Hand of Reckoning");
         bool hasBeaconOfLight = HasEnchantment(EquipmentSlot.Hands, "Beacon of Light");
 
-
         //runes
+        // Bracer
+        bool hasHammeroftheRighteous = HasEnchantment(EquipmentSlot.Wrist, "Hammer of the Righteous");
+
         //legs
         bool hasExemplar = HasEnchantment(EquipmentSlot.Legs, "Inspiration Exemplar");
         bool hasSacrifice = HasEnchantment(EquipmentSlot.Legs, "Divine Sacrifice");
@@ -306,7 +322,7 @@ public class RetPala : Rotation
             }
         }
         else
-         if (Api.Spellbook.CanCast("Devotion Aura") && !me.Auras.Contains("Devotion Aura", false) && !me.Auras.Contains("Sanctity Aura", false))
+         if (Api.Spellbook.CanCast("Concentration Aura") && !me.Auras.Contains("Concentration Aura", false) && !me.Auras.Contains("Sanctity Aura", false))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Devotion Aura");
@@ -382,6 +398,17 @@ public class RetPala : Rotation
 
         }
 
+        if (Api.Spellbook.CanCast("Hammer of Wrath") && targetHealth <= 20)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Casting Hammer of Wrath");
+            Console.ResetColor();
+            if (Api.Spellbook.Cast("Hammer of Wrath"))
+            {
+                return true;
+            }
+        }
+
         if (Api.Spellbook.CanCast("Consecration") && !Api.Spellbook.OnCooldown("Consecration") && targethp >= 30 && mana > 30 && Api.UnfriendlyUnitsNearby(5, true) >= 2)
         {
             Console.ForegroundColor = ConsoleColor.Green;
@@ -393,17 +420,17 @@ public class RetPala : Rotation
 
         }
 
-        if (!me.Auras.Contains("Seal of Command") && Api.Spellbook.CanCast("Seal of Command") && !Api.Spellbook.OnCooldown("Seal of Command") && mana > 15)
+        if (!me.Auras.Contains("Seal of Wisdom") && Api.Spellbook.CanCast("Seal of Wisdom") && !Api.Spellbook.OnCooldown("Seal of Wisdom") && mana > 15)
         {
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Seal of Command");
+            Console.WriteLine("Casting Seal of Wisdom");
             Console.ResetColor();
-            if (Api.Spellbook.Cast("Seal of Command"))
+            if (Api.Spellbook.Cast("Seal of Wisdom"))
 
                 return true;
 
         }
-        else if (!me.Auras.Contains("Seal of Righteousness") && Api.Spellbook.CanCast("Seal of Righteousness") && !Api.Spellbook.OnCooldown("Seal of Righteousness") && !me.Auras.Contains("Seal of Command") && mana > 15)
+        else if (!me.Auras.Contains("Seal of Righteousness") && Api.Spellbook.CanCast("Seal of Righteousness") && !Api.Spellbook.OnCooldown("Seal of Righteousness") && !me.Auras.Contains("Seal of Wisdom") && mana > 15)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Seal of Righteousness");
@@ -461,6 +488,7 @@ public class RetPala : Rotation
             }
 
         }
+
         if (Api.HasMacro("Chest"))
         {
             if (hasAegis && !me.Auras.Contains("Aegis"))
@@ -489,7 +517,7 @@ public class RetPala : Rotation
             }
         }
 
-        if (Api.HasMacro("Hands"))
+      if (Api.HasMacro("Hands"))
         {
             if ((DateTime.Now - Crusader) >= CrusaderCd)
             {
@@ -532,7 +560,7 @@ public class RetPala : Rotation
                 // No need to cast Beacon of Light, just log that it has the enchantment
             }
 
-            if (Api.Spellbook.CanCast("Judgement") && mana > 15 && !Api.Spellbook.OnCooldown("Judgement") && !Api.Spellbook.OnCooldown("Judgement") && (me.Auras.Contains("Seal of Righteousness") || me.Auras.Contains("Seal of Command")))
+            if (Api.Spellbook.CanCast("Judgement") && mana > 15 && !Api.Spellbook.OnCooldown("Judgement") && !Api.Spellbook.OnCooldown("Judgement") && (me.Auras.Contains("Seal of Righteousness") || me.Auras.Contains("Seal of Wisdom")))
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Casting Judgement");
@@ -543,18 +571,29 @@ public class RetPala : Rotation
                 }
             }
 
+        if (Api.HasMacro("Bracer"))
+        {
+            if ((DateTime.Now - Hammer) >= HammerCd)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
 
+                if (hasHammeroftheRighteous)
+                {
+                    Console.WriteLine("Casting Hammer of the Righteous");
 
-
-
+                    if (Api.UseMacro("Bracer"))
+                    {
+                        Hammer = DateTime.Now;
+                        return true;
+                    }
+                }
+            }
             return true;
         }
-
-
-
+        
+    
+}    
         //DPS rotation
-
-
 
         return base.CombatPulse();
     }
@@ -608,13 +647,37 @@ public class RetPala : Rotation
             Console.WriteLine("Have poison debuff");
             Console.ResetColor();
         }
+
+        if (Api.Spellbook.CanCast("Hammer of the Righteous"))
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Can Cast Hammer of the Righteous");
+            Console.ResetColor();
+
+
+        }
+
+        if (Api.Spellbook.CanCast("Hammer of the Righteous") || Api.Spellbook.CanCast(53595))
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Can Cast Hammer of the Righteous");
+            Console.ResetColor();
+        }
+        bool hasHammer = HasEnchantment(EquipmentSlot.Wrist, "Hammer of the Righteous");
+
+        if (hasHammer)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Has Hammer of the Righteous");
+            Console.ResetColor();
+
+        }
+
         if (Api.Spellbook.CanCast("Crusader Strike") || Api.Spellbook.CanCast(407676))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Can Cast Crusader Strike");
             Console.ResetColor();
-
-
         }
         bool hasCrusader = HasEnchantment(EquipmentSlot.Hands, "Crusader Strike");
 
