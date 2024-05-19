@@ -32,7 +32,7 @@ public class EnhaShaman : Rotation
     private DateTime lastlash = DateTime.MinValue;
     private TimeSpan lashCooldown = TimeSpan.FromSeconds(8);
     private DateTime lastHands = DateTime.MinValue;
-    private TimeSpan HandsCooldown = TimeSpan.FromSeconds(8);
+    private TimeSpan HandsCooldown = TimeSpan.FromSeconds(7);
     private bool HasEnchantment(EquipmentSlot slot, string enchantmentName)
     {
         return Api.Equipment.HasEnchantment(slot, enchantmentName);
@@ -48,8 +48,8 @@ public class EnhaShaman : Rotation
         // The simplest calculation for optimal ticks (to avoid key spam and false attempts)
 
         // Assuming wShadow is an instance of some class containing UnitRatings property
-        SlowTick = 600;
-        FastTick = 200;
+        SlowTick = 800;
+        FastTick = 400;
 
         // You can also use this method to add to various action lists.
 
@@ -81,50 +81,32 @@ public class EnhaShaman : Rotation
         if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsChanneling()) return false;
         if (me.Auras.Contains("Drink") || me.Auras.Contains("Food") || me.IsMounted()) return false;
 
-        bool hasFlametongueEnchantment = HasEnchantment(EquipmentSlot.MainHand, "Flametongue 1");
-        bool hasFlametongueEnchantment2 = HasEnchantment(EquipmentSlot.MainHand, "Flametongue 2");
-        bool hasRockbiterEnchantment1 = HasEnchantment(EquipmentSlot.MainHand, "Rockbiter 1");
-        bool hasRockbiterEnchantment2 = HasEnchantment(EquipmentSlot.MainHand, "Rockbiter 2");
-        bool hasRockbiterEnchantment3 = HasEnchantment(EquipmentSlot.MainHand, "Rockbiter 3");
-
-        bool hasAnyRockbiterEnchantment = hasRockbiterEnchantment1 || hasRockbiterEnchantment2 || hasRockbiterEnchantment3;
-
-        if (!hasFlametongueEnchantment && !hasFlametongueEnchantment2 && Api.Spellbook.CanCast("Flametongue Weapon"))
+        // Check if the main hand weapon doesn't have any Rockbiter enchantment
+        bool hasAnyRockbiterEnchantment = HasAnyRockbiterEnchantment(EquipmentSlot.MainHand);
+        if (!hasAnyRockbiterEnchantment && Api.Spellbook.CanCast("Rockbiter Weapon"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Flametongue Weapon");
+            Console.WriteLine("Casting Rockbiter Weapon on main hand");
+            Console.ResetColor();
+            if (Api.Spellbook.Cast("Rockbiter Weapon"))
+            {
+                return true;
+            }
+        }
+
+        // Check if the off-hand weapon doesn't have the Flametongue enchantment
+        bool hasAnyFlametongueEnchantment = HasAnyFlametongueEnchantment(EquipmentSlot.OffHand);
+        if (!hasAnyFlametongueEnchantment && Api.Spellbook.CanCast("Flametongue Weapon") && Level >= 20)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Casting Flametongue Weapon on off-hand");
             Console.ResetColor();
             if (Api.Spellbook.Cast("Flametongue Weapon"))
             {
                 return true;
             }
         }
-        else if (!hasFlametongueEnchantment && !hasFlametongueEnchantment2 && !hasAnyRockbiterEnchantment && Api.Spellbook.CanCast("Rockbiter Weapon"))
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Rockbiter Weapon");
-            Console.ResetColor();
-            if (Api.Spellbook.Cast("Rockbiter Weapon"))
-            {
-                return true;
-            }
-        }
-        bool hasRockbiterEnchantment1off = HasEnchantment(EquipmentSlot.OffHand, "Rockbiter 1");
-        bool hasRockbiterEnchantment2off = HasEnchantment(EquipmentSlot.OffHand, "Rockbiter 2");
-        bool hasRockbiterEnchantment3off = HasEnchantment(EquipmentSlot.OffHand, "Rockbiter 3");
 
-        bool hasAnyRockbiterEnchantment2 = hasRockbiterEnchantment1off || hasRockbiterEnchantment2off || hasRockbiterEnchantment3off;
-
-        if (Api.Spellbook.CanCast("Rockbiter Weapon") && !hasAnyRockbiterEnchantment2 && Level >= 20)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Rockbiter Weapon");
-            Console.ResetColor();
-            if (Api.Spellbook.Cast("Rockbiter Weapon"))
-            {
-                return true;
-            }
-        }
         if (Api.Spellbook.CanCast("Ghost Wolf") && !me.Auras.Contains("Ghost Wolf", false))
         {
             Console.ForegroundColor = ConsoleColor.Green;
@@ -227,10 +209,10 @@ public class EnhaShaman : Rotation
                 return true;
             }
         }
-        if (Api.HasMacro("Hands") && mana >= 10 && (DateTime.Now - lastHands) >= HandsCooldown && targetDistance <= 5)
+        if (Api.HasMacro("Hands") && mana >= 10 && (DateTime.Now - lastHands) >= HandsCooldown && HasAnyFlametongueEnchantment(EquipmentSlot.OffHand))
         {
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Blast.");
+            Console.WriteLine("Casting Lava Lash.");
             Console.ResetColor();
 
             if (Api.UseMacro("Hands"))
@@ -278,6 +260,18 @@ public class EnhaShaman : Rotation
 
         return base.CombatPulse();
     }
+
+
+    private bool HasAnyRockbiterEnchantment(EquipmentSlot slot)
+    {
+        return HasEnchantment(slot, "Rockbiter 1") || HasEnchantment(slot, "Rockbiter 2") || HasEnchantment(slot, "Rockbiter 3") || HasEnchantment(slot, "Rockbiter 4") || HasEnchantment(slot, "Rockbiter 5") || HasEnchantment(slot, "Rockbiter 6") || HasEnchantment(slot, "Rockbiter 7");
+    }
+
+    private bool HasAnyFlametongueEnchantment(EquipmentSlot slot)
+    {
+        return HasEnchantment(slot, "Flametongue 1") || HasEnchantment(slot, "Flametongue 2") || HasEnchantment(slot, "Flametongue 3") || HasEnchantment(slot, "Flametongue 4") || HasEnchantment(slot, "Flametongue 5") || HasEnchantment(slot, "Flametongue 6");
+    }
+    
     private bool IsNPC(WowUnit unit)
     {
         if (!IsValid(unit))
