@@ -94,7 +94,6 @@ public class EnhaShaman : Rotation
             }
         }
 
-        // Check if the off-hand weapon doesn't have the Flametongue enchantment
         bool hasAnyFlametongueEnchantment = HasAnyFlametongueEnchantment(EquipmentSlot.OffHand);
         if (!hasAnyFlametongueEnchantment && Api.Spellbook.CanCast("Flametongue Weapon") && Level >= 20)
         {
@@ -209,7 +208,9 @@ public class EnhaShaman : Rotation
                 return true;
             }
         }
-        if (Api.HasMacro("Hands") && mana >= 10 && (DateTime.Now - lastHands) >= HandsCooldown && HasAnyFlametongueEnchantment(EquipmentSlot.OffHand))
+        bool hasAnyFlametongueEnchantment = HasAnyFlametongueEnchantment(EquipmentSlot.OffHand);
+
+        if (Api.HasMacro("Hands") && mana >= 10 && (DateTime.Now - lastHands) >= HandsCooldown && HasEnchantment(EquipmentSlot.Hands, "Lava Lash") && hasAnyFlametongueEnchantment)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Lava Lash.");
@@ -222,7 +223,7 @@ public class EnhaShaman : Rotation
             }
         }
 
-        if (Api.Spellbook.CanCast("Flame Shock") && !Api.Spellbook.OnCooldown("Flame Shock") && !target.Auras.Contains("Flame Shock"))
+        if (Api.Spellbook.CanCast("Flame Shock") && !Api.Spellbook.OnCooldown("Flame Shock") && !target.Auras.Contains("Flame Shock") )
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Flame Shock");
@@ -264,14 +265,14 @@ public class EnhaShaman : Rotation
 
     private bool HasAnyRockbiterEnchantment(EquipmentSlot slot)
     {
-        return HasEnchantment(slot, "Rockbiter 1") || HasEnchantment(slot, "Rockbiter 2") || HasEnchantment(slot, "Rockbiter 3") || HasEnchantment(slot, "Rockbiter 4") || HasEnchantment(slot, "Rockbiter 5") || HasEnchantment(slot, "Rockbiter 6") || HasEnchantment(slot, "Rockbiter 7");
+        return HasEnchantment(slot, "Rockbiter 7") || HasEnchantment(slot, "Rockbiter 6") || HasEnchantment(slot, "Rockbiter 5") || HasEnchantment(slot, "Rockbiter 4") || HasEnchantment(slot, "Rockbiter 3") || HasEnchantment(slot, "Rockbiter 2") || HasEnchantment(slot, "Rockbiter 1");
     }
 
     private bool HasAnyFlametongueEnchantment(EquipmentSlot slot)
     {
-        return HasEnchantment(slot, "Flametongue 1") || HasEnchantment(slot, "Flametongue 2") || HasEnchantment(slot, "Flametongue 3") || HasEnchantment(slot, "Flametongue 4") || HasEnchantment(slot, "Flametongue 5") || HasEnchantment(slot, "Flametongue 6");
+        return HasEnchantment(slot, "Flametongue 6") || HasEnchantment(slot, "Flametongue 5") || HasEnchantment(slot, "Flametongue 4") || HasEnchantment(slot, "Flametongue 3") || HasEnchantment(slot, "Flametongue 2") || HasEnchantment(slot, "Flametongue 1");
     }
-    
+
     private bool IsNPC(WowUnit unit)
     {
         if (!IsValid(unit))
@@ -311,6 +312,24 @@ public class EnhaShaman : Rotation
         Console.WriteLine($"{mana} Mana available");
         Console.WriteLine($"{healthPercentage}% Health available");
         Console.ResetColor();
+        bool hasLava = HasEnchantment(EquipmentSlot.Hands, "Lava Lash");
+
+        if (hasLava)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Has Lava Lash");
+            Console.ResetColor();
+
+        }
+        bool hasMolten = HasEnchantment(EquipmentSlot.Hands, "Molten Blast");
+
+        if (hasMolten)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Has Molten Blast");
+            Console.ResetColor();
+
+        }
         Console.ResetColor();
     }
 }
