@@ -13,9 +13,9 @@ public class PriestShadow : Rotation
     private int debugInterval = 5; // Set the debug interval in seconds
     private DateTime lastDebugTime = DateTime.MinValue;
     private DateTime lastHands = DateTime.MinValue;
-    private TimeSpan Hands = TimeSpan.FromSeconds(14);
+    private TimeSpan Hands = TimeSpan.FromSeconds(12);
     private DateTime lastPants = DateTime.MinValue;
-    private TimeSpan Pants = TimeSpan.FromSeconds(65);
+    private TimeSpan Pants = TimeSpan.FromSeconds(120);
     private DateTime lastChest = DateTime.MinValue;
     private TimeSpan Chest = TimeSpan.FromSeconds(8);
 
@@ -37,6 +37,10 @@ public class PriestShadow : Rotation
         return true;
     }
     private bool HasItem(object item) => Api.Inventory.HasItem(item);
+    private bool HasEnchantment(EquipmentSlot slot, string enchantmentName)
+    {
+        return Api.Equipment.HasEnchantment(slot, enchantmentName);
+    }
 
 
     public override void Initialize()
@@ -49,8 +53,8 @@ public class PriestShadow : Rotation
         // The simplest calculation for optimal ticks (to avoid key spam and false attempts)
 
         // Assuming wShadow is an instance of some class containing UnitRatings property
-        SlowTick = 800;
-        FastTick = 200;
+        SlowTick = 1000;
+        FastTick = 500;
 
         // You can also use this method to add to various action lists.
 
@@ -120,21 +124,48 @@ public class PriestShadow : Rotation
 
         var reaction = me.GetReaction(target);
 
-        if (!target.IsDead() &&
-            (reaction != UnitReaction.Friendly &&
-             reaction != UnitReaction.Honored &&
-             reaction != UnitReaction.Revered &&
-             reaction != UnitReaction.Exalted) &&
-            mana > 20 && !IsNPC(target))
-            if (reaction != UnitReaction.Friendly)
+        if (target.IsDead())
+        {
+            if (reaction != UnitReaction.Friendly && reaction != UnitReaction.Honored && reaction != UnitReaction.Revered && reaction != UnitReaction.Exalted)
             {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Casting Mind Blast");
-                Console.ResetColor();
-                if (Api.Spellbook.Cast("Mind Blast"))
-
-                    return true;
+                if (mana >= 5)
+                {
+                    if (!IsNPC(target))
+                    {
+                        if (Api.Spellbook.CanCast("Smite"))
+                        {
+                            Console.ForegroundColor = ConsoleColor.Green;
+                            Console.WriteLine("Casting Smite");
+                            Console.ResetColor();
+                            if (Api.Spellbook.Cast("Smite"))
+                            {
+                                return true;
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("Smite is not ready to be cast.");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("Target is an NPC.");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Mana is not above 20%.");
+                }
             }
+            else
+            {
+                Console.WriteLine("Target is friendly, honored, revered, or exalted.");
+            }
+        }
+        else
+        {
+            Console.WriteLine("Target is dead.");
+        }
 
 
         return base.PassivePulse();
@@ -143,7 +174,6 @@ public class PriestShadow : Rotation
 
     public override bool CombatPulse()
     {
-
         var me = Api.Player;
         var target = Api.Target;
         var mana = me.ManaPercent;
@@ -208,66 +238,113 @@ public class PriestShadow : Rotation
                 return true;
             }
         }
-        if (Api.HasMacro("Hands") && targethealth >= 30)
-        {
-            if ((DateTime.Now - lastHands) >= Hands)
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Casting Hands rune");
-                Console.ResetColor();
 
-                if (Api.UseMacro("Hands"))
-                {
-                    lastHands = DateTime.Now;
-                    return true;
-                }
-            }
-            else
+        if (Api.Spellbook.CanCast("Renew") && !me.Auras.Contains("Renew") && healthPercentage < 80)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Casting Renew");
+            Console.ResetColor();
+            if (Api.Spellbook.Cast("Renew"))
             {
-                // If the cooldown period for Chimera Shot hasn't elapsed yet
-                Console.WriteLine("Hands rune is on cooldown. Skipping cast.");
+                return true;
             }
         }
-        if (Api.HasMacro("Chest") && !target.Auras.Contains("Void Plague"))
-        {
-            if ((DateTime.Now - lastChest) >= Chest)
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Casting Chest rune");
-                Console.ResetColor();
 
-                if (Api.UseMacro("Chest"))
-                {
-                    lastChest = DateTime.Now;
-                    return true;
-                }
-            }
-            else
+        if (Api.Spellbook.CanCast("Desperate Prayer") && healthPercentage < 50)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Desperate Prayer");
+            Console.ResetColor();
+            if (Api.Spellbook.Cast("Desperate Prayer"))
             {
-                Console.WriteLine("Chest rune is on cooldown. Skipping cast.");
+                return true;
             }
         }
-        if (Api.HasMacro("Legs") && targethealth >= 30)
-        {
-            if ((DateTime.Now - lastPants) >= Pants)
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Casting Legs rune");
-                Console.ResetColor();
 
-                if (Api.UseMacro("Legs"))
+       
+
+        if (Api.HasMacro("Hands"))
+        {
+            bool hasEnchantmentOnHands = HasEnchantment(EquipmentSlot.Hands, "Penance");
+
+            if (hasEnchantmentOnHands)
+            {
+                TimeSpan timeSinceLastCast = DateTime.Now - lastHands;
+                if (timeSinceLastCast >= Hands)
                 {
-                    lastHands = DateTime.Now;
-                    return true;
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Casting Hands rune");
+                    Console.ResetColor();
+
+                    if (Api.UseMacro("Hands"))
+                    {
+                        lastHands = DateTime.Now;
+                        Console.WriteLine($"Hands rune cast at {lastHands}. Next cast available after {lastHands + Hands}.");
+                        return true;
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"Hands rune is on cooldown. {Hands - timeSinceLastCast} remaining. Skipping cast.");
                 }
             }
-            else
+        }
+
+        if (Api.HasMacro("Chest"))
+        {
+            bool hasEnchantmentOnChest = HasEnchantment(EquipmentSlot.Chest, "Void Plague");
+
+            if (hasEnchantmentOnChest)
             {
-                // If the cooldown period for Chimera Shot hasn't elapsed yet
-                Console.WriteLine("Legs rune is on cooldown. Skipping cast.");
+                TimeSpan timeSinceLastCast = DateTime.Now - lastChest;
+                if (timeSinceLastCast >= Chest)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Casting Chest rune");
+                    Console.ResetColor();
+
+                    if (Api.UseMacro("Chest"))
+                    {
+                        lastChest = DateTime.Now;
+                        Console.WriteLine($"Chest rune cast at {lastChest}. Next cast available after {lastChest + Chest}.");
+                        return true;
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"Chest rune is on cooldown. {Chest - timeSinceLastCast} remaining. Skipping cast.");
+                }
             }
         }
-        if (Api.Spellbook.CanCast("Shadow Word: Pain") && !target.Auras.Contains("Shadow Word: Pain") && targethealth >= 30 && mana > 10)
+
+        if (Api.HasMacro("Legs"))
+        {
+            bool hasEnchantmentOnLegs = HasEnchantment(EquipmentSlot.Legs, "Homunculi");
+
+            if (hasEnchantmentOnLegs)
+            {
+                TimeSpan timeSinceLastCast = DateTime.Now - lastPants;
+                if (timeSinceLastCast >= Pants)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Casting Legs rune");
+                    Console.ResetColor();
+
+                    if (Api.UseMacro("Legs"))
+                    {
+                        lastPants = DateTime.Now;
+                        Console.WriteLine($"Legs rune cast at {lastPants}. Next cast available after {lastPants + Pants}.");
+                        return true;
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"Legs rune is on cooldown. {Pants - timeSinceLastCast} remaining. Skipping cast.");
+                }
+            }
+        }
+
+        if (Api.Spellbook.CanCast("Shadow Word: Pain") && !target.Auras.Contains(589)  && mana > 30)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Shadow Word: Pain");
@@ -277,6 +354,7 @@ public class PriestShadow : Rotation
                 return true;
             }
         }
+
         if (Api.Spellbook.CanCast("Mind Blast") && targethealth >= 30 && mana > 10)
         {
             Console.ForegroundColor = ConsoleColor.Green;
@@ -288,25 +366,36 @@ public class PriestShadow : Rotation
             }
         }
 
-
-        if (Api.HasMacro("Shoot"))
-
-
+        if (Api.Equipment.HasItem(EquipmentSlot.Extra))
         {
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Shoot");
+            Console.WriteLine("Ranged weapon is equipped. Attempting to cast Shoot.");
             Console.ResetColor();
 
-            if (Api.UseMacro("Shoot"))
+            if (Api.HasMacro("Shoot") && Api.UseMacro("Shoot"))
+            {
+                return true;
+            }
+        }
+        else
+        {
+            Console.WriteLine("No ranged weapon equipped. Skipping Shoot.");
+        }
+
+        if (Api.Spellbook.CanCast("Attack") && mana <= 2)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Casting Attack");
+            Console.ResetColor();
+            if (Api.Spellbook.Cast("Attack"))
             {
                 return true;
             }
         }
 
-
-
         return base.CombatPulse();
     }
+
     private bool IsNPC(WowUnit unit)
     {
         if (!IsValid(unit))
@@ -334,8 +423,6 @@ public class PriestShadow : Rotation
 
         return false;
     }
-
-
     private void LogPlayerStats()
     {
         var me = Api.Player;

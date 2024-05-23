@@ -33,7 +33,10 @@ public class Priest : Rotation
     private TimeSpan Pants = TimeSpan.FromSeconds(60);
     private DateTime lastChest = DateTime.MinValue;
     private TimeSpan Chest = TimeSpan.FromSeconds(8);
-
+    private bool HasEnchantment(EquipmentSlot slot, string enchantmentName)
+    {
+        return Api.Equipment.HasEnchantment(slot, enchantmentName);
+    }
 
 
 
@@ -71,6 +74,7 @@ public class Priest : Rotation
         var me = Api.Player;
         var mana = me.ManaPercent;
         var target = Api.Target;
+        var targethealth = target.HealthPercent;
 
         if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
         {
@@ -129,21 +133,48 @@ public class Priest : Rotation
 
         var reaction = me.GetReaction(target);
 
-        if (!target.IsDead() &&
-            (reaction != UnitReaction.Friendly &&
-             reaction != UnitReaction.Honored &&
-             reaction != UnitReaction.Revered &&
-             reaction != UnitReaction.Exalted) &&
-            mana > 20 && !IsNPC(target))
+        if (target.IsDead())
         {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Smite");
-            Console.ResetColor();
-            if (Api.Spellbook.Cast("Smite"))
-
-                return true;
+            if (reaction != UnitReaction.Friendly && reaction != UnitReaction.Honored && reaction != UnitReaction.Revered && reaction != UnitReaction.Exalted)
+            {
+                if (mana >= 5)
+                {
+                    if (!IsNPC(target))
+                    {
+                        if (Api.Spellbook.CanCast("Smite"))
+                        {
+                            Console.ForegroundColor = ConsoleColor.Green;
+                            Console.WriteLine("Casting Smite");
+                            Console.ResetColor();
+                            if (Api.Spellbook.Cast("Smite"))
+                            {
+                                return true;
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("Smite is not ready to be cast.");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("Target is an NPC.");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Mana is not above 20%.");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Target is friendly, honored, revered, or exalted.");
+            }
         }
-
+        else
+        {
+            Console.WriteLine("Target is dead.");
+        }
 
         return base.PassivePulse();
     }
@@ -167,6 +198,46 @@ public class Priest : Rotation
 
         string[] HP = { "Major Healing Potion", "Superior Healing Potion", "Greater Healing Potion", "Healing Potion", "Lesser Healing Potion", "Minor Healing Potion" };
         string[] MP = { "Major Mana Potion", "Superior Mana Potion", "Greater Mana Potion", "Mana Potion", "Lesser Mana Potion", "Minor Mana Potion" };
+
+
+        //hands
+        bool hasPenance = HasEnchantment(EquipmentSlot.Hands, "Penance");
+        bool hasDeath = HasEnchantment(EquipmentSlot.Hands, "Shadow Word: Death");
+        bool hasCircle = HasEnchantment(EquipmentSlot.Hands, "Circle of Healing");
+        bool hasMindSear = HasEnchantment(EquipmentSlot.Hands, "Mind Sear");
+
+        // Bracer
+        bool hasVoidZone = HasEnchantment(EquipmentSlot.Wrist, "Void Zone");
+        bool hasSurgeofLight = HasEnchantment(EquipmentSlot.Wrist, "Surge of Light");
+        bool hasDespair = HasEnchantment(EquipmentSlot.Wrist, "Despair");
+
+        //legs
+        bool hasSharedPain = HasEnchantment(EquipmentSlot.Legs, "Shared Pain");
+        bool hasHomunculi = HasEnchantment(EquipmentSlot.Legs, "Homunculi");
+        bool hasMending = HasEnchantment(EquipmentSlot.Legs, "Prayer of Mending");
+        bool hasBarrier = HasEnchantment(EquipmentSlot.Legs, "Power Word: Barrier");
+        bool hasSerendipity = HasEnchantment(EquipmentSlot.Legs, "Serendipity");
+
+        //waist
+        bool hasRenew = HasEnchantment(EquipmentSlot.Waist, "Empowered Renew");
+        bool hasIRenewedHope = HasEnchantment(EquipmentSlot.Waist, "Renewed Hope");
+        bool hasMindSpike = HasEnchantment(EquipmentSlot.Waist, "Mind Spike");
+
+        //feet
+        bool hasSuppression = HasEnchantment(EquipmentSlot.Feet, "Pain Suppression");
+        bool hasDispersion = HasEnchantment(EquipmentSlot.Feet, "Dispersion");
+        bool hasSpirit = HasEnchantment(EquipmentSlot.Feet, "Spirit of the Redeemer");
+
+        //chest
+        bool hasVoidPlague = HasEnchantment(EquipmentSlot.Chest, "Void Plague");
+        bool hasFaith = HasEnchantment(EquipmentSlot.Chest, "Twisted Faith");
+        bool hasStrengthofSoul = HasEnchantment(EquipmentSlot.Chest, "Strength of Soul");
+
+        //head
+        bool hasSuffering = HasEnchantment(EquipmentSlot.Head, "Pain and Suffering");
+        bool hasEye = HasEnchantment(EquipmentSlot.Head, "Eye of the Void");
+        bool hasAegis = HasEnchantment(EquipmentSlot.Head, "Divine Aegis");
+
 
         if (me.HealthPercent <= 70 && (!Api.Inventory.OnCooldown(MP) || !Api.Inventory.OnCooldown(HP)))
         {
@@ -216,7 +287,16 @@ public class Priest : Rotation
         }
         if (Api.HasMacro("Hands"))
         {
-            if ((DateTime.Now - lastHands) >= Hands)
+            bool hasEnchantmentOnHands = HasEnchantment(EquipmentSlot.Hands, "Penance") ||
+                                         HasEnchantment(EquipmentSlot.Hands, "Shadow Word: Death") ||
+                                         HasEnchantment(EquipmentSlot.Hands, "Circle of Healing") ||
+                                         HasEnchantment(EquipmentSlot.Hands, "Mind Sear");
+
+            if (!hasEnchantmentOnHands)
+            {
+                Console.WriteLine("No enchantment on Hands. Skipping cast.");
+            }
+            else if ((DateTime.Now - lastHands) >= Hands)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Casting Hands rune");
@@ -233,9 +313,18 @@ public class Priest : Rotation
                 Console.WriteLine("Hands rune is on cooldown. Skipping cast.");
             }
         }
-        if (Api.HasMacro("Chest") && !target.Auras.Contains("Void Plague"))
+
+        if (Api.HasMacro("Chest"))
         {
-            if ((DateTime.Now - lastChest) >= Chest)
+            bool hasEnchantmentOnChest = HasEnchantment(EquipmentSlot.Chest, "Void Plague") ||
+                                         HasEnchantment(EquipmentSlot.Chest, "Twisted Faith") ||
+                                         HasEnchantment(EquipmentSlot.Chest, "Strength of Soul");
+
+            if (!hasEnchantmentOnChest)
+            {
+                Console.WriteLine("No enchantment on Chest. Skipping cast.");
+            }
+            else if ((DateTime.Now - lastChest) >= Chest)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Casting Chest rune");
@@ -252,9 +341,20 @@ public class Priest : Rotation
                 Console.WriteLine("Chest rune is on cooldown. Skipping cast.");
             }
         }
+
         if (Api.HasMacro("Legs"))
         {
-            if ((DateTime.Now - lastPants) >= Pants)
+            bool hasEnchantmentOnLegs = HasEnchantment(EquipmentSlot.Legs, "Shared Pain") ||
+                                        HasEnchantment(EquipmentSlot.Legs, "Homunculi") ||
+                                        HasEnchantment(EquipmentSlot.Legs, "Prayer of Mending") ||
+                                        HasEnchantment(EquipmentSlot.Legs, "Power Word: Barrier") ||
+                                        HasEnchantment(EquipmentSlot.Legs, "Serendipity");
+
+            if (!hasEnchantmentOnLegs)
+            {
+                Console.WriteLine("No enchantment on Legs. Skipping cast.");
+            }
+            else if ((DateTime.Now - lastPants) >= Pants)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Casting Legs rune");
@@ -262,7 +362,7 @@ public class Priest : Rotation
 
                 if (Api.UseMacro("Legs"))
                 {
-                    lastHands = DateTime.Now;
+                    lastPants = DateTime.Now;
                     return true;
                 }
             }
@@ -301,20 +401,30 @@ public class Priest : Rotation
 
                 return true;
         }
-        if (Api.HasMacro("Shoot"))
-
-
+        if (Api.Equipment.HasItem(EquipmentSlot.Extra))
         {
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Shoot");
+            Console.WriteLine("Ranged weapon is equipped. Attempting to cast Shoot.");
             Console.ResetColor();
 
-            if (Api.UseMacro("Shoot"))
+            if (Api.HasMacro("Shoot") && Api.UseMacro("Shoot"))
             {
                 return true;
             }
         }
+        else
+        {
+            Console.WriteLine("No ranged weapon equipped. Skipping Shoot.");
+        }
+        if (Api.Spellbook.CanCast("Attack") && mana <= 11)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Casting Attack");
+            Console.ResetColor();
+            if (Api.Spellbook.Cast("Attack"))
 
+                return true;
+        }
 
 
         return base.CombatPulse();
@@ -355,14 +465,48 @@ public class Priest : Rotation
         var mana = me.ManaPercent;
         var healthPercentage = me.HealthPercent;
 
-
         Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine($"{mana} Mana available");
+        Console.WriteLine($"{mana}% Mana available");
         Console.WriteLine($"{healthPercentage}% Health available");
         Console.ResetColor();
 
-
-
+        // Log enchantments for each rune
+        LogEnchantment(EquipmentSlot.Hands, "Penance");
+        LogEnchantment(EquipmentSlot.Hands, "Shadow Word: Death");
+        LogEnchantment(EquipmentSlot.Hands, "Circle of Healing");
+        LogEnchantment(EquipmentSlot.Hands, "Mind Sear");
+        LogEnchantment(EquipmentSlot.Wrist, "Void Zone");
+        LogEnchantment(EquipmentSlot.Wrist, "Surge of Light");
+        LogEnchantment(EquipmentSlot.Wrist, "Despair");
+        LogEnchantment(EquipmentSlot.Legs, "Shared Pain");
+        LogEnchantment(EquipmentSlot.Legs, "Homunculi");
+        LogEnchantment(EquipmentSlot.Legs, "Prayer of Mending");
+        LogEnchantment(EquipmentSlot.Legs, "Power Word: Barrier");
+        LogEnchantment(EquipmentSlot.Legs, "Serendipity");
+        LogEnchantment(EquipmentSlot.Waist, "Empowered Renew");
+        LogEnchantment(EquipmentSlot.Waist, "Renewed Hope");
+        LogEnchantment(EquipmentSlot.Waist, "Mind Spike");
+        LogEnchantment(EquipmentSlot.Feet, "Pain Suppression");
+        LogEnchantment(EquipmentSlot.Feet, "Dispersion");
+        LogEnchantment(EquipmentSlot.Feet, "Spirit of the Redeemer");
+        LogEnchantment(EquipmentSlot.Chest, "Void Plague");
+        LogEnchantment(EquipmentSlot.Chest, "Twisted Faith");
+        LogEnchantment(EquipmentSlot.Chest, "Strength of Soul");
+        LogEnchantment(EquipmentSlot.Head, "Pain and Suffering");
+        LogEnchantment(EquipmentSlot.Head, "Eye of the Void");
+        LogEnchantment(EquipmentSlot.Head, "Divine Aegis");
     }
+
+    private void LogEnchantment(EquipmentSlot slot, string enchantmentName)
+    {
+        bool hasEnchantment = HasEnchantment(slot, enchantmentName);
+        if (hasEnchantment)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine($"Has {enchantmentName}");
+            Console.ResetColor();
+        }
+    }
+
 
 }

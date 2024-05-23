@@ -237,11 +237,12 @@ public class RetPala : Rotation
         var targethp = target.HealthPercent;
         var targetHealth = Api.Target.HealthPercent;
         if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
+        
+        //hands
         bool hasCrusaderStrike = HasEnchantment(EquipmentSlot.Hands, "Crusader Strike");
         bool hasHandOfReckoning = HasEnchantment(EquipmentSlot.Hands, "Hand of Reckoning");
         bool hasBeaconOfLight = HasEnchantment(EquipmentSlot.Hands, "Beacon of Light");
 
-        //runes
         // Bracer
         bool hasHammeroftheRighteous = HasEnchantment(EquipmentSlot.Wrist, "Hammer of the Righteous");
 
@@ -261,11 +262,6 @@ public class RetPala : Rotation
         bool hasArt = HasEnchantment(EquipmentSlot.Feet, "The Art of War");
         bool hasSacred = HasEnchantment(EquipmentSlot.Feet, "Sacred Shield");
         bool hasGuarded = HasEnchantment(EquipmentSlot.Feet, "Guarded by the Light");
-
-        //hands
-        bool hasBeacon = HasEnchantment(EquipmentSlot.Hands, "Beacon of Light");
-        bool hasReckoning = HasEnchantment(EquipmentSlot.Hands, "Hand of Reckoning");
-        bool hasCrusader = HasEnchantment(EquipmentSlot.Hands, "Crusader Strike");
 
         //chest
         bool hasStorm = HasEnchantment(EquipmentSlot.Chest, "Divine Storm");
