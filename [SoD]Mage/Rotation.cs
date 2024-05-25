@@ -64,8 +64,8 @@ public class MageSoD : Rotation
         // The simplest calculation for optimal ticks (to avoid key spam and false attempts)
 
         // Assuming wShadow is an instance of some class containing UnitRatings property
-        SlowTick = 800;
-        FastTick = 400 ;
+        SlowTick = 1550;
+        FastTick = 500 ;
 
         // You can also use this method to add to various action lists.
 
@@ -101,151 +101,153 @@ public class MageSoD : Rotation
 
         if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling()  || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
         var hasaura = me.Auras.Contains("Curse of Stalvan") || me.Auras.Contains("Curse of Blood");
-
-        if (hasaura && Api.Spellbook.CanCast("Remove Lesser Curse"))
+        if (me.IsValid())
         {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Decursing");
-            Console.ResetColor();
-            if (Api.Spellbook.Cast("Remove Lesser Curse"))
+            if (hasaura && Api.Spellbook.CanCast("Remove Lesser Curse"))
             {
-                return true;
-            }
-        }
-        //string[] GemTypes = { "Mana Agate", "Mana Sapphire", "Mana Emerald", "Mana Ruby", "Mana Citrine", "Mana Jade" };
-        //  bool needsgem = true;
-
-        //  foreach (string gemType in GemTypes)
-        //  {
-        //if (shadowApi.Inventory.HasItem(gemType))
-        //  {
-        // needsgem = false;
-        //   break;
-        // }
-        // }
-        //   if (Api.Spellbook.CanCast("Conjure Mana Agate") && needsgem)
-        //  {
-        // if (Api.Spellbook.Cast("Conjure Mana Agate"))
-        //   {
-        // Console.WriteLine("Conjure Mana Gem.");
-        // Add further actions if needed after conjuring water
-        //}
-        //}
-        if (Api.Spellbook.CanCast("Ice Armor") && !me.Auras.Contains("Ice Armor"))
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Ice Armor");
-            Console.ResetColor();
-
-            if (Api.Spellbook.Cast("Ice Armor"))
-                return true;
-        }
-
-        if (Api.Spellbook.CanCast("Frost Armor") && !me.Auras.Contains("Frost Armor") && !me.Auras.Contains("Ice Armor"))
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Frost Armor");
-            Console.ResetColor();
-
-            if (Api.Spellbook.Cast("Frost Armor"))
-                return true;
-        }
-
-        if (Api.Spellbook.CanCast("Arcane Intellect") && !me.Auras.Contains("Arcane Intellect", false))
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Arcane Intellect");
-            Console.ResetColor();
-
-            if (Api.Spellbook.Cast("Arcane Intellect"))
-                return true;
-        }
-
-
-        string[] waterTypes = { "Conjured Mana Strudel", "Conjured Mountain Spring Water", "Conjured Crystal Water", "Conjured Sparkling Water", "Conjured Mineral Water", "Conjured Spring Water", "Conjured Purified Water", "Conjured Fresh Water", "Conjured Water" };
-        string[] foodTypes = { "Conjured Mana Strudel", "Conjured Cinnamon Roll", "Conjured Sweet Roll", "Conjured Sourdough", "Conjured Pumpernickel", "Conjured Rye", "Conjured Bread", "Conjured Muffin" };
-        bool needsWater = false; // Initialize as false
-        bool needsFood = false; // Initialize as false
-
-        foreach (string waterType in waterTypes)
-        {
-            if (Api.Inventory.HasItem(waterType))
-            {
-                needsWater = true; // Set to true if the character has water
-                break;
-            }
-        }
-
-        foreach (string foodType in foodTypes)
-        {
-            if (Api.Inventory.HasItem(foodType))
-            {
-                needsFood = true; // Set to true if the character has food
-                break;
-            }
-        }
-
-        // Now needsWater and needsFood variables will indicate if the character needs water or food
-        if (!needsWater) // If the character does not have water
-        {
-            if (Api.Spellbook.CanCast("Conjure Water"))
-            {
-                if (Api.Spellbook.Cast("Conjure Water"))
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Decursing");
+                Console.ResetColor();
+                if (Api.Spellbook.Cast("Remove Lesser Curse"))
                 {
-                    Console.WriteLine("Conjured water.");
-                    // Add further actions if needed after conjuring water
+                    return true;
+                }
+            }
+            //string[] GemTypes = { "Mana Agate", "Mana Sapphire", "Mana Emerald", "Mana Ruby", "Mana Citrine", "Mana Jade" };
+            //  bool needsgem = true;
+
+            //  foreach (string gemType in GemTypes)
+            //  {
+            //if (shadowApi.Inventory.HasItem(gemType))
+            //  {
+            // needsgem = false;
+            //   break;
+            // }
+            // }
+            //   if (Api.Spellbook.CanCast("Conjure Mana Agate") && needsgem)
+            //  {
+            // if (Api.Spellbook.Cast("Conjure Mana Agate"))
+            //   {
+            // Console.WriteLine("Conjure Mana Gem.");
+            // Add further actions if needed after conjuring water
+            //}
+            //}
+            if (Api.Spellbook.CanCast("Ice Armor") && !me.Auras.Contains("Ice Armor"))
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Ice Armor");
+                Console.ResetColor();
+
+                if (Api.Spellbook.Cast("Ice Armor"))
+                    return true;
+            }
+
+            if (Api.Spellbook.CanCast("Frost Armor") && !me.Auras.Contains("Frost Armor") && !me.Auras.Contains("Ice Armor"))
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Frost Armor");
+                Console.ResetColor();
+
+                if (Api.Spellbook.Cast("Frost Armor"))
+                    return true;
+            }
+
+            if (Api.Spellbook.CanCast("Arcane Intellect") && !me.Auras.Contains("Arcane Intellect", false))
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Arcane Intellect");
+                Console.ResetColor();
+
+                if (Api.Spellbook.Cast("Arcane Intellect"))
+                    return true;
+            }
+
+
+            string[] waterTypes = { "Conjured Mana Strudel", "Conjured Mountain Spring Water", "Conjured Crystal Water", "Conjured Sparkling Water", "Conjured Mineral Water", "Conjured Spring Water", "Conjured Purified Water", "Conjured Fresh Water", "Conjured Water" };
+            string[] foodTypes = { "Conjured Mana Strudel", "Conjured Cinnamon Roll", "Conjured Sweet Roll", "Conjured Sourdough", "Conjured Pumpernickel", "Conjured Rye", "Conjured Bread", "Conjured Muffin" };
+            bool needsWater = false; // Initialize as false
+            bool needsFood = false; // Initialize as false
+
+            foreach (string waterType in waterTypes)
+            {
+                if (Api.Inventory.HasItem(waterType))
+                {
+                    needsWater = true; // Set to true if the character has water
+                    break;
+                }
+            }
+
+            foreach (string foodType in foodTypes)
+            {
+                if (Api.Inventory.HasItem(foodType))
+                {
+                    needsFood = true; // Set to true if the character has food
+                    break;
+                }
+            }
+
+            // Now needsWater and needsFood variables will indicate if the character needs water or food
+            if (!needsWater) // If the character does not have water
+            {
+                if (Api.Spellbook.CanCast("Conjure Water"))
+                {
+                    if (Api.Spellbook.Cast("Conjure Water"))
+                    {
+                        Console.WriteLine("Conjured water.");
+                        // Add further actions if needed after conjuring water
+                    }
+                }
+            }
+
+            if (!needsFood) // If the character does not have food
+            {
+                if (Api.Spellbook.CanCast("Conjure Food"))
+                {
+                    if (Api.Spellbook.Cast("Conjure Food"))
+                    {
+                        Console.WriteLine("Conjured Food.");
+                        // Add further actions if needed after conjuring food
+                    }
                 }
             }
         }
-
-        if (!needsFood) // If the character does not have food
-        {
-            if (Api.Spellbook.CanCast("Conjure Food"))
-            {
-                if (Api.Spellbook.Cast("Conjure Food"))
-                {
-                    Console.WriteLine("Conjured Food.");
-                    // Add further actions if needed after conjuring food
-                }
-            }
-        }
-
 
 
 
 
         var reaction = me.GetReaction(target);
-
-        if (!target.IsDead() &&
+        if (target.IsValid())
+        {
+            if (!target.IsDead() &&
             (reaction != UnitReaction.Friendly &&
              reaction != UnitReaction.Honored &&
              reaction != UnitReaction.Revered &&
              reaction != UnitReaction.Exalted) &&
             mana > 20 && !IsNPC(target))
-        {
-            Console.WriteLine("Trying to cast Pyroblast");
+            {
+                Console.WriteLine("Trying to cast Pyroblast");
 
-            // Try casting Pyroblast
-            if (Api.Spellbook.CanCast("Pyroblast"))
-            {
-                Api.Spellbook.Cast("Pyroblast");
-                Console.WriteLine("Casting Pyroblast");
-                return true;
-            }
-            else
-            {
-                // If Pyroblast fails, try casting Frostbolt
-                if (Api.Spellbook.CanCast("Frostbolt"))
+                // Try casting Pyroblast
+                if (Api.Spellbook.CanCast("Pyroblast"))
                 {
-                    Console.WriteLine("Casting Frostbolt");
-                    Api.Spellbook.Cast("Frostbolt");
+                    Api.Spellbook.Cast("Pyroblast");
+                    Console.WriteLine("Casting Pyroblast");
                     return true;
                 }
+                else
+                {
+                    // If Pyroblast fails, try casting Frostbolt
+                    if (Api.Spellbook.CanCast("Frostbolt"))
+                    {
+                        Console.WriteLine("Casting Frostbolt");
+                        Api.Spellbook.Cast("Frostbolt");
+                        return true;
+                    }
+                }
             }
+
+            // If none of the conditions are met or casting both spells fail
         }
-
-        // If none of the conditions are met or casting both spells fail
-
         return base.PassivePulse();
 
     }

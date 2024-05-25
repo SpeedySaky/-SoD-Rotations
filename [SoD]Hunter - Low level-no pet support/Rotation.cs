@@ -47,8 +47,8 @@ public class Hunter : Rotation
         // The simplest calculation for optimal ticks (to avoid key spam and false attempts)
 
         // Assuming wShadow is an instance of some class containing UnitRatings property
-        SlowTick = 600;
-        FastTick = 200;
+        SlowTick = 1550;
+        FastTick = 500;
 
         // You can also use this method to add to various action lists.
 
@@ -105,38 +105,39 @@ public class Hunter : Rotation
 
 
         var reaction = me.GetReaction(target);
-
-        if (!target.IsDead() &&
+        if (target.IsValid())
+        {
+            if (!target.IsDead() &&
     (reaction != UnitReaction.Friendly &&
      reaction != UnitReaction.Honored &&
      reaction != UnitReaction.Revered &&
      reaction != UnitReaction.Exalted) &&
     mana > 20 && !IsNPC(target) && Api.Spellbook.CanCast("Hunter's Mark") && !target.Auras.Contains("Hunter's Mark") && healthPercentage > 50 && mana > 20)
 
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Mark");
-            Console.ResetColor();
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Mark");
+                Console.ResetColor();
 
-            if (Api.UseMacro("Mark"))
+                if (Api.UseMacro("Mark"))
 
-                return true;
+                    return true;
 
+            }
+
+
+
+
+            if (Api.Spellbook.CanCast("Serpent Sting") && target.Auras.Contains("Hunter's Mark") && healthPercentage > 50 && mana > 20)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Serpent Sting");
+                Console.ResetColor();
+
+                if (Api.Spellbook.Cast("Serpent Sting"))
+                    return true;
+            }
         }
-
-
-
-
-        if (Api.Spellbook.CanCast("Serpent Sting") && target.Auras.Contains("Hunter's Mark") && healthPercentage > 50 && mana > 20)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Serpent Sting");
-            Console.ResetColor();
-
-            if (Api.Spellbook.Cast("Serpent Sting"))
-                return true;
-        }
-
 
 
 
@@ -168,10 +169,10 @@ public class Hunter : Rotation
 
         // Target distance from the player
 
-        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsChanneling()) return false;
-        if (me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
 
         var meTarget = me.Target;
+        if (!me.IsValid() || !target.IsValid() || me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
+
         string[] HP = { "Major Healing Potion", "Superior Healing Potion", "Greater Healing Potion", "Healing Potion", "Lesser Healing Potion", "Minor Healing Potion" };
         string[] MP = { "Major Mana Potion", "Superior Mana Potion", "Greater Mana Potion", "Mana Potion", "Lesser Mana Potion", "Minor Mana Potion" };
 

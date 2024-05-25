@@ -47,8 +47,8 @@ public class Hunter : Rotation
         // The simplest calculation for optimal ticks (to avoid key spam and false attempts)
 
         // Assuming wShadow is an instance of some class containing UnitRatings property
-        SlowTick = 600;
-        FastTick = 200;
+        SlowTick = 1550;
+        FastTick = 500;
 
         // You can also use this method to add to various action lists.
 
@@ -90,107 +90,124 @@ public class Hunter : Rotation
         if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
 
 
-        if (Api.HasMacro("Chest") && !me.Auras.Contains("Heart of the Lion", false))
-
+        if (me.IsValid())
         {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Heart of the Lion");
-            Console.ResetColor();
+            if (Api.HasMacro("Chest") && !me.Auras.Contains("Heart of the Lion", false))
 
-            if (Api.UseMacro("Chest"))
-
-                return true;
-
-        }
-
-
-        if (Api.Spellbook.CanCast("Aspect of the Cheetah") && !me.Auras.Contains("Aspect of the Cheetah", false))
-
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Aspect of the Cheetah");
-            Console.ResetColor();
-
-            if (Api.Spellbook.Cast("Aspect of the Cheetah"))
-
-                return true;
-
-        }
-        if (IsValid(pet) && PetHealth < 40 && Api.Spellbook.CanCast("Mend Pet") && !pet.Auras.Contains("Mend Pet") && mana > 10)
-        {
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("Pet health is low healing him");
-            Console.ResetColor();
-            if (Api.Spellbook.Cast("Mend Pet"))
-
-                return true;
-        }
-        var reaction = me.GetReaction(target);
-
-        if (Api.Spellbook.CanCast("Hunter's Mark") && !target.Auras.Contains("Hunter's Mark") && !target.IsDead() && (reaction != UnitReaction.Friendly && reaction != UnitReaction.Honored && reaction != UnitReaction.Revered && reaction != UnitReaction.Exalted) &&
-mana > 20 && !IsNPC(target) && healthPercentage > 50 && mana > 20 && PetHealth > 50)
-
-        {
             {
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Casting Mark");
+                Console.WriteLine("Casting Heart of the Lion");
                 Console.ResetColor();
 
-                if (Api.UseMacro("Mark"))
+                if (Api.UseMacro("Chest"))
+
+                    return true;
+
+            }
+
+
+            if (Api.Spellbook.CanCast("Aspect of the Cheetah") && !me.Auras.Contains("Aspect of the Cheetah", false))
+
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Aspect of the Cheetah");
+                Console.ResetColor();
+
+                if (Api.Spellbook.Cast("Aspect of the Cheetah"))
+
+                    return true;
+
+            }
+            if (IsValid(pet) && PetHealth < 40 && Api.Spellbook.CanCast("Mend Pet") && !pet.Auras.Contains("Mend Pet") && mana > 10)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("Pet health is low healing him");
+                Console.ResetColor();
+                if (Api.Spellbook.Cast("Mend Pet"))
+
+                    return true;
+            }
+            if ((DateTime.Now - lastCallPetTime) >= callPetCooldown && (!IsValid(pet) || !pet.IsDead()) && Api.Spellbook.CanCast("Call Pet"))
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Call Pet.");
+                Console.ResetColor();
+
+                if (Api.Spellbook.Cast("Call Pet"))
+                {
+                    lastCallPetTime = DateTime.Now; // Update the lastCallPetTime after successful casting
+                    return true;
+                }
+            }
+            // Additional actions for when the pet is dead
+            if ((!IsValid(pet) || pet.IsDead()) && Api.Spellbook.CanCast("Revive Pet"))
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("Casting Revive Pet");
+                Console.ResetColor();
+
+                if (Api.Spellbook.Cast("Revive Pet"))
                 {
                     return true;
                 }
-
-
             }
-        }
 
-
-        if (!IsValid(pet) && Api.Spellbook.CanCast("Call Pet") && (DateTime.Now - lastCallPetTime) >= callPetCooldown)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Call Pet.");
-            Console.ResetColor();
-
-            if (Api.Spellbook.Cast("Call Pet"))
+            if (IsValid(pet) && (DateTime.Now - lastFeedTime).TotalMinutes >= 10 && Api.HasMacro("Feed"))
             {
-                lastCallPetTime = DateTime.Now; // Update the lastCallPetTime after successful casting
-                return true;
-            }
-        }
-        // Additional actions for when the pet is dead
-        else if (!IsValid(pet) && Api.Spellbook.CanCast("Revive Pet"))
-        {
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("Casting Revive Pet");
-            Console.ResetColor();
-
-            if (Api.Spellbook.Cast("Revive Pet"))
-            {
-                return true;
-            }
-        }
-        if (IsValid(pet) && !pet.IsDead() && (DateTime.Now - lastFeedTime).TotalMinutes >= 10 && Api.HasMacro("Feed"))
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Feeding pet.");
-            Console.ResetColor();
-
-            if (Api.UseMacro("Feed"))
-            {
-                lastFeedTime = DateTime.Now; // Update lastFeedTime
-
-                // Log the estimated time until the next feeding attempt
-                var nextFeedTime = lastFeedTime.AddMinutes(10);
-                var timeUntilNextFeed = nextFeedTime - DateTime.Now;
-
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine($"Next feed pet in: {timeUntilNextFeed.TotalMinutes} minutes.");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Feeding pet.");
                 Console.ResetColor();
 
-                return true;
+                if (Api.UseMacro("Feed"))
+                {
+                    lastFeedTime = DateTime.Now; // Update lastFeedTime
+
+                    // Log the estimated time until the next feeding attempt
+                    var nextFeedTime = lastFeedTime.AddMinutes(10);
+                    var timeUntilNextFeed = nextFeedTime - DateTime.Now;
+
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine($"Next feed pet in: {timeUntilNextFeed.TotalMinutes} minutes.");
+                    Console.ResetColor();
+
+                    return true;
+                }
+            }
+            if (IsValid(pet) && PetHealth < 40 && Api.Spellbook.CanCast("Mend Pet") && !pet.Auras.Contains("Mend Pet") && mana > 10)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("Pet health is low healing him");
+                Console.ResetColor();
+                if (Api.Spellbook.Cast("Mend Pet"))
+
+                    return true;
             }
         }
+        var reaction = me.GetReaction(target);
+
+
+        if (target.IsValid())
+        {
+            if (Api.Spellbook.CanCast("Hunter's Mark") && !target.Auras.Contains("Hunter's Mark") && !target.IsDead() && (reaction != UnitReaction.Friendly && reaction != UnitReaction.Honored && reaction != UnitReaction.Revered && reaction != UnitReaction.Exalted) &&
+mana > 20 && !IsNPC(target) && healthPercentage > 50 && mana > 20 && PetHealth > 50)
+
+            {
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Casting Mark");
+                    Console.ResetColor();
+
+                    if (Api.UseMacro("Mark"))
+                    {
+                        return true;
+                    }
+
+
+                }
+            }
+        }
+
+
 
         return base.PassivePulse();
 
@@ -217,7 +234,7 @@ mana > 20 && !IsNPC(target) && healthPercentage > 50 && mana > 20 && PetHealth >
             lastDebugTime = DateTime.Now; // Update lastDebugTime
         }
 
-        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
+        if (!me.IsValid() || !target.IsValid() || me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
 
         var meTarget = me.Target;
 
@@ -257,7 +274,20 @@ mana > 20 && !IsNPC(target) && healthPercentage > 50 && mana > 20 && PetHealth >
                 }
             }
         }
-        if (!IsValid(pet) && Api.Spellbook.CanCast("Revive Pet"))
+        if ((!IsValid(pet) || !pet.IsDead()) && Api.Spellbook.CanCast("Call Pet"))
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Casting Call Pet.");
+            Console.ResetColor();
+
+            if (Api.Spellbook.Cast("Call Pet"))
+            {
+                lastCallPetTime = DateTime.Now; // Update the lastCallPetTime after successful casting
+                return true;
+            }
+        }
+        // Additional actions for when the pet is dead
+        if ((!IsValid(pet) || pet.IsDead()) && Api.Spellbook.CanCast("Revive Pet"))
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("Casting Revive Pet");

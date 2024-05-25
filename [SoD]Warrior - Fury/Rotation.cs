@@ -22,7 +22,8 @@ public class FuryWarriorSoD : Rotation
         }
         return true;
     }
-
+    private bool HasItem(object item) => Api.Inventory.HasItem(item);
+    
 
     public override void Initialize()
     {
@@ -34,8 +35,8 @@ public class FuryWarriorSoD : Rotation
         // The simplest calculation for optimal ticks (to avoid key spam and false attempts)
 
         // Assuming wShadow is an instance of some class containing UnitRatings property
-        SlowTick = 600;
-        FastTick = 200;
+        SlowTick = 1550;
+        FastTick = 500;
 
         // You can also use this method to add to various action lists.
 
@@ -62,20 +63,28 @@ public class FuryWarriorSoD : Rotation
         if (!IsValid(target))
             return true;
 
+        if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
+        {
+            LogPlayerStats();
+            lastDebugTime = DateTime.Now; // Update lastDebugTime
+        }
         if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
         var targetDistance = target.Position.Distance2D(me.Position);
 
-
-        if (!target.IsDead())
+        if (target.IsValid())
         {
-            if (Api.Spellbook.CanCast("Charge") && targetDistance >= 8 && targetDistance <= 23 && !Api.Spellbook.OnCooldown("Charge"))
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Charge");
-                Console.ResetColor();
 
-                if (Api.Spellbook.Cast("Charge"))
-                    return true;
+            if (!target.IsDead())
+            {
+                if (Api.Spellbook.CanCast("Charge") && targetDistance >= 8 && targetDistance <= 23 && !Api.Spellbook.OnCooldown("Charge"))
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Charge");
+                    Console.ResetColor();
+
+                    if (Api.Spellbook.Cast("Charge"))
+                        return true;
+                }
             }
         }
         return base.PassivePulse();
@@ -90,8 +99,13 @@ public class FuryWarriorSoD : Rotation
         var target = Api.Target;
         var targethealth = target.HealthPercent;
         string[] HP = { "Major Healing Potion", "Superior Healing Potion", "Greater Healing Potion", "Healing Potion", "Lesser Healing Potion", "Minor Healing Potion" };
-        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
+        if (!me.IsValid() || !target.IsValid() || me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
 
+        if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
+        {
+            LogPlayerStats();
+            lastDebugTime = DateTime.Now; // Update lastDebugTime
+        }
         if (me.HealthPercent <= 70 && !Api.Inventory.OnCooldown(HP))
         {
             foreach (string hpot in HP)
@@ -111,7 +125,7 @@ public class FuryWarriorSoD : Rotation
 
 
 
-        if (!me.HasAura("Bloodrage") && Api.Spellbook.CanCast("Bloodrage") && !Api.Spellbook.OnCooldown("Bloodrage") && healthPercentage >= 75)
+        if (!me.Auras.Contains("Bloodrage") && Api.Spellbook.CanCast("Bloodrage") && !Api.Spellbook.OnCooldown("Bloodrage") && healthPercentage >= 75)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Bloodrage");
@@ -121,7 +135,7 @@ public class FuryWarriorSoD : Rotation
                 return true;
 
         }
-        if (!me.HasAura("Battle Shout") && Api.Spellbook.CanCast("Battle Shout") && !Api.Spellbook.OnCooldown("Battle Shout"))
+        if (!me.Auras.Contains("Battle Shout") && Api.Spellbook.CanCast("Battle Shout") && !Api.Spellbook.OnCooldown("Battle Shout"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Battle Shout");
@@ -131,7 +145,7 @@ public class FuryWarriorSoD : Rotation
                 return true;
 
         }
-        if (Api.Spellbook.CanCast("Hamstring") && targethealth <= 30 && !target.HasAura("Hamstring"))
+        if (Api.Spellbook.CanCast("Hamstring") && targethealth <= 30 && !target.Auras.Contains("Hamstring"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Hamstring");
@@ -140,7 +154,7 @@ public class FuryWarriorSoD : Rotation
 
                 return true;
         }
-        if (Api.Spellbook.CanCast("Rend") && targethealth >= 30 && !target.HasAura("Rend"))
+        if (Api.Spellbook.CanCast("Rend") && targethealth >= 30 && !target.Auras.Contains("Rend"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Rend");
@@ -149,7 +163,7 @@ public class FuryWarriorSoD : Rotation
 
                 return true;
         }
-        if (Api.Spellbook.CanCast("Demoralizing Shout") && !target.HasAura("Demoralizing Shout"))  && Api.UnfriendlyUnitsNearby(8, true))
+        if (Api.Spellbook.CanCast("Demoralizing Shout") && !target.Auras.Contains("Demoralizing Shout") && Api.UnfriendlyUnitsNearby(10, true) >= 2)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Demoralizing Shout");
@@ -158,7 +172,7 @@ public class FuryWarriorSoD : Rotation
 
                 return true;
         }
-        if (Api.Spellbook.CanCast("Thunder Clap") && !target.HasAura("Thunder Clap"))  && Api.UnfriendlyUnitsNearby(8, true))
+        if (Api.Spellbook.CanCast("Thunder Clap") && !target.Auras.Contains("Thunder Clap") && Api.UnfriendlyUnitsNearby(10, true) >= 2)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Thunder Clap");
@@ -167,6 +181,7 @@ public class FuryWarriorSoD : Rotation
 
                 return true;
         }
+
 
 
 

@@ -54,8 +54,8 @@ public class RogueNoStealth : Rotation
         // The simplest calculation for optimal ticks (to avoid key spam and false attempts)
 
         // Assuming wShadow is an instance of some class containing UnitRatings property
-        SlowTick = 600;
-        FastTick = 200;
+        SlowTick = 1550;
+        FastTick = 500;
 
         // You can also use this method to add to various action lists.
 
@@ -150,10 +150,10 @@ public class RogueNoStealth : Rotation
         // Target distance from the player
         var targetDistance = target.Position.Distance2D(me.Position);
 
-        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
+        if (!me.IsValid() || !target.IsValid() || me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
 
 
-       
+
 
         if ((Api.Spellbook.CanCast("Kick") || Api.Spellbook.CanCast("Kidney Shot")) && (!Api.Spellbook.OnCooldown("Kick") || !Api.Spellbook.OnCooldown("Kidney Shot")) && (target.IsCasting() || target.IsChanneling()))
         {

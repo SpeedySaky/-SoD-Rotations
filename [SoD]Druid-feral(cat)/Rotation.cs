@@ -41,8 +41,8 @@ public class FeralDruidSoD : Rotation
         // The simplest calculation for optimal ticks (to avoid key spam and false attempts)
 
         // Assuming wShadow is an instance of some class containing UnitRatings property
-        SlowTick = 600;
-        FastTick = 200;
+        SlowTick = 1550;
+        FastTick = 500;
 
         // You can also use this method to add to various action lists.
 
@@ -77,62 +77,63 @@ public class FeralDruidSoD : Rotation
             lastDebugTime = DateTime.Now; // Update lastDebugTime
         }
 
-       
-        if (Api.Spellbook.CanCast("Mark of the Wild") && !me.Auras.Contains("Mark of the Wild") )
+        if (me.IsValid())
         {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Mark of the Wild");
-            Console.ResetColor();
-            if (Api.Spellbook.Cast("Mark of the Wild"))
+            if (Api.Spellbook.CanCast("Mark of the Wild") && !me.Auras.Contains("Mark of the Wild"))
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Mark of the Wild");
+                Console.ResetColor();
+                if (Api.Spellbook.Cast("Mark of the Wild"))
 
-                return true;
+                    return true;
+            }
+
+            if (Api.Spellbook.CanCast("Thorns") && !me.Auras.Contains("Thorns"))
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Thorns");
+                Console.ResetColor();
+                if (Api.Spellbook.Cast("Thorns"))
+
+                    return true;
+            }
+
+            if (Api.Spellbook.CanCast("Omen of Clarity") && !me.Auras.Contains("Omen of Clarity"))
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Omen of Clarity");
+                Console.ResetColor();
+                if (Api.Spellbook.Cast("Omen of Clarity"))
+
+                    return true;
+            }
+            if (Api.Spellbook.CanCast("Rejuvenation") && healthPercentage <= 60 && !me.Auras.Contains("Rejuvenation"))
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Rejuvenation");
+                Console.ResetColor();
+                if (Api.Spellbook.Cast("Rejuvenation"))
+                    return true;
+            }
+
+            if (Api.Spellbook.CanCast("Regrowth") && healthPercentage <= 40 && !me.Auras.Contains("Regrowth"))
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Regrowth");
+                Console.ResetColor();
+                if (Api.Spellbook.Cast("Regrowth"))
+                    return true;
+            }
+            if (Api.Spellbook.CanCast("Healing Touch") && healthPercentage <= 30)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Healing Touch");
+                Console.ResetColor();
+                if (Api.Spellbook.Cast("Healing Touch"))
+                    return true;
+            }
         }
-
-        if (Api.Spellbook.CanCast("Thorns") && !me.Auras.Contains("Thorns"))
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Thorns");
-            Console.ResetColor();
-            if (Api.Spellbook.Cast("Thorns"))
-
-                return true;
-        }
-
-        if (Api.Spellbook.CanCast("Omen of Clarity") && !me.Auras.Contains("Omen of Clarity") )
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Omen of Clarity");
-            Console.ResetColor();
-            if (Api.Spellbook.Cast("Omen of Clarity"))
-
-                return true;
-        }
-        if (Api.Spellbook.CanCast("Rejuvenation") && healthPercentage <= 60 && !me.Auras.Contains("Rejuvenation"))
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Rejuvenation");
-            Console.ResetColor();
-            if (Api.Spellbook.Cast("Rejuvenation"))
-                return true;
-        }
-
-        if (Api.Spellbook.CanCast("Regrowth") && healthPercentage <= 40 && !me.Auras.Contains("Regrowth"))
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Regrowth");
-            Console.ResetColor();
-            if (Api.Spellbook.Cast("Regrowth"))
-                return true;
-        }
-        if (Api.Spellbook.CanCast("Healing Touch") && healthPercentage <= 30)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Healing Touch");
-            Console.ResetColor();
-            if (Api.Spellbook.Cast("Healing Touch"))
-                return true;
-        }
-
 
 
 
@@ -154,7 +155,7 @@ public class FeralDruidSoD : Rotation
         var points = me.ComboPoints;
         string[] HP = { "Major Healing Potion", "Superior Healing Potion", "Greater Healing Potion", "Healing Potion", "Lesser Healing Potion", "Minor Healing Potion" };
         string[] MP = { "Major Mana Potion", "Superior Mana Potion", "Greater Mana Potion", "Mana Potion", "Lesser Mana Potion", "Minor Mana Potion" };
-        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.Auras.Contains("Drink") || me.Auras.Contains("Food") || me.IsMounted()) return false;
+        if (!me.IsValid() || !target.IsValid() || me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
 
         if (me.HealthPercent <= 70 && (!Api.Inventory.OnCooldown(MP) || !Api.Inventory.OnCooldown(HP)))
         {

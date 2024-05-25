@@ -48,7 +48,7 @@ public class EnhaShaman : Rotation
         // The simplest calculation for optimal ticks (to avoid key spam and false attempts)
 
         // Assuming wShadow is an instance of some class containing UnitRatings property
-        SlowTick = 800;
+        SlowTick = 1550;
         FastTick = 400;
 
         // You can also use this method to add to various action lists.
@@ -80,51 +80,53 @@ public class EnhaShaman : Rotation
         }
         if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsChanneling()) return false;
         if (me.Auras.Contains("Drink") || me.Auras.Contains("Food") || me.IsMounted()) return false;
-
-        // Check if the main hand weapon doesn't have any Rockbiter enchantment
-        bool hasAnyRockbiterEnchantment = HasAnyRockbiterEnchantment(EquipmentSlot.MainHand);
-        if (!hasAnyRockbiterEnchantment && Api.Spellbook.CanCast("Rockbiter Weapon"))
+        if (me.IsValid())
         {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Rockbiter Weapon on main hand");
-            Console.ResetColor();
-            if (Api.Spellbook.Cast("Rockbiter Weapon"))
+            // Check if the main hand weapon doesn't have any Rockbiter enchantment
+            bool hasAnyRockbiterEnchantment = HasAnyRockbiterEnchantment(EquipmentSlot.MainHand);
+            if (!hasAnyRockbiterEnchantment && Api.Spellbook.CanCast("Rockbiter Weapon"))
             {
-                return true;
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Rockbiter Weapon on main hand");
+                Console.ResetColor();
+                if (Api.Spellbook.Cast("Rockbiter Weapon"))
+                {
+                    return true;
+                }
             }
-        }
 
-        bool hasAnyFlametongueEnchantment = HasAnyFlametongueEnchantment(EquipmentSlot.OffHand);
-        if (!hasAnyFlametongueEnchantment && Api.Spellbook.CanCast("Flametongue Weapon") && Level >= 20)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Flametongue Weapon on off-hand");
-            Console.ResetColor();
-            if (Api.Spellbook.Cast("Flametongue Weapon"))
+            bool hasAnyFlametongueEnchantment = HasAnyFlametongueEnchantment(EquipmentSlot.OffHand);
+            if (!hasAnyFlametongueEnchantment && Api.Spellbook.CanCast("Flametongue Weapon") && Level >= 20)
             {
-                return true;
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Flametongue Weapon on off-hand");
+                Console.ResetColor();
+                if (Api.Spellbook.Cast("Flametongue Weapon"))
+                {
+                    return true;
+                }
             }
-        }
 
-        if (Api.Spellbook.CanCast("Ghost Wolf") && !me.Auras.Contains("Ghost Wolf", false))
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Ghost Wolf");
-            Console.ResetColor();
-            if (Api.Spellbook.Cast("Ghost Wolf"))
+            if (Api.Spellbook.CanCast("Ghost Wolf") && !me.Auras.Contains("Ghost Wolf", false))
             {
-                return true;
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Ghost Wolf");
+                Console.ResetColor();
+                if (Api.Spellbook.Cast("Ghost Wolf"))
+                {
+                    return true;
+                }
             }
-        }
 
-        if (Api.Spellbook.CanCast("Lightning Shield") && !me.Auras.Contains("Lightning Shield") && mana > 30)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Lighting Shield");
-            Console.ResetColor();
-            if (Api.Spellbook.Cast("Lightning Shield"))
+            if (Api.Spellbook.CanCast("Lightning Shield") && !me.Auras.Contains("Lightning Shield") && mana > 30)
             {
-                return true;
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Lighting Shield");
+                Console.ResetColor();
+                if (Api.Spellbook.Cast("Lightning Shield"))
+                {
+                    return true;
+                }
             }
         }
         return base.PassivePulse();
@@ -141,7 +143,7 @@ public class EnhaShaman : Rotation
         var targetDistance = target.Position.Distance2D(me.Position);
         string[] HP = { "Major Healing Potion", "Superior Healing Potion", "Greater Healing Potion", "Healing Potion", "Lesser Healing Potion", "Minor Healing Potion" };
         string[] MP = { "Major Mana Potion", "Superior Mana Potion", "Greater Mana Potion", "Mana Potion", "Lesser Mana Potion", "Minor Mana Potion" };
-        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.Auras.Contains("Drink") || me.Auras.Contains("Food") || me.IsMounted()) return false;
+        if (!me.IsValid() || !target.IsValid() || me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
 
         if (me.HealthPercent <= 70 && (!Api.Inventory.OnCooldown(MP) || !Api.Inventory.OnCooldown(HP)))
         {

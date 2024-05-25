@@ -53,7 +53,7 @@ public class PriestShadow : Rotation
         // The simplest calculation for optimal ticks (to avoid key spam and false attempts)
 
         // Assuming wShadow is an instance of some class containing UnitRatings property
-        SlowTick = 1000;
+        SlowTick = 1550;
         FastTick = 500;
 
         // You can also use this method to add to various action lists.
@@ -90,83 +90,86 @@ public class PriestShadow : Rotation
         // Target distance from the player
 
         if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsLooting() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
-
-        if (Api.Spellbook.CanCast("Renew") && !me.Auras.Contains("Renew") && healthPercentage < 80)
+        if (me.IsValid())
         {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Renew");
-            Console.ResetColor();
-            if (Api.Spellbook.Cast("Renew"))
+            if (Api.Spellbook.CanCast("Renew") && !me.Auras.Contains("Renew") && healthPercentage < 80)
             {
-                return true;
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Renew");
+                Console.ResetColor();
+                if (Api.Spellbook.Cast("Renew"))
+                {
+                    return true;
+                }
+            }
+            if (Api.Spellbook.CanCast("Power Word: Fortitude") && !me.Auras.Contains("Power Word: Fortitude"))
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Power Word: Fortitude");
+                Console.ResetColor();
+                if (Api.Spellbook.Cast("Power Word: Fortitude"))
+                {
+                    return true;
+                }
+            }
+            if (Api.Spellbook.CanCast("Inner Fire") && !me.Auras.Contains("Inner Fire"))
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Inner Fire");
+                Console.ResetColor();
+                if (Api.Spellbook.Cast("Inner Fire"))
+                {
+                    return true;
+                }
             }
         }
-        if (Api.Spellbook.CanCast("Power Word: Fortitude") && !me.Auras.Contains("Power Word: Fortitude"))
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Power Word: Fortitude");
-            Console.ResetColor();
-            if (Api.Spellbook.Cast("Power Word: Fortitude"))
-            {
-                return true;
-            }
-        }
-        if (Api.Spellbook.CanCast("Inner Fire") && !me.Auras.Contains("Inner Fire"))
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Inner Fire");
-            Console.ResetColor();
-            if (Api.Spellbook.Cast("Inner Fire"))
-            {
-                return true;
-            }
-        }
-
         var reaction = me.GetReaction(target);
 
-        if (target.IsDead())
-        {
-            if (reaction != UnitReaction.Friendly && reaction != UnitReaction.Honored && reaction != UnitReaction.Revered && reaction != UnitReaction.Exalted)
+        if (target.IsValid())
+        { 
+            if (target.IsDead())
             {
-                if (mana >= 5)
+                if (reaction != UnitReaction.Friendly && reaction != UnitReaction.Honored && reaction != UnitReaction.Revered && reaction != UnitReaction.Exalted)
                 {
-                    if (!IsNPC(target))
+                    if (mana >= 5)
                     {
-                        if (Api.Spellbook.CanCast("Smite"))
+                        if (!IsNPC(target))
                         {
-                            Console.ForegroundColor = ConsoleColor.Green;
-                            Console.WriteLine("Casting Smite");
-                            Console.ResetColor();
-                            if (Api.Spellbook.Cast("Smite"))
+                            if (Api.Spellbook.CanCast("Smite"))
                             {
-                                return true;
+                                Console.ForegroundColor = ConsoleColor.Green;
+                                Console.WriteLine("Casting Smite");
+                                Console.ResetColor();
+                                if (Api.Spellbook.Cast("Smite"))
+                                {
+                                    return true;
+                                }
+                            }
+                            else
+                            {
+                                Console.WriteLine("Smite is not ready to be cast.");
                             }
                         }
                         else
                         {
-                            Console.WriteLine("Smite is not ready to be cast.");
+                            Console.WriteLine("Target is an NPC.");
                         }
                     }
                     else
                     {
-                        Console.WriteLine("Target is an NPC.");
+                        Console.WriteLine("Mana is not above 20%.");
                     }
                 }
                 else
                 {
-                    Console.WriteLine("Mana is not above 20%.");
+                    Console.WriteLine("Target is friendly, honored, revered, or exalted.");
                 }
             }
             else
             {
-                Console.WriteLine("Target is friendly, honored, revered, or exalted.");
+                Console.WriteLine("Target is dead.");
             }
-        }
-        else
-        {
-            Console.WriteLine("Target is dead.");
-        }
-
+    }
 
         return base.PassivePulse();
     }
@@ -177,9 +180,9 @@ public class PriestShadow : Rotation
         var me = Api.Player;
         var target = Api.Target;
         var mana = me.ManaPercent;
-        if (me.IsCasting() || me.IsChanneling() || me.IsLooting()) return false;
+    if (!me.IsValid() || !target.IsValid() || me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
 
-        if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
+    if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
         {
             LogPlayerStats();
             lastDebugTime = DateTime.Now; // Update lastDebugTime

@@ -46,8 +46,8 @@ public class Druid : Rotation
         // The simplest calculation for optimal ticks (to avoid key spam and false attempts)
 
         // Assuming wShadow is an instance of some class containing UnitRatings property
-        SlowTick = 1550;
-        FastTick = 300;
+        SlowTick = 600;
+        FastTick = 150;
 
         // You can also use this method to add to various action lists.
 

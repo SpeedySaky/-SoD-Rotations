@@ -45,8 +45,8 @@ public class WarlockSoD : Rotation
         // The simplest calculation for optimal ticks (to avoid key spam and false attempts)
 
         // Assuming wShadow is an instance of some class containing UnitRatings property
-        SlowTick = 800;
-        FastTick = 200;
+        SlowTick = 1550;
+        FastTick = 500;
 
         // You can also use this method to add to various action lists.
 
@@ -96,101 +96,105 @@ public class WarlockSoD : Rotation
 
         if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
 
-        if (Api.Spellbook.CanCast("Demon Armor") && !me.Auras.Contains("Demon Armor"))
+        if (me.IsValid())
         {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Demon Armor");
-            Console.ResetColor();
-
-            if (Api.Spellbook.Cast("Demon Armor"))
-                return true;
-        }
-        if (Api.Spellbook.CanCast("Demon Skin") && !me.Auras.Contains("Demon Armor") && !me.Auras.Contains("Demon Skin"))
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Demon Skin");
-            Console.ResetColor();
-
-            if (Api.Spellbook.Cast("Demon Skin"))
-                return true;
-        }
-
-        //if (Api.HasMacro("Hands") && reaction != UnitReaction.Friendly && targethealth>=1)
-
-        var petFamily = Api.Pet.Info.GetCreatureFamily();
-        var isImp = petFamily == CreatureFamily.Imp; //|| petFamily == CreatureFamily.Felimp;
-        var isVoid = petFamily == CreatureFamily.Voidwalker; //|| petFamily == CreatureFamily.Voidlord;
-        var isGuard = petFamily == CreatureFamily.Felguard;
-        var isHunter = petFamily == CreatureFamily.Felhunter;
-        var isSuccubus = petFamily == CreatureFamily.Succubus;
-        //|| !isVoid
-
-        if (!IsValid(pet) && Api.Spellbook.CanCast("Summon Voidwalker") && HasItem("Soul Shard") && mana > 25 && Api.Spellbook.HasSpell("Summon Voidwalker"))
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Summon Voidwalker.");
-            Console.ResetColor();
-
-            if (Api.Spellbook.Cast("Summon Voidwalker"))
+            if (Api.Spellbook.CanCast("Demon Armor") && !me.Auras.Contains("Demon Armor"))
             {
-                return true;
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Demon Armor");
+                Console.ResetColor();
+
+                if (Api.Spellbook.Cast("Demon Armor"))
+                    return true;
+            }
+            if (Api.Spellbook.CanCast("Demon Skin") && !me.Auras.Contains("Demon Armor") && !me.Auras.Contains("Demon Skin"))
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Demon Skin");
+                Console.ResetColor();
+
+                if (Api.Spellbook.Cast("Demon Skin"))
+                    return true;
+            }
+
+            //if (Api.HasMacro("Hands") && reaction != UnitReaction.Friendly && targethealth>=1)
+
+            var petFamily = Api.Pet.Info.GetCreatureFamily();
+            var isImp = petFamily == CreatureFamily.Imp; //|| petFamily == CreatureFamily.Felimp;
+            var isVoid = petFamily == CreatureFamily.Voidwalker; //|| petFamily == CreatureFamily.Voidlord;
+            var isGuard = petFamily == CreatureFamily.Felguard;
+            var isHunter = petFamily == CreatureFamily.Felhunter;
+            var isSuccubus = petFamily == CreatureFamily.Succubus;
+            //|| !isVoid
+
+            if ((IsValid(pet) || pet.IsDead()) && Api.Spellbook.CanCast("Summon Voidwalker") && HasItem("Soul Shard") && mana > 25 && Api.Spellbook.HasSpell("Summon Voidwalker"))
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Summon Voidwalker.");
+                Console.ResetColor();
+
+                if (Api.Spellbook.Cast("Summon Voidwalker"))
+                {
+                    return true;
+                }
+            }
+            else if ((IsValid(pet) || pet.IsDead()) && Api.Spellbook.CanCast("Summon Imp") && mana > 30)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Summon Imp.");
+                Console.ResetColor();
+
+                if (Api.Spellbook.Cast("Summon Imp"))
+                {
+                    return true;
+                }
+            }
+
+
+            if (PetHealth < 50 && healthPercentage > 50 && Api.Spellbook.CanCast("Health Funnel"))
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Healing Pet ");
+                Console.ResetColor();
+
+                if (Api.Spellbook.Cast("Health Funnel"))
+                    return true;
+            }
+
+
+            if (Api.Spellbook.CanCast("Life Tap") && healthPercentage > 80 && mana < 30)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Life Tap");
+                Console.ResetColor();
+                if (Api.Spellbook.Cast("Life Tap"))
+                {
+                    return true;
+                }
             }
         }
-        else if (!IsValid(pet) && Api.Spellbook.CanCast("Summon Imp") && mana > 30)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Summon Imp.");
-            Console.ResetColor();
-
-            if (Api.Spellbook.Cast("Summon Imp"))
-            {
-                return true;
-            }
-        }
-
-
-        if (PetHealth < 50 && healthPercentage > 50 && Api.Spellbook.CanCast("Health Funnel"))
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Healing Pet ");
-            Console.ResetColor();
-
-            if (Api.Spellbook.Cast("Health Funnel"))
-                return true;
-        }
-
-
-        if (Api.Spellbook.CanCast("Life Tap") && healthPercentage > 80 && mana < 30)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Life Tap");
-            Console.ResetColor();
-            if (Api.Spellbook.Cast("Life Tap"))
-            {
-                return true;
-            }
-        }
-
         //string[] healthstoneTypes = { "Minor Healthstone", "Lesser Healthstone", "Healthstone", "Greater Healthstone", "Major Healthstone", "Master Healthstone", "Demonic Healthstone", "Fel Healthstone" };
 
 
 
-
-        var reaction = me.GetReaction(target);
-
-        if (Api.HasMacro("Hands") && !target.IsDead() && (reaction != UnitReaction.Friendly && reaction != UnitReaction.Honored && reaction != UnitReaction.Revered && reaction != UnitReaction.Exalted) &&
-    mana > 20 && !IsNPC(target))
-
+        if (target.IsValid())
         {
-            if ((DateTime.Now - lastHaunt) >= HauntCooldown)
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Casting Haunt");
-                Console.ResetColor();
+            var reaction = me.GetReaction(target);
 
-                if (Api.UseMacro("Hands"))
+            if (Api.HasMacro("Hands") && !target.IsDead() && (reaction != UnitReaction.Friendly && reaction != UnitReaction.Honored && reaction != UnitReaction.Revered && reaction != UnitReaction.Exalted) &&
+        mana > 20 && !IsNPC(target))
+
+            {
+                if ((DateTime.Now - lastHaunt) >= HauntCooldown)
                 {
-                    return true;
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Casting Haunt");
+                    Console.ResetColor();
+
+                    if (Api.UseMacro("Hands"))
+                    {
+                        return true;
+                    }
                 }
             }
         }
@@ -206,7 +210,7 @@ public class WarlockSoD : Rotation
         var mana = me.ManaPercent;
         var targethealth = target.HealthPercent;
         var healthPercentage = me.HealthPercent;
-        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
+        if (!me.IsValid() || !target.IsValid() || me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
 
         if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
         {

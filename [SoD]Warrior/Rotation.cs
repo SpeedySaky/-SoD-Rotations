@@ -41,8 +41,8 @@ public class Warrior : Rotation
         // The simplest calculation for optimal ticks (to avoid key spam and false attempts)
 
         // Assuming wShadow is an instance of some class containing UnitRatings property
-        SlowTick = 600;
-        FastTick = 200;
+        SlowTick = 1550;
+        FastTick = 500;
 
         // You can also use this method to add to various action lists.
 
@@ -66,8 +66,7 @@ public class Warrior : Rotation
         var target = Api.Target;
         var rage = me.Rage;
 
-        if (!IsValid(target))
-            return true;
+
 
         if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
         var targetDistance = target.Position.Distance2D(me.Position);
@@ -77,22 +76,25 @@ public class Warrior : Rotation
             lastDebugTime = DateTime.Now;
         }
         var reaction = me.GetReaction(target);
+        if (target.IsValid())
+        {
 
-        if (!target.IsDead() &&
+            if (!target.IsDead() &&
     (reaction != UnitReaction.Friendly &&
      reaction != UnitReaction.Honored &&
      reaction != UnitReaction.Revered &&
      reaction != UnitReaction.Exalted) &&
      !IsNPC(target))
-        {
-            if (Api.Spellbook.CanCast("Charge") && targetDistance > 8 && targetDistance < 25 && !Api.Spellbook.OnCooldown("Charge"))
             {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Charge");
-                Console.ResetColor();
+                if (Api.Spellbook.CanCast("Charge") && targetDistance > 8 && targetDistance < 25 && !Api.Spellbook.OnCooldown("Charge"))
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Charge");
+                    Console.ResetColor();
 
-                if (Api.Spellbook.Cast("Charge"))
-                    return true;
+                    if (Api.Spellbook.Cast("Charge"))
+                        return true;
+                }
             }
         }
         return base.PassivePulse();
@@ -106,7 +108,7 @@ public class Warrior : Rotation
         var rage = me.Rage;
         var target = Api.Target;
         var targethealth = target.HealthPercent;
-        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
+        if (!me.IsValid() || !target.IsValid() || me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
 
         string[] HP = { "Major Healing Potion", "Superior Healing Potion", "Greater Healing Potion", "Healing Potion", "Lesser Healing Potion", "Minor Healing Potion" };
 

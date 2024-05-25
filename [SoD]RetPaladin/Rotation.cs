@@ -35,7 +35,7 @@ public class RetPala : Rotation
     private DateTime lastDebugTime = DateTime.MinValue;
 
     private DateTime Crusader = DateTime.MinValue;
-    private TimeSpan CrusaderCd = TimeSpan.FromSeconds(7);
+    private TimeSpan CrusaderCd = TimeSpan.FromSeconds(6);
 
     private DateTime Hammer = DateTime.MinValue;
     private TimeSpan HammerCd = TimeSpan.FromSeconds(7);
@@ -224,6 +224,7 @@ public class RetPala : Rotation
         }
 
 
+
         return base.PassivePulse();
     }
 
@@ -275,7 +276,7 @@ public class RetPala : Rotation
 
         foreach (string hpot in HP)
         {
-            if (HasItem(hpot) && (!Api.Inventory.OnCooldown(hpot) || !Api.Inventory.OnCooldown(MP)) && healthPercentage < 70)
+            if (HasItem(hpot) && (!Api.Inventory.OnCooldown(HP) || !Api.Inventory.OnCooldown(MP)) && healthPercentage < 70)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine($"Using {hpot}");
@@ -290,7 +291,7 @@ public class RetPala : Rotation
 
         foreach (string mpot in MP)
         {
-            if (HasItem(mpot) && (!Api.Inventory.OnCooldown(mpot) || !Api.Inventory.OnCooldown(HP)) && mana < 50)
+            if (HasItem(mpot) && (!Api.Inventory.OnCooldown(MP) || !Api.Inventory.OnCooldown(HP)) && mana < 50)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine($"Using {mpot}");
