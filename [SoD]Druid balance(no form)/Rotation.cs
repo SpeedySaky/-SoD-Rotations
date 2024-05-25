@@ -74,80 +74,82 @@ public class Druid : Rotation
         var target = Api.Target;
         var reaction = me.GetReaction(target);
 
-        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
+        if ( me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
         if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
         {
             LogPlayerStats();
             lastDebugTime = DateTime.Now; // Update lastDebugTime
         }
 
-
-        if (Api.Spellbook.CanCast("Mark of the Wild") && !me.Auras.Contains("Mark of the Wild"))
+        if (me.IsValid())
         {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Mark of the Wild");
-            Console.ResetColor();
-            if (Api.Spellbook.Cast("Mark of the Wild"))
 
-                return true;
+            if (Api.Spellbook.CanCast("Mark of the Wild") && !me.Auras.Contains("Mark of the Wild"))
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Mark of the Wild");
+                Console.ResetColor();
+                if (Api.Spellbook.Cast("Mark of the Wild"))
+
+                    return true;
+            }
+            if (Api.Spellbook.CanCast("Thorns") && !me.Auras.Contains("Thorns"))
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Thorns");
+                Console.ResetColor();
+                if (Api.Spellbook.Cast("Thorns"))
+
+                    return true;
+            }
+
+            if (Api.Spellbook.CanCast("Omen of Clarity") && !me.Auras.Contains("Omen of Clarity"))
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Omen of Clarity");
+                Console.ResetColor();
+                if (Api.Spellbook.Cast("Omen of Clarity"))
+
+                    return true;
+            }
+            if (Api.Spellbook.CanCast("Rejuvenation") && healthPercentage <= 60 && !me.Auras.Contains("Rejuvenation"))
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Rejuvenation");
+                Console.ResetColor();
+                if (Api.Spellbook.Cast("Rejuvenation"))
+                    return true;
+            }
+
+            if (Api.Spellbook.CanCast("Regrowth") && healthPercentage <= 40 && !me.Auras.Contains("Regrowth"))
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Regrowth");
+                Console.ResetColor();
+                if (Api.Spellbook.Cast("Regrowth"))
+                    return true;
+            }
+            if (Api.Spellbook.CanCast("Healing Touch") && healthPercentage <= 30)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Healing Touch");
+                Console.ResetColor();
+                if (Api.Spellbook.Cast("Healing Touch"))
+                    return true;
+            }
+            if (Api.Spellbook.CanCast("Moonkin Form") && !me.Auras.Contains("Moonkin Form", false))
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Moonkin Form");
+                Console.ResetColor();
+                if (Api.Spellbook.Cast("Moonkin Form"))
+
+                    return true;
+            }
         }
-        if (Api.Spellbook.CanCast("Thorns") && !me.Auras.Contains("Thorns"))
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Thorns");
-            Console.ResetColor();
-            if (Api.Spellbook.Cast("Thorns"))
-
-                return true;
-        }
-
-        if (Api.Spellbook.CanCast("Omen of Clarity") && !me.Auras.Contains("Omen of Clarity"))
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Omen of Clarity");
-            Console.ResetColor();
-            if (Api.Spellbook.Cast("Omen of Clarity"))
-
-                return true;
-        }
-        if (Api.Spellbook.CanCast("Rejuvenation") && healthPercentage <= 60 && !me.Auras.Contains("Rejuvenation"))
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Rejuvenation");
-            Console.ResetColor();
-            if (Api.Spellbook.Cast("Rejuvenation"))
-                return true;
-        }
-
-        if (Api.Spellbook.CanCast("Regrowth") && healthPercentage <= 40 && !me.Auras.Contains("Regrowth"))
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Regrowth");
-            Console.ResetColor();
-            if (Api.Spellbook.Cast("Regrowth"))
-                return true;
-        }
-        if (Api.Spellbook.CanCast("Healing Touch") && healthPercentage <= 30)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Healing Touch");
-            Console.ResetColor();
-            if (Api.Spellbook.Cast("Healing Touch"))
-                return true;
-        }
-        if (Api.Spellbook.CanCast("Moonkin Form") && !me.Auras.Contains("Moonkin Form", false))
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Moonkin Form");
-            Console.ResetColor();
-            if (Api.Spellbook.Cast("Moonkin Form"))
-
-                return true;
-        }
-
-
-        if (!target.IsDead() &&
-            (reaction != UnitReaction.Friendly &&
+        if (target.IsValid())
+        { 
+        if (!target.IsDead() && (reaction != UnitReaction.Friendly &&
              reaction != UnitReaction.Honored &&
              reaction != UnitReaction.Revered &&
              reaction != UnitReaction.Exalted) &&
@@ -182,7 +184,7 @@ public class Druid : Rotation
 
 
         }
-
+        }
         return base.PassivePulse();
     }
 
@@ -199,7 +201,7 @@ public class Druid : Rotation
         var points = me.ComboPoints;
         string[] HP = { "Major Healing Potion", "Superior Healing Potion", "Greater Healing Potion", "Healing Potion", "Lesser Healing Potion", "Minor Healing Potion" };
         string[] MP = { "Major Mana Potion", "Superior Mana Potion", "Greater Mana Potion", "Mana Potion", "Lesser Mana Potion", "Minor Mana Potion" };
-        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
+        if (!target.IsValid() || me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
 
         bool hasSunfire = HasEnchantment(EquipmentSlot.Hands, "Sunfire");
         bool hasStarsurge = HasEnchantment(EquipmentSlot.Legs, "Starsurge");
@@ -392,7 +394,9 @@ public class Druid : Rotation
 
         var mana = me.ManaPercent;
         var healthPercentage = me.HealthPercent;
-
+        var target = Api.Target;
+        var targethealth = target.HealthPercent;
+        var reaction = me.GetReaction(target);
 
         Console.ForegroundColor = ConsoleColor.Red;
         Console.WriteLine($"{mana} Mana available");
@@ -407,10 +411,50 @@ public class Druid : Rotation
             Console.ResetColor();
         }
 
+        if (target.IsValid() && !target.IsDead())
+{
+    Console.WriteLine("Target is valid and not dead");
+    
+    Console.ForegroundColor = ConsoleColor.Red;
+    Console.WriteLine($"{targethealth}% Target Health");
+    Console.WriteLine($"Target Reaction: {reaction}");
+    Console.ResetColor();
+}
+else
+{
+    Console.WriteLine("Target is not valid or is dead");
+}
+
+
         bool hasSunfire = HasEnchantment(EquipmentSlot.Hands, "Sunfire");
         bool hasStarsurge = HasEnchantment(EquipmentSlot.Legs, "Starsurge");
         bool hasStormrage = HasEnchantment(EquipmentSlot.Chest, "Fury of Stormrage");
 
+        if (me.Auras.Contains("Mark of the Wild"))
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Have Mark of the Wild");
+            Console.ResetColor();
+        }
+        if (me.Auras.Contains("Rejuvenation"))
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Have Rejuvenation");
+            Console.ResetColor();
+        }
+        if (me.Auras.Contains(5234))
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Have 5234");
+            Console.ResetColor();
+        }
+        if (Api.Spellbook.CanCast("Mark of the Wild"))
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Can cast Mark of the Wild");
+            Console.ResetColor();
+            
+        }
 
         if (hasSunfire)
         {
