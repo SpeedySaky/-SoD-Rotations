@@ -64,7 +64,7 @@ public class RetPala : Rotation
         // The simplest calculation for optimal ticks (to avoid key spam and false attempts)
 
         // Assuming wShadow is an instance of some class containing UnitRatings property
-        SlowTick = 700;
+        SlowTick = 1550;
         FastTick = 350;
 
         // You can also use this method to add to various action lists.
@@ -88,7 +88,7 @@ public class RetPala : Rotation
         var healthPercentage = me.HealthPercent;
         var mana = me.ManaPercent;
         var target = Api.Target;
-		
+
 
 
 
@@ -99,14 +99,14 @@ public class RetPala : Rotation
             LogPlayerStats();
             lastDebugTime = DateTime.Now; // Update lastDebugTime
         }
-		
-		bool CanSelfBuff = false;
-		
-		if(target.Guid.Equals(me.Guid))
-			CanSelfBuff = true;
-		
-		if(target.Guid.IsEmpty())
-			CanSelfBuff = true;
+
+        bool CanSelfBuff = false;
+
+        if (target.Guid.Equals(me.Guid))
+            CanSelfBuff = true;
+
+        if (target.Guid.IsEmpty())
+            CanSelfBuff = true;
 
 
 
@@ -238,7 +238,7 @@ public class RetPala : Rotation
         var targethp = target.HealthPercent;
         var targetHealth = Api.Target.HealthPercent;
         if (!me.IsValid() || !target.IsValid() || me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
-        
+
         //hands
         bool hasCrusaderStrike = HasEnchantment(EquipmentSlot.Hands, "Crusader Strike");
         bool hasHandOfReckoning = HasEnchantment(EquipmentSlot.Hands, "Hand of Reckoning");
@@ -453,6 +453,8 @@ public class RetPala : Rotation
 
             if (Api.UseMacro("Legs"))
                 Console.WriteLine("Casting Rebuke rune");
+            Console.ResetColor();
+
 
             {
                 return true;
@@ -463,101 +465,131 @@ public class RetPala : Rotation
         {
 
             if (Api.UseMacro("Legs"))
-                Console.WriteLine("Casting Avenger's Shield rune");
+                Console.ForegroundColor = ConsoleColor.Green;
+
+            Console.WriteLine("Casting Avenger's Shield rune");
+            Console.ResetColor();
+
 
             {
                 Shield = DateTime.Now;
                 return true;
             }
         }
-            
-       if (hasExorcist && !Api.Spellbook.OnCooldown("Exorcism"))
+
+        if (hasExorcist && !Api.Spellbook.OnCooldown("Exorcism"))
+        {
+            if (Api.UseMacro("Legs"))
+                Console.ForegroundColor = ConsoleColor.Green;
+
+            Console.WriteLine("Casting Exorcist rune");
+            Console.ResetColor();
+
+
             {
-                if (Api.UseMacro("Legs"))
-                    Console.WriteLine("Casting Exorcist rune");
-
-                {
-                    return true;
-                }
+                return true;
             }
+        }
 
-        
+
 
         if (Api.HasMacro("Chest") && hasAegis && !me.Auras.Contains("Aegis"))
         {
-            
-                if (Api.UseMacro("Chest"))
-                    Console.WriteLine("Casting Aegis rune");
 
-                {
-                    return true;
-                }
+            if (Api.UseMacro("Chest"))
+                Console.ForegroundColor = ConsoleColor.Green;
+
+            Console.WriteLine("Casting Aegis rune");
+            Console.ResetColor();
+
+
+            {
+                return true;
+            }
         }
         else
              if (hasStorm && (DateTime.Now - Storm) >= StormCd)
-            {
-
-                    if (Api.UseMacro("Chest"))
-                        Console.WriteLine("Casting Divine Storm rune");
-
-                    {
-                        Storm = DateTime.Now;
-                        return true;
-                    }
-                
-            }
-        
-
-      if (Api.HasMacro("Hands") && (DateTime.Now - Crusader) >= CrusaderCd && hasCrusaderStrike)
         {
-            
-                    Console.WriteLine("Casting Crusader Strike");
 
-                    if (Api.UseMacro("Hands"))
-                    {
-                        Crusader = DateTime.Now;
-                        return true;
-                    }
-                    // Add logic to cast Crusader Strike using API method
-                    // Example: if (Api.UseSpell("Crusader Strike"))
-                    // Replace "Crusader Strike" with the correct API method for casting the spell
-                
-                else if (hasHandOfReckoning && !me.Auras.Contains("Hand of Reckoning"))
-                {
-                    if (Api.UseMacro("Hands"))
-                        Console.WriteLine("Casting Hand of Reckoning");
+            if (Api.UseMacro("Chest"))
+                Console.ForegroundColor = ConsoleColor.Green;
 
-                    {
-                        Recogning = DateTime.Now;
-                        return true;
-                    }
-                }
-                else if (hasBeaconOfLight)
-                {
-                    Console.WriteLine("Hands rune has Beacon of Light enchantment");
-                    // No need to cast Beacon of Light, just log that it has the enchantment
-                }
 
+            Console.WriteLine("Casting Divine Storm rune");
+            Console.ResetColor();
+
+
+            {
+                Storm = DateTime.Now;
                 return true;
+            }
+
+        }
+
+
+        if (Api.HasMacro("Hands") && (DateTime.Now - Crusader) >= CrusaderCd && hasCrusaderStrike)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+
+            Console.WriteLine("Casting Crusader Strike");
+            Console.ResetColor();
+
+
+            if (Api.UseMacro("Hands"))
+            {
+                Crusader = DateTime.Now;
+                return true;
+            }
+            // Add logic to cast Crusader Strike using API method
+            // Example: if (Api.UseSpell("Crusader Strike"))
+            // Replace "Crusader Strike" with the correct API method for casting the spell
+
+            else if (hasHandOfReckoning && !me.Auras.Contains("Hand of Reckoning"))
+            {
+                if (Api.UseMacro("Hands"))
+                    Console.ForegroundColor = ConsoleColor.Green;
+
+                Console.WriteLine("Casting Hand of Reckoning");
+                Console.ResetColor();
+
+
+                {
+                    Recogning = DateTime.Now;
+                    return true;
+                }
             }
             else if (hasBeaconOfLight)
             {
                 Console.WriteLine("Hands rune has Beacon of Light enchantment");
+                Console.ResetColor();
+
                 // No need to cast Beacon of Light, just log that it has the enchantment
             }
-        
-       
-    
-    if (Api.Spellbook.CanCast("Judgement") && mana > 15 && !Api.Spellbook.OnCooldown("Judgement") && (me.Auras.Contains("Seal of Righteousness") || me.Auras.Contains("Seal of Wisdom")))
+
+            return true;
+        }
+        else if (hasBeaconOfLight)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+
+            Console.WriteLine("Hands rune has Beacon of Light enchantment");
+            Console.ResetColor();
+
+            // No need to cast Beacon of Light, just log that it has the enchantment
+        }
+
+
+
+        if (Api.Spellbook.CanCast("Judgement") && mana > 15 && !Api.Spellbook.OnCooldown("Judgement") && (me.Auras.Contains("Seal of Righteousness") || me.Auras.Contains("Seal of Wisdom")))
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Casting Judgement");
+            Console.ResetColor();
+            if (Api.Spellbook.Cast("Judgement"))
             {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Casting Judgement");
-                Console.ResetColor();
-                if (Api.Spellbook.Cast("Judgement"))
-                {
-                    return true;
-                }
+                return true;
             }
+        }
 
         if (Api.HasMacro("Bracer"))
         {
@@ -568,6 +600,7 @@ public class RetPala : Rotation
                 if (hasHammeroftheRighteous)
                 {
                     Console.WriteLine("Casting Hammer of the Righteous");
+                    Console.ResetColor();
 
                     if (Api.UseMacro("Bracer"))
                     {
