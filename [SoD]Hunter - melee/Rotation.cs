@@ -148,7 +148,7 @@ public class SoDHunter : Rotation
 
 
 
-            if ((DateTime.Now - lastCallPetTime) >= callPetCooldown && (!IsValid(pet) || !pet.IsDead()) && Api.Spellbook.CanCast("Call Pet"))
+            if ((!IsValid(pet) || PetHealth < 1) && Api.Spellbook.CanCast("Call Pet"))
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Casting Call Pet.");
@@ -288,7 +288,7 @@ public class SoDHunter : Rotation
 
 
 
-        if ((!IsValid(pet) || !pet.IsDead()) && Api.Spellbook.CanCast("Call Pet"))
+        if ((!IsValid(pet) || PetHealth<1) && Api.Spellbook.CanCast("Call Pet"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Call Pet.");
@@ -385,8 +385,6 @@ public class SoDHunter : Rotation
 
        
 
-        if (!target.IsDead() && targetDistance <= 8)
-        {
             if (Api.Spellbook.CanCast("Aspect of the Monkey") && !me.Auras.Contains("Aspect of the Monkey", false))
             {
                 Console.ForegroundColor = ConsoleColor.Green;
@@ -477,7 +475,7 @@ public class SoDHunter : Rotation
                 if (Api.Spellbook.Cast("Attack"))
                     return true;
             }
-        }
+        
 
 
         // Check if in combat and if there are multiple targets nearby
