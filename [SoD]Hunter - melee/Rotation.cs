@@ -95,7 +95,6 @@ public class SoDHunter : Rotation
         var healthPercentage = me.HealthPercent;
         var targethealth = target.HealthPercent;
 
-        ShadowApi shadowApi = new ShadowApi();
 
         if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
         {
@@ -302,7 +301,7 @@ public class SoDHunter : Rotation
             }
         }
         // Additional actions for when the pet is dead
-        if ((!IsValid(pet) || pet.IsDead()) && Api.Spellbook.CanCast("Revive Pet"))
+        if ((!IsValid(pet) || PetHealth <=1 ) && Api.Spellbook.CanCast("Revive Pet"))
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("Casting Revive Pet");

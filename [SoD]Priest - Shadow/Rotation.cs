@@ -122,6 +122,16 @@ public class PriestShadow : Rotation
                     return true;
                 }
             }
+            if (Api.Spellbook.CanCast("Shadowform") && !me.Auras.Contains("Shadowform",false) && mana > 80)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Casting Shadowform");
+                Console.ResetColor();
+                if (Api.Spellbook.Cast("Shadowform"))
+                {
+                    return true;
+                }
+            }
         }
         var reaction = me.GetReaction(target);
 
