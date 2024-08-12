@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using wShadow.Warcraft.Classes;
 using wShadow.Warcraft.Defines;
 using wShadow.Warcraft.Managers;
+using wShadow.WowBots;
+using wShadow.WowBots.PartyInfo;
 
 
 public class Druid : Rotation
@@ -21,6 +23,10 @@ public class Druid : Rotation
         "VendorReagent", "WildBattlePet", "GarrisonMissionNPC", "GarrisonTalentNPC",
         "QuestGiver"
     };
+    private CreatureType GetCreatureType(WowUnit unit)
+    {
+        return unit.Info.GetCreatureType();
+    }
     public bool IsValid(WowUnit unit)
     {
         if (unit == null || unit.Address == null)
@@ -302,7 +308,7 @@ public class Druid : Rotation
                 return true;
             }
         }
-        if (Api.HasMacro("Hands") && !target.Auras.Contains("Sunfire") && mana >= 5)
+        if (Api.HasMacro("Hands") && !target.Auras.Contains("Sunfire") && mana >= 5 && !targetCreatureType == CreatureType.Elemental)
         {
             if (hasSunfire)
             {
@@ -348,7 +354,7 @@ public class Druid : Rotation
                 return true;
             }
         }
-        if (Api.Spellbook.CanCast("Wrath"))
+        if (Api.Spellbook.CanCast("Wrath") && !targetCreatureType == CreatureType.Elemental)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Wrath");

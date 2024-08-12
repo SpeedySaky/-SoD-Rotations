@@ -150,7 +150,8 @@ public class SoDHunter : Rotation
 
 
 
-            if ((DateTime.Now - lastCallPetTime) >= callPetCooldown && (!IsValid(pet) || !pet.IsDead()) && Api.Spellbook.CanCast("Call Pet"))
+
+            if ((DateTime.Now - lastCallPetTime) >= callPetCooldown && (!IsValid(pet) || PetHealth <= 0) && Api.Spellbook.CanCast("Call Pet"))
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Casting Call Pet.");
@@ -162,11 +163,10 @@ public class SoDHunter : Rotation
                     return true;
                 }
             }
-            // Additional actions for when the pet is dead
-            if ((!IsValid(pet) || pet.IsDead()) && Api.Spellbook.CanCast("Revive Pet"))
+            if ((!IsValid(pet) || PetHealth <= 0) && Api.Spellbook.CanCast("Revive Pet"))
             {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("Casting Revive Pet");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Ressing Pet");
                 Console.ResetColor();
 
                 if (Api.Spellbook.Cast("Revive Pet"))
@@ -323,7 +323,8 @@ public class SoDHunter : Rotation
             }
         }
 
-        if ((!IsValid(pet) || !pet.IsDead()) && Api.Spellbook.CanCast("Call Pet"))
+
+        if ((DateTime.Now - lastCallPetTime) >= callPetCooldown && (!IsValid(pet) || PetHealth <= 0) && Api.Spellbook.CanCast("Call Pet"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Call Pet.");
@@ -335,11 +336,10 @@ public class SoDHunter : Rotation
                 return true;
             }
         }
-        // Additional actions for when the pet is dead
-        if ((!IsValid(pet) || pet.IsDead()) && Api.Spellbook.CanCast("Revive Pet"))
+        if ((!IsValid(pet) || PetHealth <= 0) && Api.Spellbook.CanCast("Revive Pet"))
         {
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("Casting Revive Pet");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Ressing Pet");
             Console.ResetColor();
 
             if (Api.Spellbook.Cast("Revive Pet"))
