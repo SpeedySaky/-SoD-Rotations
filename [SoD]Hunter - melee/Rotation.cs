@@ -6,7 +6,7 @@ using wShadow.Warcraft.Classes;
 using wShadow.Warcraft.Defines;
 using wShadow.Warcraft.Managers;
 
-public class SoDHunter : Rotation
+public class SoDHunterMelee : Rotation
 {
 
     private bool HasEnchantment(EquipmentSlot slot, string enchantmentName)
@@ -148,7 +148,7 @@ public class SoDHunter : Rotation
 
 
 
-            if ((!IsValid(pet) || PetHealth < 1) && Api.Spellbook.CanCast("Call Pet"))
+            if (!IsValid(pet) && null == pet && (DateTime.Now - lastCallPetTime) >= callPetCooldown && Api.Spellbook.CanCast("Call Pet"))
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Casting Call Pet.");
@@ -160,11 +160,10 @@ public class SoDHunter : Rotation
                     return true;
                 }
             }
-            // Additional actions for when the pet is dead
-            if ((!IsValid(pet) || pet.IsDead()) && Api.Spellbook.CanCast("Revive Pet"))
+            if (null == pet && Api.Spellbook.CanCast("Revive Pet"))
             {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("Casting Revive Pet");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Ressing Pet");
                 Console.ResetColor();
 
                 if (Api.Spellbook.Cast("Revive Pet"))
@@ -172,7 +171,6 @@ public class SoDHunter : Rotation
                     return true;
                 }
             }
-
             if (IsValid(pet) && (DateTime.Now - lastFeedTime).TotalMinutes >= 10 && Api.HasMacro("Feed"))
             {
                 Console.ForegroundColor = ConsoleColor.Green;
@@ -194,6 +192,7 @@ public class SoDHunter : Rotation
                     return true;
                 }
             }
+            
             if (IsValid(pet) && PetHealth < 40 && Api.Spellbook.CanCast("Mend Pet") && !pet.Auras.Contains("Mend Pet") && mana > 10)
             {
                 Console.ForegroundColor = ConsoleColor.Yellow;
@@ -288,7 +287,7 @@ public class SoDHunter : Rotation
 
 
 
-        if ((!IsValid(pet) || PetHealth<1) && Api.Spellbook.CanCast("Call Pet"))
+        if (!IsValid(pet) && null == pet && (DateTime.Now - lastCallPetTime) >= callPetCooldown && Api.Spellbook.CanCast("Call Pet"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Call Pet.");
@@ -300,11 +299,10 @@ public class SoDHunter : Rotation
                 return true;
             }
         }
-        // Additional actions for when the pet is dead
-        if ((!IsValid(pet) || PetHealth <=1 ) && Api.Spellbook.CanCast("Revive Pet"))
+        if (null == pet && Api.Spellbook.CanCast("Revive Pet"))
         {
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("Casting Revive Pet");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Ressing Pet");
             Console.ResetColor();
 
             if (Api.Spellbook.Cast("Revive Pet"))
@@ -352,7 +350,7 @@ public class SoDHunter : Rotation
             }
 
         }
-        if (Api.Spellbook.CanCast("Bestial Wrath") && Api.Spellbook.HasSpell("Bestial Wrath") && !Api.Spellbook.OnCooldown("Bestial Wrath"))
+        if (Api.Spellbook.CanCast("Bestial Wrath") && Api.Spellbook.HasSpell("Bestial Wrath") && !Api.Spellbook.OnCooldown("Bestial Wrath") && IsValid(pet))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Bestial Wrath");

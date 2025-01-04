@@ -151,7 +151,7 @@ public class SoDHunter : Rotation
 
 
 
-            if ((DateTime.Now - lastCallPetTime) >= callPetCooldown && (!IsValid(pet) || PetHealth <= 0) && Api.Spellbook.CanCast("Call Pet"))
+            if (!IsValid(pet) && null == pet && (DateTime.Now - lastCallPetTime) >= callPetCooldown && Api.Spellbook.CanCast("Call Pet"))
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Casting Call Pet.");
@@ -163,7 +163,7 @@ public class SoDHunter : Rotation
                     return true;
                 }
             }
-            if ((!IsValid(pet) || PetHealth <= 0) && Api.Spellbook.CanCast("Revive Pet"))
+            if (null == pet && Api.Spellbook.CanCast("Revive Pet"))
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Ressing Pet");
@@ -174,7 +174,6 @@ public class SoDHunter : Rotation
                     return true;
                 }
             }
-
             if (IsValid(pet) && (DateTime.Now - lastFeedTime).TotalMinutes >= 10 && Api.HasMacro("Feed"))
             {
                 Console.ForegroundColor = ConsoleColor.Green;
@@ -289,7 +288,7 @@ public class SoDHunter : Rotation
         string[] HP = { "Major Healing Potion", "Superior Healing Potion", "Greater Healing Potion", "Healing Potion", "Lesser Healing Potion", "Minor Healing Potion" };
         string[] MP = { "Major Mana Potion", "Superior Mana Potion", "Greater Mana Potion", "Mana Potion", "Lesser Mana Potion", "Minor Mana Potion" };
 
-        if (healthPercentage <= 70 && (!Api.Inventory.OnCooldown(MP) || !Api.Inventory.OnCooldown(HP)))
+        if (healthPercentage <= 70 && (!Api.Inventory.OnCooldown(MP) && !Api.Inventory.OnCooldown(HP)))
         {
             foreach (string hpot in HP)
             {
@@ -306,7 +305,7 @@ public class SoDHunter : Rotation
             }
         }
 
-        if (mana <= 50 && (!Api.Inventory.OnCooldown(MP) || !Api.Inventory.OnCooldown(HP)))
+        if (mana <= 50 && (!Api.Inventory.OnCooldown(MP) && !Api.Inventory.OnCooldown(HP)))
         {
             foreach (string manapot in MP)
             {
@@ -324,7 +323,7 @@ public class SoDHunter : Rotation
         }
 
 
-        if ((DateTime.Now - lastCallPetTime) >= callPetCooldown && (!IsValid(pet) || PetHealth <= 0) && Api.Spellbook.CanCast("Call Pet"))
+        if (!IsValid(pet) && null == pet && (DateTime.Now - lastCallPetTime) >= callPetCooldown && Api.Spellbook.CanCast("Call Pet"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Call Pet.");
@@ -336,7 +335,7 @@ public class SoDHunter : Rotation
                 return true;
             }
         }
-        if ((!IsValid(pet) || PetHealth <= 0) && Api.Spellbook.CanCast("Revive Pet"))
+        if (null == pet && Api.Spellbook.CanCast("Revive Pet"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Ressing Pet");
