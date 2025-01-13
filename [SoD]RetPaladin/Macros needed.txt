@@ -1,0 +1,46 @@
+Macros must be case sensitive and bound to your action bar to function correctly.
+Copy the following macros and paste them in-game under the macro creation window.
+
+---
+
+Back
+Enter Macro Commands:
+#showtooltip
+/cast Cloak Rune Ability
+
+---
+
+Chest
+Enter Macro Commands:
+#showtooltip
+/cast Chest Rune Ability
+
+---
+
+Feet
+Enter Macro Commands:
+#showtooltip
+/cast Feet Rune Ability
+
+---
+
+Hands
+Enter Macro Commands:
+#showtooltip
+/cast Hands Rune Ability
+
+---
+
+Legs
+Enter Macro Commands:
+#showtooltip
+/cast Legs Rune Ability
+
+---
+
+Wrist
+Enter Macro Commands:
+#showtooltip
+/cast Bracer Rune Ability
+
+---
