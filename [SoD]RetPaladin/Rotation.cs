@@ -1,10 +1,13 @@
 using System;
+using System.Linq;
 using System.Threading;
 using wShadow.Templates;
 using System.Collections.Generic;
 using wShadow.Warcraft.Classes;
 using wShadow.Warcraft.Defines;
 using wShadow.Warcraft.Managers;
+using wShadow.WowBots;
+using wShadow.WowBots.PartyInfo;					  
 
 
 
@@ -30,28 +33,44 @@ public class RetPala : Rotation
     {
         return Api.Equipment.HasEnchantment(slot, enchantmentName);
     }
+	    private CreatureType GetCreatureType(WowUnit unit)
+    {
+        return unit.Info.GetCreatureType();
+    }												  
     private bool HasItem(object item) => Api.Inventory.HasItem(item);
     private int debugInterval = 5; // Set the debug interval in seconds
     private DateTime lastDebugTime = DateTime.MinValue;
 
-    private DateTime Crusader = DateTime.MinValue;
-    private TimeSpan CrusaderCd = TimeSpan.FromSeconds(6);
+// Cooldown Tracking for Runes/Enchants
+private DateTime HammerOfTheRighteousCd = DateTime.MinValue;
+private TimeSpan HammerOfTheRighteousDuration = TimeSpan.FromSeconds(6);
 
-    private DateTime Hammer = DateTime.MinValue;
-    private TimeSpan HammerCd = TimeSpan.FromSeconds(7);
+private DateTime DivineStormCd = DateTime.MinValue;
+private TimeSpan DivineStormDuration = TimeSpan.FromSeconds(10);
 
-    private DateTime Storm = DateTime.MinValue;
-    private TimeSpan StormCd = TimeSpan.FromSeconds(10.5);
+private DateTime ShieldOfRighteousnessCd = DateTime.MinValue;
+private TimeSpan ShieldOfRighteousnessDuration = TimeSpan.FromSeconds(6);
 
-    private DateTime Shield = DateTime.MinValue;
-    private TimeSpan ShieldCd = TimeSpan.FromSeconds(30);
+private DateTime CrusaderStrikeCd = DateTime.MinValue;
+private TimeSpan CrusaderStrikeDuration = TimeSpan.FromSeconds(6);
 
-    private DateTime Recogning = DateTime.MinValue;
-    private TimeSpan ReckoningCooldown = TimeSpan.FromSeconds(12);
+private DateTime ConsecrationCd = DateTime.MinValue;
+private TimeSpan ConsecrationDuration = TimeSpan.FromSeconds(8);
 
-    private DateTime lastChest = DateTime.MinValue;
-    private TimeSpan ChestCd = TimeSpan.FromSeconds(12);
+private DateTime DivineLightCd = DateTime.MinValue;
+private TimeSpan DivineLightDuration = TimeSpan.FromSeconds(8);
 
+private DateTime AvengerShieldCd = DateTime.MinValue;
+private TimeSpan AvengerShieldDuration = TimeSpan.FromSeconds(15);
+
+private DateTime RebukeCd = DateTime.MinValue;
+private TimeSpan RebukeDuration = TimeSpan.FromSeconds(15);
+
+private DateTime HandOfReckoningCd = DateTime.MinValue;
+private TimeSpan HandOfReckoningDuration = TimeSpan.FromSeconds(10);
+
+private DateTime lastGlobalCooldown = DateTime.MinValue;
+private TimeSpan globalCooldownDuration = TimeSpan.FromSeconds(1.5);  // Normal GCD
 
 
     public override void Initialize()
@@ -64,8 +83,8 @@ public class RetPala : Rotation
         // The simplest calculation for optimal ticks (to avoid key spam and false attempts)
 
         // Assuming wShadow is an instance of some class containing UnitRatings property
-        SlowTick = 1550;
-        FastTick = 350;
+        SlowTick = 750;
+        FastTick = 500;
 
         // You can also use this method to add to various action lists.
 
@@ -78,6 +97,9 @@ public class RetPala : Rotation
         // bool: needTarget -> If true action will not fire if player does not have a target
         // Func<bool>: function -> Action to attempt, must return true or false.
         CombatActions.Add((true, () => false));
+		    
+			if (!PartyBot.IsEnabled())
+            PartyBot.Enable();
 
 
 
@@ -85,14 +107,15 @@ public class RetPala : Rotation
     public override bool PassivePulse()
     {
         var me = Api.Player;
+		var mana = me.Mana;
         var healthPercentage = me.HealthPercent;
-        var mana = me.ManaPercent;
+        var manaProc = me.ManaPercent;
         var target = Api.Target;
-
-
-
+		var targetDistance = target.Position.Distance2D(me.Position);	
+		var members = PartyBot.GetMemberUnits();		
 
         if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
+
 
         if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
         {
@@ -100,19 +123,9 @@ public class RetPala : Rotation
             lastDebugTime = DateTime.Now; // Update lastDebugTime
         }
 
-        bool CanSelfBuff = false;
-
-        if (target.Guid.Equals(me.Guid))
-            CanSelfBuff = true;
-
-        if (target.Guid.IsEmpty())
-            CanSelfBuff = true;
-
-
-
         if (me.IsValid())
         {
-            if (Api.Spellbook.CanCast("Holy Light") && healthPercentage <= 50 && mana > 20)
+            if (Api.Spellbook.CanCast("Holy Light") && healthPercentage <= 50 && manaProc > 20)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Casting Holy Light");
@@ -173,7 +186,7 @@ public class RetPala : Rotation
                                   me.Auras.Contains("Death's Door") ||
                                   me.Auras.Contains("Plague Strike");
 
-            if (hasDisease && Api.Spellbook.CanCast("Purify") && mana > 32)
+            if (hasDisease && Api.Spellbook.CanCast("Purify") && manaProc > 32)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Have poison debuff casting Purify");
@@ -184,7 +197,7 @@ public class RetPala : Rotation
             }
 
 
-            if (Api.Spellbook.CanCast("Blessing of Might") && !me.Auras.Contains("Blessing of Might") && mana > 15)
+            if (Api.Spellbook.CanCast("Blessing of Might") && !me.Auras.Contains("Blessing of Might") && manaProc > 15)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Casting Blessing of Might");
@@ -222,203 +235,15 @@ public class RetPala : Rotation
             }
 
         }
-
-
-
-        return base.PassivePulse();
-    }
-
-
-
-    public override bool CombatPulse()
-    {
-        var me = Api.Player;
-        var healthPercentage = me.HealthPercent;
-        var mana = me.ManaPercent;
-        var target = Api.Target;
-        var targethp = target.HealthPercent;
-        var targetHealth = Api.Target.HealthPercent;
-        if (!me.IsValid() || !target.IsValid() || me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
-
-        //hands
-        bool hasCrusaderStrike = HasEnchantment(EquipmentSlot.Hands, "Crusader Strike");
-        bool hasHandOfReckoning = HasEnchantment(EquipmentSlot.Hands, "Hand of Reckoning");
-        bool hasBeaconOfLight = HasEnchantment(EquipmentSlot.Hands, "Beacon of Light");
-
-        // Bracer
-        bool hasHammeroftheRighteous = HasEnchantment(EquipmentSlot.Wrist, "Hammer of the Righteous");
-
-        //legs
-        bool hasExemplar = HasEnchantment(EquipmentSlot.Legs, "Inspiration Exemplar");
-        bool hasSacrifice = HasEnchantment(EquipmentSlot.Legs, "Divine Sacrifice");
-        bool hasExorcist = HasEnchantment(EquipmentSlot.Legs, "Exorcist");
-        bool hasShield = HasEnchantment(EquipmentSlot.Legs, "Avenger's Shield");
-        bool hasRebuke = HasEnchantment(EquipmentSlot.Legs, "Rebuke");
-
-        //waist
-        bool hasSheath = HasEnchantment(EquipmentSlot.Waist, "Sheath of Light");
-        bool hasInfusion = HasEnchantment(EquipmentSlot.Waist, "Infusion of Light");
-        bool hasJudgements = HasEnchantment(EquipmentSlot.Waist, "Enlightened Judgements");
-
-        //feet
-        bool hasArt = HasEnchantment(EquipmentSlot.Feet, "The Art of War");
-        bool hasSacred = HasEnchantment(EquipmentSlot.Feet, "Sacred Shield");
-        bool hasGuarded = HasEnchantment(EquipmentSlot.Feet, "Guarded by the Light");
-
-        //chest
-        bool hasStorm = HasEnchantment(EquipmentSlot.Chest, "Divine Storm");
-        bool hasMartyrdom = HasEnchantment(EquipmentSlot.Chest, "Seal of Martyrdom");
-        bool hasLordaeron = HasEnchantment(EquipmentSlot.Chest, "Horn of Lordaeron");
-        bool hasAegis = HasEnchantment(EquipmentSlot.Chest, "Aegis");
-
-        string[] HP = { "Major Healing Potion", "Superior Healing Potion", "Greater Healing Potion", "Healing Potion", "Lesser Healing Potion", "Minor Healing Potion" };
-        string[] MP = { "Major Mana Potion", "Superior Mana Potion", "Greater Mana Potion", "Mana Potion", "Lesser Mana Potion", "Minor Mana Potion" };
-
-        foreach (string hpot in HP)
-        {
-            if (HasItem(hpot) && (!Api.Inventory.OnCooldown(HP) || !Api.Inventory.OnCooldown(MP)) && healthPercentage < 70)
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($"Using {hpot}");
-                Console.ResetColor();
-
-                if (Api.Inventory.Use(hpot))
-                {
-                    return true;
-                }
-            }
-        }
-
-        foreach (string mpot in MP)
-        {
-            if (HasItem(mpot) && (!Api.Inventory.OnCooldown(MP) || !Api.Inventory.OnCooldown(HP)) && mana < 50)
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($"Using {mpot}");
-                Console.ResetColor();
-
-                if (Api.Inventory.Use(mpot))
-                {
-                    return true;
-                }
-            }
-        }
-
-
-
-
-
-        if (Api.Spellbook.CanCast("Sanctity Aura") && !me.Auras.Contains("Sanctity Aura", false))
+		        if (!me.Auras.Contains("Seal of Command") && Api.Spellbook.CanCast("Seal of Command"))
         {
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Sanctity Aura");
+            Console.WriteLine("Casting Seal of Command");
             Console.ResetColor();
-
-            if (Api.Spellbook.Cast("Sanctity Aura"))
-            {
+            if (Api.Spellbook.Cast("Seal of Command"))
                 return true;
-            }
         }
-        else
-         if (Api.Spellbook.CanCast("Devotion Aura") && !me.Auras.Contains("Devotion Aura", false) && !me.Auras.Contains("Sanctity Aura", false))
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Devotion Aura");
-            Console.ResetColor();
-
-            if (Api.Spellbook.Cast("Devotion Aura"))
-            {
-                return true;
-            }
-        }
-        if (Api.Spellbook.CanCast("Divine Protection") && Api.Player.HealthPercent < 45 && !me.IsCasting() && !Api.Player.Auras.Contains("Forbearance", false) && !Api.Spellbook.OnCooldown("Divine Protection"))
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Divine Protection");
-            Console.ResetColor();
-            if (Api.Spellbook.Cast("Divine Protection"))
-            {
-                return true;
-            }
-        }
-
-        if (me.Auras.Contains("Divine Protection") && healthPercentage <= 50 && Api.Spellbook.CanCast("Holy Light"))
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Holy Light");
-            Console.ResetColor();
-            if (Api.Spellbook.Cast("Holy Light"))
-            {
-                return true;
-            }
-        }
-
-        if (Api.Spellbook.CanCast("Blessing of Protection") && Api.Player.HealthPercent < 30 && !me.IsCasting() && !Api.Player.Auras.Contains("Forbearance", false) && !Api.Spellbook.OnCooldown("Blessing of Protection"))
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Blessing of Protection");
-            Console.ResetColor();
-            if (Api.Spellbook.Cast("Blessing of Protection"))
-            {
-                return true;
-            }
-        }
-
-        if (Api.Player.Auras.Contains("Blessing of Protection") && healthPercentage <= 35 && Api.Spellbook.CanCast("Holy Light") && mana > 20)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Holy Light");
-            Console.ResetColor();
-            if (Api.Spellbook.Cast("Holy Light"))
-            {
-                return true;
-            }
-        }
-        if (healthPercentage <= 10 && Api.Spellbook.CanCast("Lay on Hands") && !Api.Spellbook.OnCooldown("Lay on Hands"))
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Lay on Hands");
-            Console.ResetColor();
-            if (Api.Spellbook.Cast("Lay on Hands"))
-            {
-                return true;
-            }
-        }
-
-        if (Api.Spellbook.CanCast("Holy Light") && healthPercentage <= 50 && mana > 20)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Holy Light");
-            Console.ResetColor();
-            if (Api.Spellbook.Cast("Holy Light"))
-
-                return true;
-
-        }
-
-        if (Api.Spellbook.CanCast("Hammer of Wrath") && targetHealth <= 20)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Hammer of Wrath");
-            Console.ResetColor();
-            if (Api.Spellbook.Cast("Hammer of Wrath"))
-            {
-                return true;
-            }
-        }
-
-        if (Api.Spellbook.CanCast("Consecration") && !Api.Spellbook.OnCooldown("Consecration") && targethp >= 30 && mana > 30 && Api.UnfriendlyUnitsNearby(5, true) >= 2)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Consecration");
-            Console.ResetColor();
-            if (Api.Spellbook.Cast("Consecration"))
-
-                return true;
-
-        }
-
-        if (!me.Auras.Contains("Seal of Wisdom") && Api.Spellbook.CanCast("Seal of Wisdom") && !Api.Spellbook.OnCooldown("Seal of Wisdom") && mana > 15)
+        if (!me.Auras.Contains("Seal of Wisdom") && Api.Spellbook.CanCast("Seal of Wisdom") && !Api.Spellbook.OnCooldown("Seal of Wisdom") && !me.Auras.Contains("Seal of Command") && mana > 15)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Seal of Wisdom");
@@ -428,7 +253,7 @@ public class RetPala : Rotation
                 return true;
 
         }
-        else if (!me.Auras.Contains("Seal of Righteousness") && Api.Spellbook.CanCast("Seal of Righteousness") && !Api.Spellbook.OnCooldown("Seal of Righteousness") && !me.Auras.Contains("Seal of Wisdom") && mana > 15)
+        else if (!me.Auras.Contains("Seal of Righteousness") && Api.Spellbook.CanCast("Seal of Righteousness") && !Api.Spellbook.OnCooldown("Seal of Righteousness") && !me.Auras.Contains("Seal of Wisdom") && !me.Auras.Contains("Seal of Command") && mana > 15)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Seal of Righteousness");
@@ -436,193 +261,480 @@ public class RetPala : Rotation
             if (Api.Spellbook.Cast("Seal of Righteousness"))
 
                 return true;
-
         }
-
-        if (Api.Spellbook.CanCast("Hammer of Justice") && mana > 10 && !Api.Spellbook.OnCooldown("Hammer of Justice") && (target.IsCasting() || target.IsChanneling()))
+        var reaction = me.GetReaction(target);
+        if (target.IsValid())
         {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Hammer of Justice");
-            Console.ResetColor();
-            if (Api.Spellbook.Cast("Hammer of Justice"))
-            {
-                return true;
-            }
-        }
-        if (Api.HasMacro("Legs") && hasRebuke && (target.IsCasting() || target.IsChanneling()) && Api.Spellbook.OnCooldown("Hammer of Justice"))
-        {
-
-            if (Api.UseMacro("Legs"))
-                Console.WriteLine("Casting Rebuke rune");
-            Console.ResetColor();
-
-
-            {
-                return true;
-            }
-        }
-        else
-        if (hasShield && (DateTime.Now - Shield) >= ShieldCd)
-        {
-
-            if (Api.UseMacro("Legs"))
-                Console.ForegroundColor = ConsoleColor.Green;
-
-            Console.WriteLine("Casting Avenger's Shield rune");
-            Console.ResetColor();
-
-
-            {
-                Shield = DateTime.Now;
-                return true;
-            }
-        }
-
-        if (hasExorcist && !Api.Spellbook.OnCooldown("Exorcism"))
-        {
-            if (Api.UseMacro("Legs"))
-                Console.ForegroundColor = ConsoleColor.Green;
-
-            Console.WriteLine("Casting Exorcist rune");
-            Console.ResetColor();
-
-
-            {
-                return true;
-            }
-        }
-
-
-
-        if (Api.HasMacro("Chest") && hasAegis && !me.Auras.Contains("Aegis"))
-        {
-
-            if (Api.UseMacro("Chest"))
-                Console.ForegroundColor = ConsoleColor.Green;
-
-            Console.WriteLine("Casting Aegis rune");
-            Console.ResetColor();
-
-
-            {
-                return true;
-            }
-        }
-        else
-             if (hasStorm && (DateTime.Now - Storm) >= StormCd)
-        {
-
-            if (Api.UseMacro("Chest"))
-                Console.ForegroundColor = ConsoleColor.Green;
-
-
-            Console.WriteLine("Casting Divine Storm rune");
-            Console.ResetColor();
-
-
-            {
-                Storm = DateTime.Now;
-                return true;
-            }
-
-        }
-
-
-        if (Api.HasMacro("Hands") && (DateTime.Now - Crusader) >= CrusaderCd && hasCrusaderStrike)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-
-            Console.WriteLine("Casting Crusader Strike");
-            Console.ResetColor();
-
-
-            if (Api.UseMacro("Hands"))
-            {
-                Crusader = DateTime.Now;
-                return true;
-            }
-            // Add logic to cast Crusader Strike using API method
-            // Example: if (Api.UseSpell("Crusader Strike"))
-            // Replace "Crusader Strike" with the correct API method for casting the spell
-
-            else if (hasHandOfReckoning && !me.Auras.Contains("Hand of Reckoning"))
-            {
-                if (Api.UseMacro("Hands"))
+            if (!target.IsDead() &&
+            (reaction != UnitReaction.Friendly &&
+             reaction != UnitReaction.Honored &&
+             reaction != UnitReaction.Revered &&
+             reaction != UnitReaction.Exalted) &&
+            mana > 20 && !IsNPC(target))
+                if (Api.Spellbook.CanCast("Judgement") && targetDistance > 5 && targetDistance <10 && targetDistance < 10 && !Api.Spellbook.OnCooldown("Judgement"))
+                {
                     Console.ForegroundColor = ConsoleColor.Green;
-
-                Console.WriteLine("Casting Hand of Reckoning");
-                Console.ResetColor();
-
-
-                {
-                    Recogning = DateTime.Now;
-                    return true;
-                }
-            }
-            else if (hasBeaconOfLight)
-            {
-                Console.WriteLine("Hands rune has Beacon of Light enchantment");
-                Console.ResetColor();
-
-                // No need to cast Beacon of Light, just log that it has the enchantment
-            }
-
-            return true;
-        }
-        else if (hasBeaconOfLight)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-
-            Console.WriteLine("Hands rune has Beacon of Light enchantment");
-            Console.ResetColor();
-
-            // No need to cast Beacon of Light, just log that it has the enchantment
-        }
-
-
-
-        if (Api.Spellbook.CanCast("Judgement") && mana > 15 && !Api.Spellbook.OnCooldown("Judgement") && (me.Auras.Contains("Seal of Righteousness") || me.Auras.Contains("Seal of Wisdom")))
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Judgement");
-            Console.ResetColor();
-            if (Api.Spellbook.Cast("Judgement"))
-            {
-                return true;
-            }
-        }
-
-        if (Api.HasMacro("Bracer"))
-        {
-            if ((DateTime.Now - Hammer) >= HammerCd)
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-
-                if (hasHammeroftheRighteous)
-                {
-                    Console.WriteLine("Casting Hammer of the Righteous");
+                    Console.WriteLine("Casting Judgement");
                     Console.ResetColor();
 
-                    if (Api.UseMacro("Bracer"))
+                    if (Api.Spellbook.Cast("Judgement"))
+                        return true;
+                }
+            else  if (Api.Spellbook.CanCast("Attack") && !me.IsAutoAttacking())
+                {
+                    Api.Spellbook.Cast("Attack");
+                    Console.WriteLine("Attacking");
+                    return true;
+                }
+
+            }
+			        
+					
+// --- blessing buff party members //				
+       if (members == null || members.Length == 0)
+        {
+            Console.WriteLine("No party members detected.");
+            return base.PassivePulse();
+        }
+
+        foreach (var member in members)
+{
+    if (member == null || !member.IsValid() || member.IsDead())
+        continue;
+
+    // Rename to avoid conflict
+    var memberDistance = member.Position.Distance2D(me.Position);
+
+    // Skip if party member is out of Blessing of Might range (30 yards)
+    if (memberDistance > 30)
+    {
+        Console.WriteLine($"{member.Name} is out of range ({memberDistance:F1} yards). Skipping.");
+        continue;
+    }
+
+    // Check if the member already has any Blessing
+    if (member.Auras.Contains("Blessing of Might") || 
+        member.Auras.Contains("Blessing of Wisdom") || 
+        member.Auras.Contains("Blessing of Kings") || 
+        member.Auras.Contains("Blessing of Sanctuary"))
+    {
+        Console.WriteLine($"{member.Name} already has a blessing. Skipping.");
+        continue;
+    }
+
+    // Apply Blessing of Might if missing and in range
+    if (Api.Spellbook.CanCast("Blessing of Might"))
+    {
+        var partyMember = (PartyMember)Array.IndexOf(members, member);
+        PartyBot.TargetMember(partyMember);
+
+        Console.WriteLine($"Casting Blessing of Might on {member.Name} ({memberDistance:F1} yards).");
+
+        if (Api.Spellbook.Cast("Blessing of Might"))
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine($"Blessing of Might successfully cast on {member.Name}.");
+            Console.ResetColor();
+        }
+        else
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"Failed to cast Blessing of Might on {member.Name}.");
+            Console.ResetColor();
+        }
+    }
+}
+
+        return base.PassivePulse();
+    }
+
+
+
+public override bool CombatPulse()
+{
+    var me = Api.Player;
+    var target = Api.Target;
+    var mana = me.Mana;
+    var healthPercentage = me.HealthPercent;
+    var targetHealthPercentage = target.HealthPercent;
+    var targetDistance = target.Position.Distance2D(me.Position);
+    var targetCreatureType = GetCreatureType(target);
+    var manaProc = me.ManaPercent;
+
+    const int EXORCISM_BASE_MANA = 80;
+    const int JUDGEMENT_MANA = 42;
+    const int DIVINE_STORM_MANA = 87;
+    const int CONSECRATION_MANA = 135;
+    const int CRUSADER_STRIKE_MANA = 30;
+    const int DANGER_HEALTH_LEVEL = 30;
+    const int LOW_MANA_THRESHOLD = 20;
+    const int CRITICAL_HEALTH_THRESHOLD = 10;  // Lay on Hands threshold
+    const int LOW_HEALTH_THRESHOLD = 30;       // Divine Protection threshold
+
+    // Early Exit - Check if Player/Target is Invalid
+    if (!me.IsValid() || !target.IsValid() || me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsChanneling() || me.IsMounted() || me.Auras.Contains("Drink") || me.Auras.Contains("Food"))
+        return false;
+
+    // --- Log Player Stats ---
+    Console.ForegroundColor = ConsoleColor.Red;
+    Console.WriteLine($"{mana} Mana available");
+    Console.WriteLine($"{healthPercentage}% Health available");
+    Console.ResetColor();
+
+    // --- Dynamic Runes/Enchants ---
+    // Hands
+    bool hasCrusaderStrike = HasEnchantment(EquipmentSlot.Hands, "Crusader Strike");
+    bool hasHandOfReckoning = HasEnchantment(EquipmentSlot.Hands, "Hand of Reckoning");
+    bool hasBeaconOfLight = HasEnchantment(EquipmentSlot.Hands, "Beacon of Light");
+
+    // Wrist
+    bool hasHammeroftheRighteous = HasEnchantment(EquipmentSlot.Wrist, "Hammer of the Righteous");
+    bool hasImprovedHammerOfWrath = HasEnchantment(EquipmentSlot.Wrist, "Improved Hammer of Wrath");
+    bool hasPurifyingPower = HasEnchantment(EquipmentSlot.Wrist, "Purifying Power");
+    bool hasLightsGrace = HasEnchantment(EquipmentSlot.Wrist, "Light's Grace");
+
+    // Legs
+    bool hasExemplar = HasEnchantment(EquipmentSlot.Legs, "Inspiration Exemplar");
+    bool hasSacrifice = HasEnchantment(EquipmentSlot.Legs, "Divine Sacrifice");
+    bool hasShield = HasEnchantment(EquipmentSlot.Legs, "Avenger's Shield");
+    bool hasRebuke = HasEnchantment(EquipmentSlot.Legs, "Rebuke");
+    bool hasAuraMastery = HasEnchantment(EquipmentSlot.Legs, "Aura Mastery");
+
+    // Waist
+    bool hasSheath = HasEnchantment(EquipmentSlot.Waist, "Sheath of Light");
+    bool hasInfusion = HasEnchantment(EquipmentSlot.Waist, "Infusion of Light");
+    bool hasMalleableProtection = HasEnchantment(EquipmentSlot.Waist, "Malleable Protection");
+
+    // Feet
+    bool hasArt = HasEnchantment(EquipmentSlot.Feet, "The Art of War");
+    bool hasSacred = HasEnchantment(EquipmentSlot.Feet, "Sacred Shield");
+    bool hasGuarded = HasEnchantment(EquipmentSlot.Feet, "Guarded by the Light");
+
+    // Chest
+    bool hasStorm = HasEnchantment(EquipmentSlot.Chest, "Divine Storm");
+    bool hasAegis = HasEnchantment(EquipmentSlot.Chest, "Aegis");
+    bool hasHallowedGround = HasEnchantment(EquipmentSlot.Chest, "Hallowed Ground");
+    bool hasDivineLight = HasEnchantment(EquipmentSlot.Chest, "Divine Light");
+
+    // Back
+    bool hasShieldOfRighteousness = HasEnchantment(EquipmentSlot.Back, "Shield of Righteousness");
+    bool hasShockAndAwe = HasEnchantment(EquipmentSlot.Back, "Shock and Awe");
+    bool hasRighteousVengeance = HasEnchantment(EquipmentSlot.Back, "Righteous Vengeance");
+
+    // Head
+    bool hasFanaticism = HasEnchantment(EquipmentSlot.Head, "Fanaticism");
+    bool hasImprovedSanctuary = HasEnchantment(EquipmentSlot.Head, "Improved Sanctuary");
+    bool hasWrath = HasEnchantment(EquipmentSlot.Head, "Wrath");
+
+    // --- Potion Handling (Health and Mana) ---
+    if (healthPercentage <= DANGER_HEALTH_LEVEL || manaProc <= LOW_MANA_THRESHOLD)
+    {
+        Console.WriteLine("Entering Potion Handling Phase.");
+
+        // Health Potion Usage
+        if (healthPercentage <= DANGER_HEALTH_LEVEL)
+        {
+            var healthPotions = Api.Inventory.ItemNames?
+                .Where(x => x.Contains("Healing Potion"))
+                .ToArray() ?? Array.Empty<string>();
+
+            foreach (var potion in healthPotions)
+            {
+                if (!Api.Inventory.OnCooldown(potion) && Api.Inventory.CanUse(potion))
+                {
+                    Console.WriteLine($"Using {potion} to restore health.");
+                    if (Api.Inventory.Use(potion))
                     {
-                        Hammer = DateTime.Now;
+                        lastGlobalCooldown = DateTime.Now;
                         return true;
                     }
                 }
             }
-            return true;
-        }
-        if (Api.Spellbook.CanCast("Attack"))
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Casting Attack");
-            Console.ResetColor();
-            if (Api.Spellbook.Cast("Attack"))
-            {
-                return true;
-            }
+            Console.WriteLine("No healing potions found or all are on cooldown.");
         }
 
+        // Mana Potion Usage
+        if (manaProc <= LOW_MANA_THRESHOLD)
+        {
+            var manaPotions = Api.Inventory.ItemNames?
+                .Where(x => x.Contains("Mana Potion"))
+                .ToArray() ?? Array.Empty<string>();
+
+            foreach (var potion in manaPotions)
+            {
+                if (!Api.Inventory.OnCooldown(potion) && Api.Inventory.CanUse(potion))
+                {
+                    Console.WriteLine($"Using {potion} to restore mana.");
+                    if (Api.Inventory.Use(potion))
+                    {
+                        lastGlobalCooldown = DateTime.Now;
+                        return true;
+                    }
+                }
+            }
+            Console.WriteLine("No mana potions found or all are on cooldown.");
+        }
+
+        // If no potions work, fall back to defensive cooldowns
+            if (healthPercentage <= LOW_HEALTH_THRESHOLD && 
+        Api.Spellbook.CanCast("Divine Protection") && 
+        !Api.Spellbook.OnCooldown("Divine Protection"))
+    {
+        Console.WriteLine("Activating Divine Protection.");
+        if (Api.Spellbook.Cast("Divine Protection"))
+        {
+            lastGlobalCooldown = DateTime.Now;
+            return true;
+        }
+    }
+
+    if (healthPercentage <= CRITICAL_HEALTH_THRESHOLD && 
+        Api.Spellbook.CanCast("Lay on Hands") && 
+        !Api.Spellbook.OnCooldown("Lay on Hands"))
+    {
+        Console.WriteLine("Casting Lay on Hands.");
+        if (Api.Spellbook.Cast("Lay on Hands"))
+        {
+            lastGlobalCooldown = DateTime.Now;
+            return true;
+        }
+    }
+    }
+
+
+    // --- SEAL MANAGEMENT ---
+    if (manaProc < 25 && !me.Auras.Contains("Seal of Wisdom") && Api.Spellbook.CanCast("Seal of Wisdom"))
+    {
+        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.WriteLine("Applying Seal of Wisdom for Mana Regeneration.");
+        Console.ResetColor();
+        if (Api.Spellbook.Cast("Seal of Wisdom"))
+        {
+            lastGlobalCooldown = DateTime.Now;
+            return true;
+        }
+    }
+
+    if (!me.Auras.Contains("Seal of Righteousness") && Api.Spellbook.CanCast("Seal of Righteousness") && manaProc > 30)
+    {
+        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.WriteLine("Reapplying Seal of Righteousness.");
+        Console.ResetColor();
+        if (Api.Spellbook.Cast("Seal of Righteousness"))
+        {
+            lastGlobalCooldown = DateTime.Now;
+            return true;
+        }
+    }
+
+
+
+// --- Judgement - 10 Yards ---
+if (Api.Spellbook.CanCast("Judgement") && 
+    mana >= JUDGEMENT_MANA && 
+    !Api.Spellbook.OnCooldown("Judgement") &&
+    targetDistance <= 10)
+{
+    if (me.Auras.Contains("Seal of Righteousness") || me.Auras.Contains("Seal of Wisdom"))
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Casting Judgement (10 yards).");
+        Console.ResetColor();
+        if (Api.Spellbook.Cast("Judgement"))
+            return true;
+    }
+    else
+    {
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine("Judgement skipped – No active seal detected.");
+        Console.ResetColor();
+    }
+}
+else
+{
+    Console.WriteLine($"Judgement skipped. Mana: {mana}/{JUDGEMENT_MANA}, Cooldown: {Api.Spellbook.OnCooldown("Judgement")}");
+}
+
+// --- Crusader Strike (Rune) - 5 Yards ---
+if (hasCrusaderStrike && 
+    (DateTime.Now - CrusaderStrikeCd) >= CrusaderStrikeDuration &&
+    (DateTime.Now - lastGlobalCooldown) >= globalCooldownDuration &&
+    targetDistance <= 5)
+{
+    Console.ForegroundColor = ConsoleColor.Yellow;
+    Console.WriteLine("Casting Crusader Strike (5 yards).");
+    Console.ResetColor();
+    if (Api.UseMacro("Hands"))  // Crusader Strike is a hands rune
+    {
+        CrusaderStrikeCd = DateTime.Now;
+        lastGlobalCooldown = DateTime.Now;
+        return true;
+    }
+}
+
+// --- Divine Storm (AoE) - 8 Yards ---
+if (hasStorm && 
+    (DateTime.Now - DivineStormCd) >= DivineStormDuration &&
+    (DateTime.Now - lastGlobalCooldown) >= globalCooldownDuration &&
+    targetDistance <= 8)
+{
+    Console.ForegroundColor = ConsoleColor.Yellow;
+    Console.WriteLine("Casting Divine Storm (8 yards).");
+    Console.ResetColor();
+    if (Api.UseMacro("Chest"))  // Divine Storm is a chest rune
+    {
+        DivineStormCd = DateTime.Now;
+        lastGlobalCooldown = DateTime.Now;
+        return true;
+    }
+}
+
+// --- Consecration (AoE) ---
+if (Api.Spellbook.CanCast("Consecration") && mana >= CONSECRATION_MANA &&
+    (DateTime.Now - ConsecrationCd) >= ConsecrationDuration && Api.UnfriendlyUnitsNearby(8, true) >= 2)
+{
+    Console.ForegroundColor = ConsoleColor.Yellow;
+    Console.WriteLine("Casting Consecration (AoE).");
+    Console.ResetColor();
+    if (Api.Spellbook.Cast("Consecration"))
+    {
+        ConsecrationCd = DateTime.Now;
+        return true;
+    }
+}
+
+    // --- Exorcism (Undead/Demon Priority) ---
+    if (Api.Spellbook.CanCast("Exorcism") && !Api.Spellbook.OnCooldown("Exorcism") && 
+        targetDistance <= 30 && mana >= EXORCISM_BASE_MANA && 
+        (targetCreatureType == CreatureType.Undead || targetCreatureType == CreatureType.Demon))
+    {
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.WriteLine("Casting Exorcism: High Priority on Undead/Demon.");
+        Console.ResetColor();
+        
+        if (Api.Spellbook.Cast("Exorcism"))
+        {
+            Console.WriteLine("Exorcism successfully cast.");
+            return true;
+        }
+        else
+        {
+            Console.WriteLine("Exorcism cast failed.");
+        }
+    }
+
+    // --- General Exorcism Use (If Demon/Undead is Not Target) ---
+    if (Api.Spellbook.CanCast("Exorcism") && !Api.Spellbook.OnCooldown("Exorcism") && targetDistance <= 30)
+    {
+        Console.WriteLine("Casting Exorcism as part of the normal rotation.");
+        if (Api.Spellbook.Cast("Exorcism")) return true;
+    }
+
+// --- INTERRUPTS MANAGEMENT ---
+if (Api.HasMacro("Legs") && hasRebuke && 
+    (DateTime.Now - RebukeCd) >= RebukeDuration &&
+    (DateTime.Now - lastGlobalCooldown) >= globalCooldownDuration &&
+    (target.IsCasting() || target.IsChanneling()))
+{
+    Console.WriteLine("Interrupting with Rebuke.");
+    if (Api.UseMacro("Legs"))
+    {
+        RebukeCd = DateTime.Now;
+        lastGlobalCooldown = DateTime.Now;
+        return true;
+    }
+}
+
+if (Api.Spellbook.CanCast("Hammer of Justice") && 
+    (target.IsCasting() || target.IsChanneling()) &&
+    (DateTime.Now - lastGlobalCooldown) >= globalCooldownDuration)
+{
+    Console.WriteLine("Interrupting with Hammer of Justice.");
+    if (Api.Spellbook.Cast("Hammer of Justice"))
+    {
+        lastGlobalCooldown = DateTime.Now;
+        return true;
+    }
+}
+
+// --- Avenger’s Shield (Legs Rune) - 30 Yards ---
+if (Api.HasMacro("Legs") && hasShield && 
+    (DateTime.Now - AvengerShieldCd) >= AvengerShieldDuration &&
+    (DateTime.Now - lastGlobalCooldown) >= globalCooldownDuration &&
+    targetDistance <= 30)
+{
+    Console.WriteLine("Casting Avenger's Shield (30 yards).");
+    if (Api.UseMacro("Legs"))
+    {
+        AvengerShieldCd = DateTime.Now;
+        lastGlobalCooldown = DateTime.Now;
+        return true;
+    }
+}
+
+
+// --- DEFENSIVE / HEALING ---
+// SACRED SHIELD (Feet Rune)
+if (Api.HasMacro("Feet") && hasSacred && !me.Auras.Contains("Sacred Shield") && healthPercentage < 50)
+{
+    Console.WriteLine("Applying Sacred Shield.");
+    if (Api.UseMacro("Feet"))
+        return true;
+}
+
+// DIVINE PROTECTION
+if (Api.Spellbook.CanCast("Divine Protection") && healthPercentage < 45)
+{
+    Console.WriteLine("Activating Divine Protection.");
+    if (Api.Spellbook.Cast("Divine Protection"))
+        return true;
+}
+
+// LAY ON HANDS
+if (healthPercentage <= 10 && Api.Spellbook.CanCast("Lay on Hands") && !Api.Spellbook.OnCooldown("Lay on Hands"))
+{
+    Console.WriteLine("Casting Lay on Hands.");
+    if (Api.Spellbook.Cast("Lay on Hands"))
+        return true;
+}
+
+// --- COOLDOWN MANAGEMENT ---
+// AURA MASTERY (Legs Rune)
+if (Api.HasMacro("Legs") && hasAuraMastery && !Api.Spellbook.OnCooldown("Aura Mastery"))
+{
+    Console.WriteLine("Casting Aura Mastery.");
+    if (Api.UseMacro("Legs"))
+        return true;
+}
+
+// DIVINE SACRIFICE (Legs Rune)
+if (Api.HasMacro("Legs") && hasSacrifice && healthPercentage > 50)
+{
+    Console.WriteLine("Casting Divine Sacrifice.");
+    if (Api.UseMacro("Legs"))
+        return true;
+}
+
+// --- UTILITY & BUFFS ---
+// BEACON OF LIGHT (Hands Rune)
+if (hasBeaconOfLight && Api.HasMacro("Hands"))
+{
+    Console.WriteLine("Beacon of Light is active - Passive Healing.");
+}
+
+// GUARDED BY THE LIGHT (Feet Rune)
+if (hasGuarded)
+{
+    Console.WriteLine("Guarded by the Light - Passive Mana Regen.");
+}
+
+// --- DEFAULT ATTACK ---
+if (Api.Spellbook.CanCast("Attack") && !me.IsAutoAttacking())
+{
+    Console.WriteLine("Starting Auto Attack.");
+    if (Api.Spellbook.Cast("Attack"))
+        return true;
+}
         //DPS rotation
 
         return base.CombatPulse();
@@ -656,224 +768,256 @@ public class RetPala : Rotation
 
         return false;
     }
-    private void LogPlayerStats()
+	private void LogPlayerStats()
+	{
+    var me = Api.Player;
+
+    var mana = me.Mana;
+    var healthPercentage = me.HealthPercent;
+
+    Console.ForegroundColor = ConsoleColor.Red;
+    Console.WriteLine($"{mana} Mana available");
+    Console.WriteLine($"{healthPercentage}% Health available");
+
+    var hasPoisonDebuff = me.Auras.Contains("Poison");
+
+    if (hasPoisonDebuff)
     {
-        var me = Api.Player;
-
-        var mana = me.Mana;
-        var healthPercentage = me.HealthPercent;
-
-
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine($"{mana} Mana available");
-        Console.WriteLine($"{healthPercentage}% Health available");
-
-        // Assuming me is an instance of a player character
-        var hasPoisonDebuff = me.Auras.Contains("Poison");
-
-        if (hasPoisonDebuff)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Have poison debuff");
-            Console.ResetColor();
-        }
-
-        if (Api.Spellbook.CanCast("Hammer of the Righteous"))
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Can Cast Hammer of the Righteous");
-            Console.ResetColor();
-
-
-        }
-
-        if (Api.Spellbook.CanCast("Hammer of the Righteous") || Api.Spellbook.CanCast(53595))
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Can Cast Hammer of the Righteous");
-            Console.ResetColor();
-        }
-        bool hasHammer = HasEnchantment(EquipmentSlot.Wrist, "Hammer of the Righteous");
-
-        if (hasHammer)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Has Hammer of the Righteous");
-            Console.ResetColor();
-
-        }
-
-        if (Api.Spellbook.CanCast("Crusader Strike") || Api.Spellbook.CanCast(407676))
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Can Cast Crusader Strike");
-            Console.ResetColor();
-        }
-        bool hasCrusader = HasEnchantment(EquipmentSlot.Hands, "Crusader Strike");
-
-        if (hasCrusader)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Has Crusade Strike");
-            Console.ResetColor();
-
-        }
-        bool hasAegis = HasEnchantment(EquipmentSlot.Chest, "Aegis");
-
-        if (hasAegis)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Has Aegis");
-            Console.ResetColor();
-
-        }
-        bool hasRebuke = HasEnchantment(EquipmentSlot.Legs, "Rebuke");
-
-        if (hasRebuke)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Has Rebuke");
-            Console.ResetColor();
-
-        }
-        bool hasLordaeron = HasEnchantment(EquipmentSlot.Chest, "Horn of Lordaeron");
-
-        if (hasLordaeron)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Has Horn of Lordaeron");
-            Console.ResetColor();
-
-        }
-        bool hasReckoning = HasEnchantment(EquipmentSlot.Hands, "Hand of Reckoning");
-
-        if (hasReckoning)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Has Hand of Reckoning");
-            Console.ResetColor();
-
-        }
-        bool hasMartyrdom = HasEnchantment(EquipmentSlot.Chest, "Seal of Martyrdom");
-
-        if (hasMartyrdom)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Has Seal of Martyrdom");
-            Console.ResetColor();
-
-        }
-        bool hasStorm = HasEnchantment(EquipmentSlot.Chest, "Divine Storm");
-
-        if (hasStorm)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Has Divine Storm");
-            Console.ResetColor();
-
-        }
-        bool hasShield = HasEnchantment(EquipmentSlot.Legs, "Avenger's Shield");
-
-        if (hasShield)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Has Avenger's Shield");
-            Console.ResetColor();
-
-        }
-        bool hasExorcist = HasEnchantment(EquipmentSlot.Legs, "Exorcist");
-
-        if (hasExorcist)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Has Exorcist");
-            Console.ResetColor();
-
-        }
-        bool hasSacrifice = HasEnchantment(EquipmentSlot.Legs, "Divine Sacrifice");
-
-        if (hasSacrifice)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Has Divine Sacrifice");
-            Console.ResetColor();
-
-        }
-        bool hasBeacon = HasEnchantment(EquipmentSlot.Hands, "Beacon of Light");
-
-        if (hasBeacon)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Has Beacon of Light");
-            Console.ResetColor();
-
-        }
-        bool hasJudgements = HasEnchantment(EquipmentSlot.Waist, "Enlightened Judgements");
-
-        if (hasJudgements)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Has Enlightened Judgements");
-            Console.ResetColor();
-
-        }
-        bool hasGuarded = HasEnchantment(EquipmentSlot.Feet, "Guarded by the Light");
-
-        if (hasGuarded)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Has Guarded by the Light");
-            Console.ResetColor();
-
-        }
-        bool hasSacred = HasEnchantment(EquipmentSlot.Feet, "Sacred Shield");
-
-        if (hasSacred)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Has Sacred Shield");
-            Console.ResetColor();
-
-        }
-        bool hasArt = HasEnchantment(EquipmentSlot.Feet, "The Art of War");
-
-        if (hasArt)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Has The Art of War");
-            Console.ResetColor();
-
-        }
-        bool hasInfusion = HasEnchantment(EquipmentSlot.Waist, "Infusion of Light");
-
-        if (hasInfusion)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Has Infusion of Light");
-            Console.ResetColor();
-
-        }
-        bool hasSheath = HasEnchantment(EquipmentSlot.Waist, "Sheath of Light");
-
-        if (hasSheath)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Has Sheath of Light");
-            Console.ResetColor();
-
-        }
-        bool hasExemplar = HasEnchantment(EquipmentSlot.Legs, "Inspiration Exemplar");
-
-        if (hasExemplar)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Has Inspiration Exemplar");
-            Console.ResetColor();
-
-        }
-
-
-
-
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Have poison debuff");
+        Console.ResetColor();
     }
+
+    // Hands
+    bool hasCrusaderStrike = HasEnchantment(EquipmentSlot.Hands, "Crusader Strike");
+    if (hasCrusaderStrike)
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Has Crusader Strike");
+        Console.ResetColor();
+    }
+
+    bool hasHandOfReckoning = HasEnchantment(EquipmentSlot.Hands, "Hand of Reckoning");
+    if (hasHandOfReckoning)
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Has Hand of Reckoning");
+        Console.ResetColor();
+    }
+
+    bool hasBeaconOfLight = HasEnchantment(EquipmentSlot.Hands, "Beacon of Light");
+    if (hasBeaconOfLight)
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Has Beacon of Light");
+        Console.ResetColor();
+    }
+
+    // Wrist
+    bool hasHammeroftheRighteous = HasEnchantment(EquipmentSlot.Wrist, "Hammer of the Righteous");
+    if (hasHammeroftheRighteous)
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Has Hammer of the Righteous");
+        Console.ResetColor();
+    }
+
+    bool hasImprovedHammerOfWrath = HasEnchantment(EquipmentSlot.Wrist, "Improved Hammer of Wrath");
+    if (hasImprovedHammerOfWrath)
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Has Improved Hammer of Wrath");
+        Console.ResetColor();
+    }
+
+    bool hasPurifyingPower = HasEnchantment(EquipmentSlot.Wrist, "Purifying Power");
+    if (hasPurifyingPower)
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Has Purifying Power");
+        Console.ResetColor();
+    }
+
+    bool hasLightsGrace = HasEnchantment(EquipmentSlot.Wrist, "Light's Grace");
+    if (hasLightsGrace)
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Has Light's Grace");
+        Console.ResetColor();
+    }
+
+    // Legs
+    bool hasExemplar = HasEnchantment(EquipmentSlot.Legs, "Inspiration Exemplar");
+    if (hasExemplar)
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Has Inspiration Exemplar");
+        Console.ResetColor();
+    }
+
+    bool hasSacrifice = HasEnchantment(EquipmentSlot.Legs, "Divine Sacrifice");
+    if (hasSacrifice)
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Has Divine Sacrifice");
+        Console.ResetColor();
+    }
+
+    bool hasShield = HasEnchantment(EquipmentSlot.Legs, "Avenger's Shield");
+    if (hasShield)
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Has Avenger's Shield");
+        Console.ResetColor();
+    }
+
+    bool hasRebuke = HasEnchantment(EquipmentSlot.Legs, "Rebuke");
+    if (hasRebuke)
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Has Rebuke");
+        Console.ResetColor();
+    }
+
+    bool hasAuraMastery = HasEnchantment(EquipmentSlot.Legs, "Aura Mastery");
+    if (hasAuraMastery)
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Has Aura Mastery");
+        Console.ResetColor();
+    }
+
+    // Waist
+    bool hasSheath = HasEnchantment(EquipmentSlot.Waist, "Sheath of Light");
+    if (hasSheath)
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Has Sheath of Light");
+        Console.ResetColor();
+    }
+
+    bool hasInfusion = HasEnchantment(EquipmentSlot.Waist, "Infusion of Light");
+    if (hasInfusion)
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Has Infusion of Light");
+        Console.ResetColor();
+    }
+
+    bool hasMalleableProtection = HasEnchantment(EquipmentSlot.Waist, "Malleable Protection");
+    if (hasMalleableProtection)
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Has Malleable Protection");
+        Console.ResetColor();
+    }
+
+    // Feet
+    bool hasArt = HasEnchantment(EquipmentSlot.Feet, "The Art of War");
+    if (hasArt)
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Has The Art of War");
+        Console.ResetColor();
+    }
+
+    bool hasSacred = HasEnchantment(EquipmentSlot.Feet, "Sacred Shield");
+    if (hasSacred)
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Has Sacred Shield");
+        Console.ResetColor();
+    }
+
+    bool hasGuarded = HasEnchantment(EquipmentSlot.Feet, "Guarded by the Light");
+    if (hasGuarded)
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Has Guarded by the Light");
+        Console.ResetColor();
+    }
+
+    // Chest
+    bool hasStorm = HasEnchantment(EquipmentSlot.Chest, "Divine Storm");
+    if (hasStorm)
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Has Divine Storm");
+        Console.ResetColor();
+    }
+
+    bool hasAegis = HasEnchantment(EquipmentSlot.Chest, "Aegis");
+    if (hasAegis)
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Has Aegis");
+        Console.ResetColor();
+    }
+
+    bool hasHallowedGround = HasEnchantment(EquipmentSlot.Chest, "Hallowed Ground");
+    if (hasHallowedGround)
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Has Hallowed Ground");
+        Console.ResetColor();
+    }
+
+    bool hasDivineLight = HasEnchantment(EquipmentSlot.Chest, "Divine Light");
+    if (hasDivineLight)
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Has Divine Light");
+        Console.ResetColor();
+    }
+
+    // Back
+    bool hasShieldOfRighteousness = HasEnchantment(EquipmentSlot.Back, "Shield of Righteousness");
+    if (hasShieldOfRighteousness)
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Has Shield of Righteousness");
+        Console.ResetColor();
+    }
+
+    bool hasShockAndAwe = HasEnchantment(EquipmentSlot.Back, "Shock and Awe");
+    if (hasShockAndAwe)
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Has Shock and Awe");
+        Console.ResetColor();
+    }
+
+    bool hasRighteousVengeance = HasEnchantment(EquipmentSlot.Back, "Righteous Vengeance");
+    if (hasRighteousVengeance)
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Has Righteous Vengeance");
+        Console.ResetColor();
+    }
+
+    // Head
+    bool hasFanaticism = HasEnchantment(EquipmentSlot.Head, "Fanaticism");
+    if (hasFanaticism)
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Has Fanaticism");
+        Console.ResetColor();
+    }
+
+    bool hasImprovedSanctuary = HasEnchantment(EquipmentSlot.Head, "Improved Sanctuary");
+    if (hasImprovedSanctuary)
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Has Improved Sanctuary");
+        Console.ResetColor();
+    }
+
+    bool hasWrath = HasEnchantment(EquipmentSlot.Head, "Wrath");
+    if (hasWrath)
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Has Wrath");
+        Console.ResetColor();
+    }
+}
 }
