@@ -308,6 +308,8 @@ public class Druid : Rotation
                 return true;
             }
         }
+        var targetCreatureType = GetCreatureType(target);
+
         if (Api.HasMacro("Hands") && !target.Auras.Contains("Sunfire") && mana >= 5 && !targetCreatureType == CreatureType.Elemental)
         {
             if (hasSunfire)
