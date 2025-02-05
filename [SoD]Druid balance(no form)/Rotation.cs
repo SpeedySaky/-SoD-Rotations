@@ -9,7 +9,7 @@ using wShadow.WowBots;
 using wShadow.WowBots.PartyInfo;
 
 
-public class Druid : Rotation
+public class SodBalanceDruid : Rotation
 {
     private bool HasEnchantment(EquipmentSlot slot, string enchantmentName)
     {
@@ -36,6 +36,7 @@ public class Druid : Rotation
         return true;
     }
     private bool HasItem(object item) => Api.Inventory.HasItem(item);
+    private Dictionary<string, DateTime> potionCooldowns = new Dictionary<string, DateTime>();
 
     private int debugInterval = 20; // Set the debug interval in seconds
     private DateTime lastDebugTime = DateTime.MinValue;
@@ -80,7 +81,7 @@ public class Druid : Rotation
         var target = Api.Target;
         var reaction = me.GetReaction(target);
 
-        if ( me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() || me.IsChanneling() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
+        if ( me.IsDead() || me.IsGhost() || me.IsCasting()  || me.IsChanneling() || me.Auras.Contains("Drink") || me.Auras.Contains("Food")) return false;
         if ((DateTime.Now - lastDebugTime).TotalSeconds >= debugInterval)
         {
             LogPlayerStats();
@@ -127,7 +128,7 @@ public class Druid : Rotation
                     return true;
             }
 
-            if (Api.Spellbook.CanCast("Regrowth") && healthPercentage <= 40 && !me.Auras.Contains("Regrowth"))
+            if (Api.Spellbook.CanCast("Regrowth") && healthPercentage <= 40 && !me.Auras.Contains("Regrowth") && !me.IsMoving())
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Casting Regrowth");
@@ -135,7 +136,7 @@ public class Druid : Rotation
                 if (Api.Spellbook.Cast("Regrowth"))
                     return true;
             }
-            if (Api.Spellbook.CanCast("Healing Touch") && healthPercentage <= 30)
+            if (Api.Spellbook.CanCast("Healing Touch") && healthPercentage <= 30 && !me.IsMoving())
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Casting Healing Touch");
@@ -143,7 +144,7 @@ public class Druid : Rotation
                 if (Api.Spellbook.Cast("Healing Touch"))
                     return true;
             }
-            if (Api.Spellbook.CanCast("Moonkin Form") && !me.Auras.Contains("Moonkin Form", false))
+            if (Api.Spellbook.CanCast("Moonkin Form") && !me.Auras.Contains("Moonkin Form", false) && mana>35)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Casting Moonkin Form");
@@ -175,7 +176,7 @@ public class Druid : Rotation
                                  // If unable to cast Moonfire, proceed to the next spell
             }
             else
-            if (Api.Spellbook.CanCast("Wrath"))
+            if (Api.Spellbook.CanCast("Wrath") && !me.IsMoving())
             {
 
                 Console.ForegroundColor = ConsoleColor.Green;
@@ -213,38 +214,9 @@ public class Druid : Rotation
         bool hasStarsurge = HasEnchantment(EquipmentSlot.Legs, "Starsurge");
         bool hasStormrage = HasEnchantment(EquipmentSlot.Chest, "Fury of Stormrage");
 
-        if (me.HealthPercent <= 70 && (!Api.Inventory.OnCooldown(MP) || !Api.Inventory.OnCooldown(HP)))
+        if (UsePotions())
         {
-            foreach (string hpot in HP)
-            {
-                if (HasItem(hpot))
-                {
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine("Using Healing potion");
-                    Console.ResetColor();
-                    if (Api.Inventory.Use(hpot))
-                    {
-                        return true;
-                    }
-                }
-            }
-        }
-
-        if (me.ManaPercent <= 50 && (!Api.Inventory.OnCooldown(MP) || !Api.Inventory.OnCooldown(HP)))
-        {
-            foreach (string manapot in MP)
-            {
-                if (HasItem(manapot))
-                {
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine("Using mana potion");
-                    Console.ResetColor();
-                    if (Api.Inventory.Use(manapot))
-                    {
-                        return true;
-                    }
-                }
-            }
+            return true; // Exit early if a potion was used
         }
 
         if (Api.Spellbook.CanCast("Rejuvenation") && !me.Auras.Contains("Rejuvenation") && healthPercentage <= 70 && mana >= 15)
@@ -268,7 +240,7 @@ public class Druid : Rotation
                 return true;
             }
         }
-        if (Api.Spellbook.CanCast("Healing Touch") && healthPercentage <= 45 && mana >= 20)
+        if (Api.Spellbook.CanCast("Healing Touch") && healthPercentage <= 45 && mana >= 20 && !me.IsMoving())
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Healing Touch");
@@ -278,7 +250,7 @@ public class Druid : Rotation
                 return true;
             }
         }
-        if (Api.Spellbook.CanCast("Moonkin Form") && !me.Auras.Contains("Moonkin Form", false))
+        if (Api.Spellbook.CanCast("Moonkin Form") && !me.Auras.Contains("Moonkin Form", false) && mana>35)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Moonkin Form");
@@ -310,7 +282,7 @@ public class Druid : Rotation
         }
         var targetCreatureType = GetCreatureType(target);
 
-        if (Api.HasMacro("Hands") && !target.Auras.Contains("Sunfire") && mana >= 5 && !targetCreatureType == CreatureType.Elemental)
+        if (Api.HasMacro("Hands") && !target.Auras.Contains("Sunfire") && mana >= 5 && targetCreatureType != CreatureType.Elemental)
         {
             if (hasSunfire)
             {
@@ -356,7 +328,7 @@ public class Druid : Rotation
                 return true;
             }
         }
-        if (Api.Spellbook.CanCast("Wrath") && !targetCreatureType == CreatureType.Elemental)
+        if (Api.Spellbook.CanCast("Wrath") && targetCreatureType != CreatureType.Elemental)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Wrath");
@@ -395,6 +367,55 @@ public class Druid : Rotation
         }
 
         return false;
+    }
+    public bool UsePotions()
+    {
+        // Check for health potions if health is low
+        if (Api.Player.HealthPercent <= 70)
+        {
+            if (UsePotion("Major Healing Potion")) return true;
+            if (UsePotion("Superior Healing Potion")) return true;
+            if (UsePotion("Greater Healing Potion")) return true;
+            if (UsePotion("Healing Potion")) return true;
+            if (UsePotion("Lesser Healing Potion")) return true;
+            if (UsePotion("Minor Healing Potion")) return true;
+        }
+
+        // Check for mana potions if mana is low
+        if (Api.Player.ManaPercent < 30)
+        {
+            if (UsePotion("Major Mana Potion")) return true;
+            if (UsePotion("Superior Mana Potion")) return true;
+            if (UsePotion("Greater Mana Potion")) return true;
+            if (UsePotion("Mana Potion")) return true;
+            if (UsePotion("Lesser Mana Potion")) return true;
+            if (UsePotion("Minor Mana Potion")) return true;
+        }
+
+        return false; // No potions were used
+    }
+
+    private bool UsePotion(string potionName)
+    {
+        int potionCount = Api.Inventory.ItemCount(potionName);
+
+        // Check cooldown for potions
+        bool isOnCooldown = potionCooldowns.ContainsKey("Potion") && (DateTime.Now - potionCooldowns["Potion"]).TotalSeconds < 130;
+
+        if (potionCount > 0 && !isOnCooldown)
+        {
+            Console.ForegroundColor = potionName.Contains("Mana") ? ConsoleColor.Cyan : ConsoleColor.Green;
+            Console.WriteLine($"Using {potionName}.");
+            Console.ResetColor();
+
+            if (Api.Inventory.Use(potionName))
+            {
+                potionCooldowns["Potion"] = DateTime.Now; // Update the cooldown
+                return true; // Exit early after using the potion
+            }
+        }
+
+        return false; // Potion was not used
     }
     private void LogPlayerStats()
     {
@@ -485,6 +506,48 @@ else
             Console.WriteLine("hasStarsurge");
             Console.ResetColor();
 
+        }
+        // Log available health potions
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.WriteLine("Available Health Potions:");
+        LogPotionCount("Major Healing Potion");
+        LogPotionCount("Superior Healing Potion");
+        LogPotionCount("Greater Healing Potion");
+        LogPotionCount("Healing Potion");
+        LogPotionCount("Lesser Healing Potion");
+        LogPotionCount("Minor Healing Potion");
+        Console.ResetColor();
+
+        // Log available mana potions
+        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.WriteLine("Available Mana Potions:");
+        LogPotionCount("Major Mana Potion");
+        LogPotionCount("Superior Mana Potion");
+        LogPotionCount("Greater Mana Potion");
+        LogPotionCount("Mana Potion");
+        LogPotionCount("Lesser Mana Potion");
+        LogPotionCount("Minor Mana Potion");
+        Console.ResetColor();
+
+        // Log potion cooldown timer
+        if (potionCooldowns.ContainsKey("Potion"))
+        {
+            var cooldownRemaining = 130 - (DateTime.Now - potionCooldowns["Potion"]).TotalSeconds;
+            if (cooldownRemaining > 0)
+            {
+                Console.ForegroundColor = ConsoleColor.Magenta;
+                Console.WriteLine($"Potion cooldown remaining: {Math.Ceiling(cooldownRemaining)} seconds");
+                Console.ResetColor();
+            }
+        }
+    }
+    private void LogPotionCount(string potionName)
+    {
+        int count = Api.Inventory.ItemCount(potionName);
+        Console.WriteLine($"Checking {potionName}: {count}");
+        if (count > 0)
+        {
+            Console.WriteLine($"{potionName}: {count}");
         }
     }
 }
