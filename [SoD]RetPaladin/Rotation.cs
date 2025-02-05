@@ -9,71 +9,7 @@ using wShadow.Warcraft.Managers;
 using wShadow.WowBots;
 using wShadow.WowBots.PartyInfo;
 
-public class SoDRetPalaHybrid : Rotation
-/*
- * -----------------------------------------------------------------
- *  SoD Ret Paladin Rotation - Enhanced for Season of Discovery (SoD)
- * -----------------------------------------------------------------
- * 
- *  Based on the original Classic Era Ret Paladin rotation from:
- *  ➤ GitHub: https://github.com/SpeedySaky/-ERA-Rotations
- *  This update builds upon the existing Classic version to incorporate
- *  Season of Discovery (SoD) mechanics, including rune abilities and
- *  enhanced spell priority.
- * 
- *  Features & Changes:
- * 
- *  [1] Added SoD Rune Logic
- *      - Checks for Crusader Strike, Hammer of the Righteous, Divine Storm, 
- *        Shield of Righteousness, Rebuke, and Avenger’s Shield.
- *      - Uses corresponding macros (e.g., `Api.UseMacro("Hands")`).
- *      - Tracks individual cooldowns per rune.
- *
- *  [2] Judgement Effect Refresh (NOT Cooldown Reset)
- *      - Crusader Strike refreshes **Judgement effects on the target** 
- *        but does **not reset the spell cooldown**.
- *      - Ensures Judgement is used early in the rotation to maximize uptime.
- * 
- *  [3] Optimized Combat Rotation
- *      - Prioritizes Judgement → Crusader Strike → Other damage abilities.
- *      - Uses Hammer of Wrath in execute range and Consecration for AoE.
- * 
- *  [4] Global Cooldown (GCD) Tracking
- *      - Enforces 1.5s GCD for spell usage and SoD rune macros.
- *
- *  [5] Purify Implementation (Poison/Disease Removal)
- *      - Detects a list of known poison/disease debuffs.
- *      - Auto-casts Purify if needed and mana is above 32%.
- * 
- *  [6] Automatic Party Buffing
- *      - Casts Blessing of Might/Wisdom on missing party members within 30 yards.
- *
- *  [7] Smart Potion Usage
- *      - Uses health potions if HP < 70% and mana potions if mana < 30%.
- *      - 2-minute shared cooldown tracking.
- * 
- *  [8] Defensive Cooldowns
- *      - Divine Protection triggers below 45% HP.
- *      - Blessing of Protection used at critical HP.
- *      - Lay on Hands used as a last resort below 10% HP.
- *
- *  [9] Debugging & Logging
- *      - Prints health, mana, and potion cooldown info every few seconds.
- *      - Outputs messages for important actions like Judgement, Crusader Strike, 
- *        and defensive abilities.
- * 
- * -----------------------------------------------------------------
- *  Summary:
- *  This update integrates **Season of Discovery** abilities into the Classic 
- *  **Retribution Paladin** rotation, maintaining strong **damage output, 
- *  survivability, and party utility.**
- * 
- *  Credits:
- *  ➤ Based on: https://github.com/SpeedySaky/-ERA-Rotations
- *  ➤ SoD Enhancements: Eaxium & SpeedySaky
- * -----------------------------------------------------------------
- */
-
+public class EraRetPala : Rotation
 {
     // ------------------------------------------------------------
     //  1) RUNE / ENCHANT COOLDOWN TRACKERS & GLOBAL CD
@@ -105,9 +41,13 @@ public class SoDRetPalaHybrid : Rotation
     private DateTime HandOfReckoningCd = DateTime.MinValue;
     private TimeSpan HandOfReckoningDuration = TimeSpan.FromSeconds(10);
 
+    // Track Judgement cooldown so that Crusader Strike can “reset” it if needed
+    private DateTime lastJudgementCast = DateTime.MinValue; 
+    private readonly TimeSpan judgementCooldown = TimeSpan.FromSeconds(8);
+
     // Global Cooldown
     private DateTime lastGlobalCooldown = DateTime.MinValue;
-    private readonly TimeSpan globalCooldownDuration = TimeSpan.FromSeconds(1.5);
+    private readonly TimeSpan globalCooldownDuration = TimeSpan.FromSeconds(1.5); 
 
     // ------------------------------------------------------------
     //  2) OTHER IMPORTANT COOLDOWNS / VARIABLES
@@ -147,6 +87,22 @@ public class SoDRetPalaHybrid : Rotation
         return unit.Info.GetCreatureType();
     }
 
+    private int GetSafeManaPercent()
+    {
+        var me = Api.Player;
+        if (me.IsDead() || me.IsGhost())
+            return 0;
+
+        int manaPercent = (int)me.ManaPercent;
+        if (manaPercent == 0)
+        {
+            Console.WriteLine("Fallback enabled: Mana reading is 0 due to a known bug with wepw. Using 100% as fallback.");
+            return 100;
+        }
+        
+        return manaPercent;
+    }
+
     private bool IsNPC(WowUnit unit)
     {
         if (!IsValid(unit))
@@ -155,15 +111,15 @@ public class SoDRetPalaHybrid : Rotation
         {
             switch (condition)
             {
-                case "Innkeeper" when unit.IsInnkeeper():
-                case "Auctioneer" when unit.IsAuctioneer():
-                case "Banker" when unit.IsBanker():
-                case "FlightMaster" when unit.IsFlightMaster():
-                case "GuildBanker" when unit.IsGuildBanker():
-                case "StableMaster" when unit.IsStableMaster():
-                case "Trainer" when unit.IsTrainer():
-                case "Vendor" when unit.IsVendor():
-                case "QuestGiver" when unit.IsQuestGiver():
+                case "Innkeeper"     when unit.IsInnkeeper():
+                case "Auctioneer"    when unit.IsAuctioneer():
+                case "Banker"        when unit.IsBanker():
+                case "FlightMaster"  when unit.IsFlightMaster():
+                case "GuildBanker"   when unit.IsGuildBanker():
+                case "StableMaster"  when unit.IsStableMaster():
+                case "Trainer"       when unit.IsTrainer():
+                case "Vendor"        when unit.IsVendor():
+                case "QuestGiver"    when unit.IsQuestGiver():
                     return true;
             }
         }
@@ -198,35 +154,39 @@ public class SoDRetPalaHybrid : Rotation
         return false;
     }
 
-    // Uses a healing or mana potion if conditions are met. 
-    // Returns true if a potion was successfully used.
+    /// <summary>
+    /// Uses a healing or mana potion if conditions are met. 
+    /// Returns true if a potion was successfully used.
+    /// </summary>
     public bool UsePotions()
     {
         var me = Api.Player;
         if (me.HealthPercent <= 70)
         {
             // Health potions
-            if (UsePotion("Major Healing Potion")) return true;
+            if (UsePotion("Major Healing Potion"))    return true;
             if (UsePotion("Superior Healing Potion")) return true;
-            if (UsePotion("Greater Healing Potion")) return true;
-            if (UsePotion("Healing Potion")) return true;
-            if (UsePotion("Lesser Healing Potion")) return true;
-            if (UsePotion("Minor Healing Potion")) return true;
+            if (UsePotion("Greater Healing Potion"))  return true;
+            if (UsePotion("Healing Potion"))          return true;
+            if (UsePotion("Lesser Healing Potion"))   return true;
+            if (UsePotion("Minor Healing Potion"))    return true;
         }
         if (me.ManaPercent < 30)
         {
             // Mana potions
-            if (UsePotion("Major Mana Potion")) return true;
-            if (UsePotion("Superior Mana Potion")) return true;
-            if (UsePotion("Greater Mana Potion")) return true;
-            if (UsePotion("Mana Potion")) return true;
-            if (UsePotion("Lesser Mana Potion")) return true;
-            if (UsePotion("Minor Mana Potion")) return true;
+            if (UsePotion("Major Mana Potion"))       return true;
+            if (UsePotion("Superior Mana Potion"))    return true;
+            if (UsePotion("Greater Mana Potion"))     return true;
+            if (UsePotion("Mana Potion"))             return true;
+            if (UsePotion("Lesser Mana Potion"))      return true;
+            if (UsePotion("Minor Mana Potion"))       return true;
         }
-        return false;
+        return false; 
     }
 
-    //Logs some basic debug info at an interval.
+    /// <summary>
+    /// Logs some basic debug info at an interval.
+    /// </summary>
     private void LogPlayerStats()
     {
         var me = Api.Player;
@@ -300,11 +260,11 @@ public class SoDRetPalaHybrid : Rotation
     {
         var me = Api.Player;
         var healthPercentage = me.HealthPercent;
-        var mana = me.ManaPercent;
+        var mana = GetSafeManaPercent();
         var target = Api.Target;
 
-        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving()
-            || me.IsChanneling() || me.IsMounted()
+        if (me.IsDead() || me.IsGhost() || me.IsCasting() || me.IsMoving() 
+            || me.IsChanneling() || me.IsMounted() 
             || me.Auras.Contains("Drink") || me.Auras.Contains("Food"))
         {
             return false;
@@ -391,9 +351,9 @@ public class SoDRetPalaHybrid : Rotation
 
 
         // Keep a Blessing on ourselves
-        if (Api.Spellbook.CanCast("Blessing of Wisdom")
+        if (Api.Spellbook.CanCast("Blessing of Wisdom") 
             && !me.Auras.Contains("Blessing of Wisdom", false)
-            && mana < 30)
+            && mana < 30) 
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Casting Blessing of Wisdom (OOC)");
@@ -401,7 +361,7 @@ public class SoDRetPalaHybrid : Rotation
             if (Api.Spellbook.Cast("Blessing of Wisdom"))
                 return true;
         }
-        else if (Api.Spellbook.CanCast("Blessing of Might")
+        else if (Api.Spellbook.CanCast("Blessing of Might") 
                  && !me.Auras.Contains("Blessing of Might", false)
                  && mana > 80)
         {
@@ -413,7 +373,7 @@ public class SoDRetPalaHybrid : Rotation
         }
 
         // Keep an Aura up
-        if (Api.Spellbook.CanCast("Sanctity Aura")
+        if (Api.Spellbook.CanCast("Sanctity Aura") 
             && !me.Auras.Contains("Sanctity Aura", false))
         {
             Console.ForegroundColor = ConsoleColor.Green;
@@ -422,7 +382,7 @@ public class SoDRetPalaHybrid : Rotation
             if (Api.Spellbook.Cast("Sanctity Aura"))
                 return true;
         }
-        else if (Api.Spellbook.CanCast("Devotion Aura")
+        else if (Api.Spellbook.CanCast("Devotion Aura") 
                  && !me.Auras.Contains("Devotion Aura", false)
                  && !me.Auras.Contains("Sanctity Aura", false))
         {
@@ -437,9 +397,10 @@ public class SoDRetPalaHybrid : Rotation
         if (target.IsValid() && !target.IsDead())
         {
             var dist = target.Position.Distance2D(me.Position);
-            if (!me.Auras.Contains("Seal of Command", false)
-                && Api.Spellbook.CanCast("Seal of Command")
-                && dist < 30
+            // Just example thresholds:
+            if (!me.Auras.Contains("Seal of Command", false) 
+                && Api.Spellbook.CanCast("Seal of Command") 
+                && dist < 30 
                 && mana > 30)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
@@ -448,8 +409,8 @@ public class SoDRetPalaHybrid : Rotation
                 if (Api.Spellbook.Cast("Seal of Command"))
                     return true;
             }
-            else if (!me.Auras.Contains("Seal of Wisdom", false)
-                     && Api.Spellbook.CanCast("Seal of Wisdom")
+            else if (!me.Auras.Contains("Seal of Wisdom", false) 
+                     && Api.Spellbook.CanCast("Seal of Wisdom") 
                      && !me.Auras.Contains("Seal of Command", false)
                      && dist < 30
                      && mana < 20)
@@ -461,9 +422,11 @@ public class SoDRetPalaHybrid : Rotation
                     return true;
             }
         }
+
+        // Optional: If you want to auto-attack a hostile target out of combat
         var reaction = me.GetReaction(target);
-        if (target.IsValid() && !target.IsDead()
-            && reaction <= UnitReaction.Unfriendly
+        if (target.IsValid() && !target.IsDead() 
+            && reaction <= UnitReaction.Unfriendly 
             && mana > 20 && !IsNPC(target))
         {
             // Possibly cast Judgement if in range
@@ -484,9 +447,9 @@ public class SoDRetPalaHybrid : Rotation
             }
         }
 
-        // -------------------------------
-        // BLESSING BUFF FOR PARTY MEMBERS
-        // -------------------------------
+        // --------------------------------------------------
+        // BLESSING BUFF FOR PARTY MEMBERS (from old code)
+        // --------------------------------------------------
         var members = PartyBot.GetMemberUnits();
         if (members == null || members.Length == 0)
         {
@@ -496,20 +459,20 @@ public class SoDRetPalaHybrid : Rotation
 
         foreach (var member in members)
         {
-            if (member == null || !member.IsValid() || member.IsDead())
+            if (member == null || !member.IsValid() || member.IsDead()) 
                 continue;
 
             var memberDistance = member.Position.Distance2D(me.Position);
             // If > 30 yards, skip
-            if (memberDistance > 30)
+            if (memberDistance > 30) 
             {
                 Console.WriteLine($"{member.Name} is out of range ({memberDistance:F1} yards). Skipping Blessing.");
                 continue;
             }
 
             // Check if the member already has a blessing
-            if (member.Auras.Contains("Blessing of Might", false)
-                || member.Auras.Contains("Blessing of Wisdom", false)
+            if (member.Auras.Contains("Blessing of Might",    false) 
+                || member.Auras.Contains("Blessing of Wisdom",false)
                 || member.Auras.Contains("Blessing of Kings", false)
                 || member.Auras.Contains("Blessing of Sanctuary", false))
             {
@@ -544,7 +507,7 @@ public class SoDRetPalaHybrid : Rotation
     {
         var me = Api.Player;
         var target = Api.Target;
-        if (!IsValid(me) || !IsValid(target)
+        if (!IsValid(me) || !IsValid(target) 
             || me.IsDead() || me.IsGhost()
             || me.IsCasting() || me.IsMoving()
             || me.IsChanneling() || me.IsMounted()
@@ -554,7 +517,7 @@ public class SoDRetPalaHybrid : Rotation
         }
 
         var healthPercentage = me.HealthPercent;
-        var mana = me.ManaPercent;
+        var mana = GetSafeManaPercent();
         var targetHealth = target.HealthPercent;
         var dist = target.Position.Distance2D(me.Position);
 
@@ -563,7 +526,7 @@ public class SoDRetPalaHybrid : Rotation
             return true;
 
         // Keep aura in combat
-        if (Api.Spellbook.CanCast("Sanctity Aura")
+        if (Api.Spellbook.CanCast("Sanctity Aura") 
             && !me.Auras.Contains("Sanctity Aura", false))
         {
             Console.ForegroundColor = ConsoleColor.Green;
@@ -584,10 +547,10 @@ public class SoDRetPalaHybrid : Rotation
         }
 
         // Defensive cooldowns
-        if (Api.Spellbook.CanCast("Divine Protection")
+        if (Api.Spellbook.CanCast("Divine Protection") 
             && !Api.Spellbook.OnCooldown("Divine Protection")
             && (DateTime.Now - lastDivineProtectionCast) >= divineProtectionCooldown
-            && healthPercentage < 45
+            && healthPercentage < 45 
             && !me.IsCasting()
             && !me.Auras.Contains("Forbearance", false))
         {
@@ -600,7 +563,7 @@ public class SoDRetPalaHybrid : Rotation
                 return true;
             }
         }
-        if (me.Auras.Contains("Divine Protection", false)
+        if (me.Auras.Contains("Divine Protection", false) 
             && healthPercentage <= 50
             && Api.Spellbook.CanCast("Holy Light"))
         {
@@ -612,7 +575,7 @@ public class SoDRetPalaHybrid : Rotation
         }
 
         // Blessing of Protection
-        if (Api.Spellbook.CanCast("Blessing of Protection")
+        if (Api.Spellbook.CanCast("Blessing of Protection") 
             && healthPercentage < 30
             && !me.IsCasting()
             && !me.Auras.Contains("Forbearance", false)
@@ -624,7 +587,7 @@ public class SoDRetPalaHybrid : Rotation
             if (Api.Spellbook.Cast("Blessing of Protection"))
                 return true;
         }
-        if (me.Auras.Contains("Blessing of Protection", false)
+        if (me.Auras.Contains("Blessing of Protection", false) 
             && healthPercentage <= 35
             && Api.Spellbook.CanCast("Holy Light")
             && mana > 20)
@@ -663,7 +626,7 @@ public class SoDRetPalaHybrid : Rotation
         }
 
         // Keep or switch Seals in combat
-        if (!me.Auras.Contains("Seal of Command", false)
+        if (!me.Auras.Contains("Seal of Command", false) 
             && Api.Spellbook.CanCast("Seal of Command")
             && mana > 30)
         {
@@ -705,7 +668,7 @@ public class SoDRetPalaHybrid : Rotation
             && Api.Spellbook.CanCast("Judgement")
             && mana > 15
             && (DateTime.Now - lastGlobalCooldown) >= globalCooldownDuration
-            && (me.Auras.Contains("Seal of Righteousness", false)
+            && (me.Auras.Contains("Seal of Righteousness", false) 
                 || me.Auras.Contains("Seal of Wisdom", false)
                 || me.Auras.Contains("Seal of Command", false)))
         {
@@ -720,7 +683,7 @@ public class SoDRetPalaHybrid : Rotation
             }
         }
 
-        // Priority #2: Crusader Strike (SoD Rune: Hands) – No mana cost
+        // Priority #2: Crusader Strike (SoD Rune: Hands) – No mana cost, resets Judgement
         bool hasCrusaderStrike = HasEnchantment(EquipmentSlot.Hands, "Crusader Strike");
         if (hasCrusaderStrike
             && (DateTime.Now - CrusaderStrikeCd) >= CrusaderStrikeDuration
@@ -732,14 +695,67 @@ public class SoDRetPalaHybrid : Rotation
             Console.WriteLine("Casting Crusader Strike (Hands Rune).");
             Console.ResetColor();
 
+            // If Crusader Strike resets the Judgement cooldown, we can do that here:
+            // lastJudgementCast = DateTime.MinValue; // forcibly reset so it can be cast again
+            // or you might rely on in-game script to do it automatically if SoD says so.
+
             if (Api.UseMacro("Hands"))
             {
                 CrusaderStrikeCd = DateTime.Now;
                 lastGlobalCooldown = DateTime.Now;
 
+                // If your SoD enchant instantly resets Judgement, forcibly reset timer:
+                lastJudgementCast = DateTime.MinValue;
+
                 return true;
             }
         }
+
+            // --- EXORCISM HANDLING ---
+            var targetCreatureType = GetCreatureType(target);
+            bool isUndeadOrDemon = (targetCreatureType == CreatureType.Undead || targetCreatureType == CreatureType.Demon);
+            var targetDistanceForExorcism = target.Position.Distance2D(me.Position);
+
+            if (Api.Spellbook.CanCast("Exorcism") &&
+                !Api.Spellbook.OnCooldown("Exorcism") &&
+                targetDistanceForExorcism <= 30 &&
+                (DateTime.Now - lastGlobalCooldown) >= globalCooldownDuration)
+            {
+                bool hasArtOfWar = HasEnchantment(EquipmentSlot.Feet, "The Art of War");
+                bool hasPurifyingPower = HasEnchantment(EquipmentSlot.Wrist, "Purifying Power");
+                
+                // Dynamic mana threshold based on enchantments
+                int effectiveManaThreshold = hasArtOfWar ? 20 : 50;
+                bool targetIsInterruptible = target.IsCasting() || target.IsChanneling();
+
+                if (isUndeadOrDemon)
+                {
+                    // Priority casting against Undead/Demons
+                    if (targetIsInterruptible || GetSafeManaPercent() >= effectiveManaThreshold)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Yellow;
+                        Console.WriteLine($"Casting Exorcism on {targetCreatureType}" + 
+                                        (hasArtOfWar ? " [Art of War]" : "") + 
+                                        (hasPurifyingPower ? " [Purifying Power]" : ""));
+                        Console.ResetColor();
+                        
+                        if (Api.Spellbook.Cast("Exorcism"))
+                        {
+                            lastGlobalCooldown = DateTime.Now;
+                            return true;
+                        }
+                    }
+                }
+                else if (GetSafeManaPercent() >= effectiveManaThreshold) // Normal target
+                {
+                    Console.WriteLine("Casting Exorcism (Available Mana: {GetSafeManaPercent()}%)");
+                    if (Api.Spellbook.Cast("Exorcism"))
+                    {
+                        lastGlobalCooldown = DateTime.Now;
+                        return true;
+                    }
+                }
+            }                
 
         // Hammer of Wrath in execute range
         if (Api.Spellbook.CanCast("Hammer of Wrath") && targetHealth <= 20 && mana > 20)
